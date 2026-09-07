@@ -847,7 +847,7 @@ function renderMenu() {
       </div>`;
     });
     grp.innerHTML = `<div class="menu-group-header"><span class="gh-icon">${gr.icon}</span><span class="gh-label">${gr.label}</span><span class="gh-arrow">›</span></div><div class="menu-group-items">${itemsHtml}</div>`;
-    grp.querySelector('.menu-group-header').onclick = () => grp.classList.toggle('open');
+    grp.querySelector('.menu-group-header').onclick = () => { const wasOpen = grp.classList.contains('open'); g.querySelectorAll('.menu-group').forEach(x => x.classList.remove('open')); if (!wasOpen) grp.classList.add('open'); };
     grp.querySelectorAll('.menu-item').forEach(el => el.onclick = () => startMode(el.dataset.mode, parseInt(el.dataset.total)||5));
     g.appendChild(grp);
   });
