@@ -52,23 +52,30 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .screen.active { display: block; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-.menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.menu-btn {
-  background: var(--card); border: 2px solid var(--border); border-radius: var(--radius);
-  padding: 18px 10px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow);
-}
-.menu-btn:active { transform: scale(0.96); }
-.menu-btn .icon { font-size: 2rem; display: block; margin-bottom: 6px; }
-.menu-btn .label { font-size: 0.9rem; font-weight: 700; }
-.menu-btn .count { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+.menu { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.menu-group { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; border: 2px solid var(--border); }
+.menu-group-header { display: flex; align-items: center; gap: 10px; padding: 16px 14px; cursor: pointer; transition: background 0.2s; }
+.menu-group-header:active { background: var(--bg); }
+.gh-icon { font-size: 1.6rem; }
+.gh-label { flex: 1; font-size: 1rem; font-weight: 700; }
+.gh-arrow { font-size: 1.3rem; transition: transform 0.3s; color: var(--text-secondary); }
+.menu-group.open .gh-arrow { transform: rotate(90deg); }
+.menu-group-items { display: none; padding: 0 8px 8px 8px; }
+.menu-group.open .menu-group-items { display: block; }
+.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 12px; margin: 2px 0; border-radius: 8px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; }
+.menu-item:active { background: var(--bg); border-color: var(--border); }
+.mi-label { font-size: 0.88rem; font-weight: 600; }
+.mi-count { font-size: 0.72rem; color: var(--text-secondary); }
 
 .menu-btn.game-btn {
   grid-column: 1 / -1;
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   border: none; color: white; padding: 20px 10px;
+  border-radius: var(--radius); cursor: pointer; text-align: center;
 }
-.menu-btn.game-btn .label { color: #00d4ff; }
-.menu-btn.game-btn .count { color: rgba(255,255,255,0.7); }
+.menu-btn.game-btn .icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+.menu-btn.game-btn .label { font-size: 0.9rem; font-weight: 700; color: #00d4ff; }
+.menu-btn.game-btn .count { font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-top: 2px; }
 
 .stats-row { display: flex; gap: 8px; margin-bottom: 12px; }
 .stat-box {
@@ -381,7 +388,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   .header { padding: 12px !important; margin-bottom: 12px !important; }
   .btn { padding: 10px 14px !important; font-size: 0.95em !important; }
   .btn-big { padding: 14px 16px !important; }
-  .mode-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .mode-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
   .stat { padding: 12px 10px !important; }
   .stat-val { font-size: 1.6em !important; }
   .stat-lbl { font-size: 0.65em !important; }
@@ -462,7 +469,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 
 @media (min-width: 481px) and (max-width: 768px) {
   .g-cell { width: clamp(58px, calc((100vw - 100px) / 8 - 6px), 70px) !important; height: clamp(58px, calc((100vw - 100px) / 8 - 6px), 70px) !important; }
-  .mode-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+  .mode-grid { grid-template-columns: 1fr !important; }
 }
 </style>
 </head>
@@ -759,29 +766,56 @@ function checkUser() {
 }
 
 // ===== TRAINING MODES =====
-const modes = [
-  { id:'add2', label:'Сложение', icon:'➕', desc:'Двухзначные + двузначные', gen: () => { const a=rnd(10,99), b=rnd(10,99); return { q:`${a} + ${b}`, a:a+b }; } },
-  { id:'add3', label:'Сложение', icon:'➕', desc:'Трёхзначные + трёхзначные', gen: () => { const a=rnd(100,999), b=rnd(100,999); return { q:`${a} + ${b}`, a:a+b }; } },
-  { id:'sub2', label:'Вычитание', icon:'➖', desc:'Двухзначные − двузначные', gen: () => { let a=rnd(20,99), b=rnd(10,a); return { q:`${a} − ${b}`, a:a-b }; } },
-  { id:'sub3', label:'Вычитание', icon:'➖', desc:'Трёхзначные − трёхзначные', gen: () => { let a=rnd(200,999), b=rnd(100,a); return { q:`${a} − ${b}`, a:a-b }; } },
-  { id:'mul1', label:'Умножение', icon:'✖️', desc:'Двухзначные × однозначные', gen: () => { const a=rnd(10,99), b=rnd(2,9); return { q:`${a} × ${b}`, a:a*b }; } },
-  { id:'mul2', label:'Умножение', icon:'✖️', desc:'Двухзначные × двузначные', gen: () => { const a=rnd(10,30), b=rnd(10,30); return { q:`${a} × ${b}`, a:a*b }; } },
-  { id:'div1', label:'Деление', icon:'➗', desc:'Деление без остатка (лёгкое)', gen: () => { const b=rnd(2,12), q=rnd(10,99), a=b*q; return { q:`${a} ÷ ${b}`, a:q }; } },
-  { id:'div2', label:'Деление', icon:'➗', desc:'Деление без остатка (сложное)', gen: () => { const b=rnd(5,25), q=rnd(10,99), a=b*q; return { q:`${a} ÷ ${b}`, a:q }; } },
-  { id:'avg2', label:'Среднее', icon:'📐', desc:'Среднее арифметическое 2 чисел', gen: () => { const a=rnd(10,90), b=rnd(10,90); const sum=a+b; const ans=sum/2; return { q:`Среднее арифметическое: ${a} и ${b}`, a:ans }; } },
-  { id:'avg3', label:'Среднее', icon:'📐', desc:'Среднее арифметическое 3 чисел', gen: () => { const a=rnd(10,80), b=rnd(10,80), c=rnd(10,80); const sum=a+b+c; const ans=sum/3; return { q:`Среднее арифметическое: ${a}, ${b} и ${c}`, a:ans }; } },
-  { id:'avg5', label:'Среднее', icon:'📐', desc:'Среднее арифметическое 5 чисел', gen: () => { const nums=[]; for(let i=0;i<5;i++) nums.push(rnd(10,50)*2); const sum=nums.reduce((s,v)=>s+v,0); const ans=sum/5; return { q:`Среднее арифметическое: ${nums.join(', ')}`, a:ans }; } },
-  { id:'mix', label:'Микс', icon:'🎲', desc:'Все действия подряд', gen: null },
-  { id:'time10',label:'На время', icon:'⏱️', desc:'10 примеров на скорость', gen: null },
-  { id:'time20',label:'На время', icon:'⏱️', desc:'20 примеров на скорость', gen: null },
-  { id:'custom',label:'Свой', icon:'✏️', desc:'Количество и тип на выбор', gen: null },
+const modes = {
+  add2: { gen: () => { const a=rnd(10,99), b=rnd(10,99); return { q:`${a} + ${b}`, a:a+b }; } },
+  add3: { gen: () => { const a=rnd(100,999), b=rnd(100,999); return { q:`${a} + ${b}`, a:a+b }; } },
+  sub2: { gen: () => { let a=rnd(20,99), b=rnd(10,a); return { q:`${a} − ${b}`, a:a-b }; } },
+  sub3: { gen: () => { let a=rnd(200,999), b=rnd(100,a); return { q:`${a} − ${b}`, a:a-b }; } },
+  mul1: { gen: () => { const a=rnd(10,99), b=rnd(2,9); return { q:`${a} × ${b}`, a:a*b }; } },
+  mul2: { gen: () => { const a=rnd(10,30), b=rnd(10,30); return { q:`${a} × ${b}`, a:a*b }; } },
+  div1: { gen: () => { const b=rnd(2,12), q=rnd(10,99), a=b*q; return { q:`${a} ÷ ${b}`, a:q }; } },
+  div2: { gen: () => { const b=rnd(5,25), q=rnd(10,99), a=b*q; return { q:`${a} ÷ ${b}`, a:q }; } },
+  avg2: { gen: () => { const a=rnd(10,90), b=rnd(10,90); const sum=a+b; return { q:`Среднее арифметическое: ${a} и ${b}`, a:sum/2 }; } },
+  avg3: { gen: () => { const a=rnd(10,80), b=rnd(10,80), c=rnd(10,80); const sum=a+b+c; return { q:`Среднее арифметическое: ${a}, ${b} и ${c}`, a:sum/3 }; } },
+  avg5: { gen: () => { const nums=[]; for(let i=0;i<5;i++) nums.push(rnd(10,50)*2); const sum=nums.reduce((s,v)=>s+v,0); return { q:`Среднее арифметическое: ${nums.join(', ')}`, a:sum/5 }; } },
+  mix: { gen: null },
+};
+const groups = [
+  { id:'gAdd', label:'Сложение', icon:'➕', items:[
+    { id:'add2', label:'Двухзначные + двузначные' },
+    { id:'add3', label:'Трёхзначные + трёхзначные' }
+  ]},
+  { id:'gSub', label:'Вычитание', icon:'➖', items:[
+    { id:'sub2', label:'Двухзначные − двузначные' },
+    { id:'sub3', label:'Трёхзначные − трёхзначные' }
+  ]},
+  { id:'gMul', label:'Умножение', icon:'✖️', items:[
+    { id:'mul1', label:'Двухзначные × однозначные' },
+    { id:'mul2', label:'Двухзначные × двузначные' }
+  ]},
+  { id:'gDiv', label:'Деление', icon:'➗', items:[
+    { id:'div1', label:'Деление без остатка (лёгкое)' },
+    { id:'div2', label:'Деление без остатка (сложное)' }
+  ]},
+  { id:'gAvg', label:'Среднее арифметическое', icon:'📐', items:[
+    { id:'avg2', label:'Среднее 2 чисел' },
+    { id:'avg3', label:'Среднее 3 чисел' },
+    { id:'avg5', label:'Среднее 5 чисел' }
+  ]},
+  { id:'gMix', label:'Микс', icon:'🎲', items:[
+    { id:'mix', label:'Все действия подряд' }
+  ]},
+  { id:'gTime', label:'На время', icon:'⏱️', items:[
+    { id:'time10', label:'10 примеров на скорость', total:10 },
+    { id:'time20', label:'20 примеров на скорость', total:20 }
+  ]}
 ];
 function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function genExercise(type) {
-  const m = modes.find(x => x.id === type);
+  const m = modes[type];
   if (m && m.gen) return m.gen();
-  const pool = modes.filter(x => x.gen);
-  return pool[rnd(0, pool.length - 1)].gen();
+  const ids = Object.keys(modes).filter(k => modes[k].gen);
+  return modes[ids[rnd(0, ids.length - 1)]].gen();
 }
 function genOptions(correct) {
   const opts = new Set([correct]);
@@ -802,11 +836,20 @@ function renderMenu() {
   document.getElementById('allTimeStats').innerHTML = `
     <div class="stat-box green"><div class="stat-val">${totalOk}</div><div class="stat-label">Всего верно</div></div>
     <div class="stat-box"><div class="stat-val">${totalAll}</div><div class="stat-label">Всего решено</div></div>`;
-  modes.forEach(m => {
-    const s = stats[m.id]; const cnt = s ? s.ok + s.fail : 0;
-    const b = document.createElement('div'); b.className = 'menu-btn';
-    b.innerHTML = `<span class="icon">${m.icon}</span><div class="label">${m.label}</div><div class="count">${m.desc}${cnt ? ' · ' + cnt + ' реш.' : ''}</div>`;
-    b.onclick = () => startMode(m.id); g.appendChild(b);
+  groups.forEach(gr => {
+    const grp = document.createElement('div'); grp.className = 'menu-group';
+    let itemsHtml = '';
+    gr.items.forEach(it => {
+      const s = stats[it.id]; const cnt = s ? s.ok + s.fail : 0;
+      itemsHtml += `<div class="menu-item" data-mode="${it.id}" data-total="${it.total||5}">
+        <span class="mi-label">${it.label}</span>
+        <span class="mi-count">${cnt ? cnt+' реш.' : ''}</span>
+      </div>`;
+    });
+    grp.innerHTML = `<div class="menu-group-header"><span class="gh-icon">${gr.icon}</span><span class="gh-label">${gr.label}</span><span class="gh-arrow">›</span></div><div class="menu-group-items">${itemsHtml}</div>`;
+    grp.querySelector('.menu-group-header').onclick = () => grp.classList.toggle('open');
+    grp.querySelectorAll('.menu-item').forEach(el => el.onclick = () => startMode(el.dataset.mode, parseInt(el.dataset.total)||5));
+    g.appendChild(grp);
   });
   const gameBtn = document.createElement('div'); gameBtn.className = 'menu-btn game-btn';
   gameBtn.innerHTML = `<span class="icon">🧩</span><div class="label">Математический Лабиринт</div><div class="count">Проходи лабиринт, решая примеры!</div>`;
@@ -822,23 +865,13 @@ function confirmQuit() {
   if (state.current > 0 && state.current < state.total) { if (!confirm('Тренировка не завершена. Выйти в меню?')) return; clearInterval(state.timerInterval); }
   goMenu();
 }
-function startMode(id) {
-  if (id === 'custom') { startCustom(); return; }
-  let total = 5; if (id === 'time10') total = 10; if (id === 'time20') total = 20;
+function startMode(id, total) {
+  if (!total) total = 5;
   state = { mode: id, total, current: 0, ok: 0, fail: 0, answers: [], startTime: Date.now(), timerInterval: null };
   document.getElementById('statOk').textContent = '0'; document.getElementById('statFail').textContent = '0';
-  document.getElementById('navTrainTitle').textContent = modes.find(m => m.id === id)?.label || 'Тренажёр';
-  showScreen('screenTrain'); startTimer(); nextExercise();
-}
-function startCustom() {
-  const types = ['add2','add3','sub2','sub3','mul1','mul2','div1','div2','avg2','avg3','avg5'];
-  const choice = prompt('Типы через запятую:\nadd2, add3, sub2, sub3, mul1, mul2, div1, div2, avg2, avg3, avg5\n\nПример: add2, avg3', 'add2, avg3');
-  if (!choice) return;
-  const count = parseInt(prompt('Сколько примеров?', '10'));
-  if (!count || count < 1) return;
-  state = { mode: 'custom', customTypes: choice.split(',').map(s=>s.trim()), total: count, current: 0, ok: 0, fail: 0, answers: [], startTime: Date.now(), timerInterval: null };
-  document.getElementById('statOk').textContent = '0'; document.getElementById('statFail').textContent = '0';
-  document.getElementById('navTrainTitle').textContent = 'Свой набор';
+  let label = id;
+  for (const gr of groups) { const it = gr.items.find(x => x.id === id); if (it) { label = it.label; break; } }
+  document.getElementById('navTrainTitle').textContent = label;
   showScreen('screenTrain'); startTimer(); nextExercise();
 }
 function startTimer() {
@@ -857,8 +890,9 @@ function nextExercise() {
   const pct = Math.round((state.current / state.total) * 100);
   document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('progressBar').textContent = pct + '%';
   let gen, label;
-  if (state.mode === 'custom') { const t = state.customTypes[rnd(0, state.customTypes.length - 1)]; gen = genExercise(t); label = modes.find(m => m.id === t)?.desc || t; }
-  else { gen = genExercise(state.mode); label = modes.find(m => m.id === state.mode)?.desc || ''; }
+  gen = genExercise(state.mode);
+  label = state.mode;
+  for (const gr of groups) { const it = gr.items.find(x => x.id === state.mode); if (it) { label = it.label; break; } }
   currentAnswer = gen.a;
   document.getElementById('exLabel').textContent = label;
   document.getElementById('exTask').innerHTML = gen.q + ' <span class="op">=</span> ?';
