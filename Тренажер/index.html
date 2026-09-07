@@ -768,6 +768,9 @@ const modes = [
   { id:'mul2', label:'Умножение', icon:'✖️', desc:'Двухзначные × двузначные', gen: () => { const a=rnd(10,30), b=rnd(10,30); return { q:`${a} × ${b}`, a:a*b }; } },
   { id:'div1', label:'Деление', icon:'➗', desc:'Деление без остатка (лёгкое)', gen: () => { const b=rnd(2,12), q=rnd(10,99), a=b*q; return { q:`${a} ÷ ${b}`, a:q }; } },
   { id:'div2', label:'Деление', icon:'➗', desc:'Деление без остатка (сложное)', gen: () => { const b=rnd(5,25), q=rnd(10,99), a=b*q; return { q:`${a} ÷ ${b}`, a:q }; } },
+  { id:'avg2', label:'Среднее', icon:'📐', desc:'Среднее арифметическое 2 чисел', gen: () => { const a=rnd(10,90), b=rnd(10,90); const sum=a+b; const ans=sum/2; return { q:`Среднее арифметическое: ${a} и ${b}`, a:ans }; } },
+  { id:'avg3', label:'Среднее', icon:'📐', desc:'Среднее арифметическое 3 чисел', gen: () => { const a=rnd(10,80), b=rnd(10,80), c=rnd(10,80); const sum=a+b+c; const ans=sum/3; return { q:`Среднее арифметическое: ${a}, ${b} и ${c}`, a:ans }; } },
+  { id:'avg5', label:'Среднее', icon:'📐', desc:'Среднее арифметическое 5 чисел', gen: () => { const nums=[]; for(let i=0;i<5;i++) nums.push(rnd(10,50)*2); const sum=nums.reduce((s,v)=>s+v,0); const ans=sum/5; return { q:`Среднее арифметическое: ${nums.join(', ')}`, a:ans }; } },
   { id:'mix', label:'Микс', icon:'🎲', desc:'Все действия подряд', gen: null },
   { id:'time10',label:'На время', icon:'⏱️', desc:'10 примеров на скорость', gen: null },
   { id:'time20',label:'На время', icon:'⏱️', desc:'20 примеров на скорость', gen: null },
@@ -828,8 +831,8 @@ function startMode(id) {
   showScreen('screenTrain'); startTimer(); nextExercise();
 }
 function startCustom() {
-  const types = ['add2','add3','sub2','sub3','mul1','mul2','div1','div2'];
-  const choice = prompt('Типы через запятую:\nadd2, add3, sub2, sub3, mul1, mul2, div1, div2\n\nПример: add2, mul1', 'add2, mul1');
+  const types = ['add2','add3','sub2','sub3','mul1','mul2','div1','div2','avg2','avg3','avg5'];
+  const choice = prompt('Типы через запятую:\nadd2, add3, sub2, sub3, mul1, mul2, div1, div2, avg2, avg3, avg5\n\nПример: add2, avg3', 'add2, avg3');
   if (!choice) return;
   const count = parseInt(prompt('Сколько примеров?', '10'));
   if (!count || count < 1) return;
