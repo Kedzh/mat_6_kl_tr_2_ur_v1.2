@@ -1,0 +1,6 @@
+*.xls
+*.docx
+*.pdf
+*.backup.html
+.DS_Store
+Thumbs.db

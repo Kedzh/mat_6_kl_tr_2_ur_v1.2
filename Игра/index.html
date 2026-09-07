@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Математический Платформер</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="menu-screen">
+        <h1>Математический Платформер</h1>
+        <div class="menu-content">
+            <button id="btn-play">Играть</button>
+            <button id="btn-settings">Настройки</button>
+            <button id="btn-records">Рекорды</button>
+        </div>
+    </div>
+
+    <div id="settings-screen" class="hidden">
+        <h2>Как играть</h2>
+        <div class="settings-group">
+            <label>Цель:</label>
+            <p style="color:white;font-size:16px;margin-bottom:16px;">Дойти до флага, отвечая на примеры</p>
+        </div>
+        <div class="settings-group">
+            <label>Управление:</label>
+            <p style="color:white;font-size:16px;margin-bottom:8px;">◀ ▶ — движение</p>
+            <p style="color:white;font-size:16px;margin-bottom:8px;">▲ — прыжок</p>
+            <p style="color:white;font-size:16px;margin-bottom:16px;">Свайп вверх на телефоне</p>
+        </div>
+        <div class="settings-group">
+            <label>Примеры из ВПР 5 класс:</label>
+            <p style="color:white;font-size:14px;margin-bottom:8px;">Чем ближе к финишу — тем сложнее!</p>
+            <p style="color:white;font-size:14px;">+ — − — × — ÷ — порядок действий</p>
+        </div>
+        <button id="btn-settings-back">Назад</button>
+    </div>
+
+    <div id="records-screen" class="hidden">
+        <h2>Рекорды</h2>
+        <div id="records-list"></div>
+        <button id="btn-records-back">Назад</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <div id="hud">
+            <span id="hud-level">Ур. 1</span>
+            <span id="hud-progress">0%</span>
+            <span id="hud-score">0</span>
+            <span id="hud-time">60</span>
+            <button id="btn-hint" class="hud-btn">?</button>
+            <span id="hud-hint">x3</span>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="mobile-controls">
+            <button id="btn-left" class="ctrl-btn">◀</button>
+            <button id="btn-jump" class="ctrl-btn">▲</button>
+            <button id="btn-right" class="ctrl-btn">▶</button>
+        </div>
+    </div>
+
+    <div id="question-modal" class="hidden">
+        <div class="modal-content">
+            <p id="question-text">2 + 3 = ?</p>
+            <div id="answers-grid"></div>
+        </div>
+    </div>
+
+    <div id="level-complete-modal" class="hidden">
+        <div class="modal-content">
+            <h2>Уровень пройден!</h2>
+            <p id="level-score"></p>
+            <p id="level-time"></p>
+            <button id="btn-next-level">Следующий уровень</button>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="hidden">
+        <div class="modal-content">
+            <h2>Игра окончена!</h2>
+            <p id="final-score"></p>
+            <button id="btn-retry">Заново</button>
+            <button id="btn-menu">Меню</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

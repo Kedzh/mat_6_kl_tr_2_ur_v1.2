@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Первый урок по ИИ: Как устроены нейросети?</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#4a6cf7;--purple:#9b59b6;--pink:#e056a0;
+  --dark:#0f0e17;--card:#1a1a2e;--text:#e0e0ff;
+  --glow:rgba(74,108,247,0.4);--green:#27e0a3;
+}
+html,body{height:100%}
+body{
+  font-family:'Nunito',sans-serif;background:var(--dark);color:var(--text);
+  overflow:hidden;position:fixed;width:100%;height:100%;
+}
+h1,h2,h3{font-family:'Space Mono',monospace}
+
+#deck{width:100%;height:100%;position:relative}
+.slide{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;
+  padding:4.5rem 3.5rem;text-align:center;
+  opacity:0;transform:translateX(60px);pointer-events:none;
+  transition:opacity .6s ease,transform .6s ease;
+  overflow:hidden;
+}
+.slide-inner{max-height:100%;overflow-y:auto;scrollbar-width:thin;margin:auto;width:100%;max-width:1000px;position:relative;z-index:2;scrollbar-color:rgba(74,108,247,.4) transparent}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:auto;z-index:2}
+.slide.prev{transform:translateX(-60px)}
+.slide{background:linear-gradient(160deg,#0f0e17 0%,#171733 55%,#0f0e17 100%)}
+
+.slide-kicker{font-family:'Space Mono',monospace;font-size:1.05rem;color:var(--pink);text-transform:uppercase;letter-spacing:3px;margin-bottom:0.6rem;opacity:0.95}
+.slide-title{font-size:clamp(2rem,5.5vw,3.6rem);margin-bottom:1.2rem;background:linear-gradient(135deg,var(--blue),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;max-width:900px;line-height:1.15}
+
+.card{background:rgba(26,26,46,0.85);border:1px solid rgba(74,108,247,0.25);border-radius:18px;padding:1.6rem 2rem;margin:1rem auto;max-width:820px;backdrop-filter:blur(8px)}
+.card .emoji-icon{font-size:2.6rem;display:block;margin-bottom:0.5rem}
+.card h3{font-size:1.6rem;margin-bottom:0.7rem;color:var(--pink)}
+.card p{font-size:1.35rem;line-height:1.65;opacity:0.97}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem auto;max-width:820px}
+.info-box{background:rgba(74,108,247,0.12);border:1px solid rgba(74,108,247,0.35);border-radius:16px;padding:1.4rem;text-align:center}
+.info-box h4{color:var(--blue);font-size:1.4rem;margin-bottom:0.5rem}
+.info-box p{font-size:1.2rem;opacity:0.95;line-height:1.55}
+
+.compare{display:grid;grid-template-columns:1fr auto 1fr;gap:1.2rem;align-items:stretch;margin:1.3rem 0}
+.compare-box{background:rgba(74,108,247,0.12);border:1px solid rgba(74,108,247,0.35);border-radius:16px;padding:1.6rem;text-align:center}
+.compare-box h4{color:var(--blue);margin-bottom:0.6rem;font-size:1.4rem}
+.compare-box p{font-size:1.25rem;opacity:0.95;line-height:1.55}
+.compare-arrow{align-self:center;font-size:2.6rem;color:var(--pink)}
+
+.nn-viz{margin:1.2rem auto;position:relative;padding:1rem 0;max-width:820px}
+.nn-row{display:flex;justify-content:space-between;align-items:flex-end;position:relative}
+.nn-col{display:flex;flex-direction:column;align-items:center;gap:0.5rem;z-index:1}
+.nn-col .cap{font-size:0.9rem;opacity:0.7;margin-bottom:0.35rem;white-space:nowrap}
+.nn-node{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;animation:pulse 2s ease-in-out infinite}
+.nn-node.in{background:linear-gradient(135deg,#4a6cf7,#6a8cff);box-shadow:0 0 18px rgba(74,108,247,0.5)}
+.nn-node.hid{background:linear-gradient(135deg,#9b59b6,#c084fc);box-shadow:0 0 18px rgba(155,89,182,0.5)}
+.nn-node.out{background:linear-gradient(135deg,#e056a0,#ff7eb3);box-shadow:0 0 18px rgba(224,86,160,0.5)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.nn-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.nn-lines line{stroke:rgba(74,108,247,0.3);stroke-width:3}
+.ball{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--pink);box-shadow:0 0 10px var(--pink);z-index:2;opacity:0}
+
+.slider-group{margin:1.2rem 0}
+.slider-row{display:flex;align-items:center;gap:1rem;margin:0.7rem auto;background:rgba(26,26,46,0.6);border-radius:12px;padding:0.9rem 1.4rem;max-width:640px}
+.slider-row label{min-width:120px;font-size:1.2rem}
+.slider-row input[type=range]{flex:1;-webkit-appearance:none;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--pink));outline:none;cursor:pointer}
+.slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:white;cursor:pointer;box-shadow:0 0 8px var(--glow)}
+.slider-row .val{min-width:55px;text-align:right;font-family:'Space Mono',monospace;font-size:1.3rem;color:var(--pink)}
+
+.fruit-game{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1.2rem auto;max-width:760px}
+.fruit-card{background:rgba(26,26,46,0.7);border:2px solid transparent;border-radius:16px;padding:1.3rem;text-align:center;cursor:pointer;transition:all .3s}
+.fruit-card:hover,.fruit-card.active{border-color:var(--pink);box-shadow:0 0 18px rgba(224,86,160,0.35)}
+.fruit-card .emoji-icon{font-size:2.7rem}
+.fruit-card strong{font-size:1.2rem}
+.fruit-card small{opacity:0.75;font-size:0.95rem}
+.fruit-result{text-align:center;padding:1rem 1.4rem;border-radius:12px;margin:1.1rem auto;font-size:1.25rem;line-height:1.7;background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.3);min-height:58px;max-width:660px}
+
+.feedback-demo{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:1.2rem 0}
+.fb-step{background:rgba(26,26,46,0.7);border-radius:16px;padding:1.4rem;text-align:center;flex:1;min-width:185px;max-width:235px;border:1px solid rgba(74,108,247,0.2);position:relative}
+.fb-step .step-num{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--pink));color:white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;font-weight:900}
+.fb-step .emoji-icon{font-size:2.3rem;display:block;margin-bottom:0.5rem}
+.fb-step h3{font-size:1.25rem;margin-bottom:0.5rem}
+.fb-step p{font-size:1.05rem}
+
+/* Cat or dog game */
+.pet-game{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:1.2rem 0}
+.pet-attr{background:rgba(26,26,46,0.7);border:2px solid rgba(74,108,247,0.3);border-radius:14px;padding:1rem 1.4rem;cursor:pointer;font-size:1.25rem;transition:all .3s;min-width:150px}
+.pet-attr:hover{box-shadow:0 0 14px var(--glow)}
+.pet-attr.on{border-color:var(--green);box-shadow:0 0 14px rgba(39,224,163,0.5);background:rgba(39,224,163,0.12)}
+.pet-guess{display:flex;gap:1.5rem;justify-content:center;align-items:center;margin:1.2rem 0;flex-wrap:wrap}
+.pet-answer{background:rgba(26,26,46,0.7);border:2px solid transparent;border-radius:16px;padding:1.3rem 2rem;text-align:center;min-width:200px}
+.pet-answer .emoji-icon{font-size:3rem}
+.pet-answer .pct{font-size:2rem;font-family:'Space Mono',monospace;background:linear-gradient(135deg,var(--blue),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pet-answer.winner{border-color:var(--green);box-shadow:0 0 18px rgba(39,224,163,0.4)}
+.pet-desc{font-size:1.15rem;opacity:0.9;max-width:640px;margin:0.5rem auto}
+
+.btn{padding:0.9rem 2.1rem;border:none;border-radius:50px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:1.25rem;font-weight:700;transition:all .3s;margin:0.2rem}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:white;box-shadow:0 4px 18px rgba(74,108,247,0.4)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 26px rgba(74,108,247,0.6)}
+.btn-secondary{background:rgba(255,255,255,0.1);color:var(--text);border:1px solid rgba(255,255,255,0.2)}
+.btn-secondary:hover{background:rgba(255,255,255,0.2)}
+
+/* Digit grid game */
+.digit-game{display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:center;align-items:flex-start;margin:1rem 0}
+.digit-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;width:330px;height:330px}
+.dcell{background:#23233d;border:1px solid rgba(255,255,255,0.12);border-radius:4px;cursor:pointer;transition:background .15s}
+.dcell.on{background:linear-gradient(135deg,var(--blue),var(--purple));box-shadow:0 0 6px rgba(74,108,247,0.7)}
+.digit-panel{display:flex;flex-direction:column;align-items:center;gap:0.9rem;min-width:290px}
+.prediction-box{background:rgba(26,26,46,0.85);border:1px solid rgba(74,108,247,0.3);border-radius:16px;padding:1.2rem 1.6rem;text-align:center;min-width:250px;width:100%}
+.prediction-box .big-num{font-family:'Space Mono',monospace;font-size:3rem;background:linear-gradient(135deg,var(--blue),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.prediction-box .confidence{font-size:1.05rem;opacity:0.75}
+.prob-area{background:rgba(26,26,46,0.6);border:1px solid rgba(74,108,247,0.2);border-radius:16px;padding:0.9rem 1.2rem;width:100%}
+.prob-bars{display:flex;gap:4px;align-items:flex-end;height:70px}
+.prob-bar{width:18px;border-radius:3px 3px 0 0;transition:height .5s ease;background:linear-gradient(0deg,var(--blue),var(--pink))}
+.prob-labels{display:flex;gap:4px;margin-top:3px}
+.prob-labels span{width:18px;font-size:0.8rem;opacity:0.75;text-align:center}
+.reason{font-size:1.15rem;opacity:0.9;max-width:640px;margin:0.4rem auto}
+
+/* Quiz */
+.quiz-q{font-size:1.6rem;margin:1rem 0;font-family:'Space Mono',monospace}
+.quiz-opts{display:flex;flex-direction:column;gap:0.8rem;max-width:560px;margin:1rem auto}
+.quiz-opt{background:rgba(26,26,46,0.7);border:2px solid rgba(74,108,247,0.3);border-radius:14px;padding:1rem 1.6rem;cursor:pointer;font-size:1.3rem;transition:all .3s;text-align:left}
+.quiz-opt:hover{box-shadow:0 0 14px var(--glow)}
+.quiz-opt.correct{border-color:var(--green);background:rgba(39,224,163,0.15)}
+.quiz-opt.wrong{border-color:#ff4757;background:rgba(255,71,87,0.15)}
+.quiz-score{font-family:'Space Mono',monospace;font-size:1.3rem;color:var(--pink)}
+.quiz-feedback{font-size:1.2rem;margin:0.8rem auto;min-height:2em}
+.quiz-nav{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+.dots{position:fixed;bottom:1.3rem;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:50;flex-wrap:wrap;justify-content:center;max-width:90vw}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.25);cursor:pointer;transition:all .3s}
+.dot.active{background:var(--pink);transform:scale(1.35)}
+.slide-counter{position:fixed;bottom:1.2rem;right:1.4rem;font-family:'Space Mono',monospace;font-size:0.8rem;opacity:0.6;z-index:50}
+.nav-btn{position:fixed;top:50%;transform:translateY(-50%);z-index:60;width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;background:rgba(74,108,247,0.18);color:var(--text);font-size:1.8rem;transition:all .3s;display:flex;align-items:center;justify-content:center}
+.nav-btn:hover{background:rgba(74,108,247,0.4)}
+.nav-prev{left:1.1rem}
+.nav-next{right:1.1rem}
+.kb-legend{position:fixed;bottom:1.3rem;left:1.4rem;font-size:0.85rem;opacity:0.45;z-index:50}
+
+.particles{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;border-radius:50%;opacity:0.3;animation:floatUp linear infinite}
+@keyframes floatUp{0%{transform:translateY(110vh) scale(0);opacity:0}20%{opacity:0.3}100%{transform:translateY(-10vh) scale(1);opacity:0}}
+
+@media(max-width:760px){
+  .slide{padding:2.5rem 0.8rem}
+  .compare{grid-template-columns:1fr;gap:0.6rem}
+  .compare-arrow{transform:rotate(90deg)}
+  .fruit-game,.grid2{grid-template-columns:1fr 1fr}
+  .feedback-demo{flex-direction:column;align-items:center}
+  .nn-node{width:36px;height:36px;font-size:0.9rem}
+  .nav-btn{width:40px;height:40px;font-size:1.2rem}
+  .nav-prev{left:0.3rem}.nav-next{right:0.3rem}
+  .kb-legend{display:none}
+  .digit-grid{width:270px;height:270px}
+  .dcell{border-radius:3px}
+}
+</style>
+</head>
+<body>
+
+<div id="deck">
+  <!-- SLIDE 0: TITLE -->
+  <section class="slide active" id="slide0">
+    <div class="particles" id="particles"></div>
+    <div class="slide-inner">
+      <div class="slide-kicker">Информатика · Урок 1</div>
+      <h1 class="slide-title">Первый урок по ИИ</h1>
+      <p style="font-size:1.6rem;opacity:0.95;max-width:680px;margin:0.6rem auto 1.6rem">Как устроены нейросети? Просто, наглядно и с играми 🎮</p>
+      <div style="display:flex;justify-content:center"><button class="btn btn-primary" onclick="go(1)">🚀 Начать урок</button></div>
+      <p style="margin-top:1.2rem;font-size:1.05rem;opacity:0.65">Для 6–7 класса · Листай стрелками (→/←), кнопками или цифрами на клавиатуре</p>
+    </div>
+  </section>
+
+  <!-- SLIDE 1: What is AI -->
+  <section class="slide" id="slide1">
+    <div class="slide-inner">
+      <div class="slide-kicker">Блок 1 · Вступление</div>
+      <h2 class="slide-title">🤖 Что такое ИИ на пальцах</h2>
+      <div class="compare">
+        <div class="compare-box">
+          <h4>👨‍🍳 Повар</h4>
+          <p>Пробует блюдо, спрашивает «вкусно?» и всё время корректирует рецепт.</p>
+        </div>
+        <div class="compare-arrow">⚡</div>
+        <div class="compare-box">
+          <h4>🧠 Нейросеть</h4>
+          <p>Пробует решить задачу, слышит «неправильно!» и подстраивает свои «внутренние кнопки».</p>
+        </div>
+      </div>
+      <div class="card">
+        <span class="emoji-icon">💡</span>
+        <h3>Простая мысль</h3>
+        <p><strong>Искусственный интеллект</strong> — это не робот из фильма, а программа, которая <strong>учится на примерах</strong>, как ты учишься решать примеры по математике.</p>
+      </div>
+      <div class="card">
+        <span class="emoji-icon">🔍</span>
+        <h3>«Умный» = «наученный»</h3>
+        <p>ИИ не знает всё заранее. Он <strong>смотрит на тысячи примеров</strong> и потихоньку замечает закономерности. Чем больше примеров — тем он «умнее».</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: Examples around us -->
+  <section class="slide" id="slide2">
+    <div class="slide-inner">
+      <div class="slide-kicker">Блок 1 · Примеры</div>
+      <h2 class="slide-title">📍 Где живёт ИИ рядом с нами</h2>
+      <div class="grid2">
+        <div class="info-box"><h4>💬 Переводчики</h4><p>Всё, что ты переводишь онлайн, — это нейросеть.</p></div>
+        <div class="info-box"><h4>🐱 Фильтры фото</h4><p>Маски и «магические» фильтры находят лицо и рисуют на нём.</p></div>
+        <div class="info-box"><h4>🎮 Игры и боты</h4><p>Соперники в шахматах и стратегиях «думают» с помощью ИИ.</p></div>
+        <div class="info-box"><h4>📣 Умные колонки</h4><p>«Алиса», «Маруся» — распознают твою речь и отвечают.</p></div>
+        <div class="info-box"><h4>🚗 Автопилоты</h4><p>Машины учатся видеть дорогу, знаки и людей.</p></div>
+        <div class="info-box"><h4>🔄 Еда и магазины</h4><p>ИИ подсказывает, что ты, возможно, хочешь купить.</p></div>
+      </div>
+      <div class="card">
+        <h3>⚖️ Что ИИ умеет / пока не умеет</h3>
+        <p>Умеет: находить лица, переводить, играть, предсказывать погоду. ⚠️ Не умеет по-настоящему «понимать» и «чувствовать» — он просто находит закономерности в примерах.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3: Neuron -->
+  <section class="slide" id="slide3">
+    <div class="slide-inner">
+      <div class="slide-kicker">Блок 2 · Основы</div>
+      <h2 class="slide-title">🧬 Один нейрон — как лампочка</h2>
+      <div class="compare">
+        <div class="compare-box">
+          <h4>🕹️ Выключатель</h4>
+          <p>Нажал — лампа загорелась. Не нажал — темно. Один «вход» → один «выход».</p>
+        </div>
+        <div class="compare-arrow">⚡</div>
+        <div class="compare-box">
+          <h4>🧠 Нейрон</h4>
+          <p>Получает сигналы со входов, «суммирует» их и решает — включаться или нет.</p>
+        </div>
+      </div>
+      <div class="card">
+        <span class="emoji-icon">📮</span>
+        <h3>Как нейрон принимает решение</h3>
+        <p>Нейрон <strong>складывает</strong> входящие сигналы, каждый со своим <strong>весом</strong>. Если сумма больше порога — он «загорается» и передаёт сигнал дальше. Как передача мяча по цепочке игроков! 🤾</p>
+      </div>
+      <div class="card">
+        <span class="emoji-icon">🧩</span>
+        <h3>А в мозге у тебя</h3>
+        <p>В твоей голове около <strong>86 миллиардов</strong> нейронов! У самой большой нейросети — в тысячи раз меньше. Вот почему ИИ пока учится дольше человека.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4: Architecture -->
+  <section class="slide" id="slide4">
+    <div class="slide-inner">
+      <div class="slide-kicker">Блок 2 · Архитектура</div>
+      <h2 class="slide-title">🏗️ Нейросеть — слоёный пирог</h2>
+      <div class="card">
+        <p>У торта есть слои: бисквит, крем, ягоды. У нейросети тоже: <strong>вход → скрытые слои → выход</strong></p>
+      </div>
+      <div class="nn-viz">
+        <div class="nn-row" id="nnRow" style="padding:1rem 0 2.5rem"></div>
+      </div>
+      <div class="card">
+        <span class="emoji-icon">📨</span>
+        <h3>Как данные бегут по слоям</h3>
+        <p>Картинка цифры «5» попадает на <strong>вход</strong>. Каждый скрытый слой «разглядывает» её по чуть-чуть. На <strong>выходе</strong> сеть говорит: «Это 5 с вероятностью 92%!»</p>
+      </div>
+      <div class="card">
+        <span class="emoji-icon">🔍</span>
+        <h3>Почему много слоёв?</h3>
+        <p>Первый слой ищет короткие чёрточки и уголки. Следующий собирает их в формы: круг, крестик. Последний понимает целую цифру. Каждый слой — новый уровень умения!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5: Weights & Biases -->
+  <section class="slide" id="slide5">
+    <div class="slide-inner">
+      <div class="slide-kicker">Блок 3 · Веса и смещения</div>
+      <h2 class="slide-title">⚖️ Угадай фрукт или овощ</h2>
+      <p style="max-width:740px;margin:0 auto 1rem;font-size:1.35rem">Нейросеть смотрит на <strong>цвет</strong>, <strong>вес</strong> и <strong>размер</strong>. Ползунки задают, насколько важен каждый признак. Выбери предмет и посмотри, кого сеть «узнает»:</p>
+      <div class="slider-group">
+        <div class="slider-row"><label>🔴 Цвет</label><input type="range" min="0" max="100" value="70" id="wColor" oninput="updateFruit()"><span class="val" id="vColor">70</span></div>
+        <div class="slider-row"><label>⚖️ Вес</label><input type="range" min="0" max="100" value="40" id="wWeight" oninput="updateFruit()"><span class="val" id="vWeight">40</span></div>
+        <div class="slider-row"><label>📐 Размер</label><input type="range" min="0" max="100" value="50" id="wSize" oninput="updateFruit()"><span class="val" id="vSize">50</span></div>
+        <div class="slider-row"><label>🎚️ Смещение</label><input type="range" min="-50" max="50" value="0" id="wBias" oninput="updateFruit()"><span class="val" id="vBias">0</span></div>
+      </div>
+      <div class="fruit-game">
+        <div class="fruit-card" id="fruit0" onclick="selectFruit(0)"><span class="emoji-icon">🍎</span><strong>Яблоко</strong><br><small>фрукт</small></div>
+        <div class="fruit-card" id="fruit1" onclick="selectFruit(1)"><span class="emoji-icon">🍌</span><strong>Банан</strong><br><small>фрукт</small></div>
+        <div class="fruit-card" id="fruit2" onclick="selectFruit(2)"><span class="emoji-icon">🍅</span><strong>Помидор</strong><br><small>овощ</small></div>
+        <div class="fruit-card" id="fruit3" onclick="selectFruit(3)"><span class="emoji-icon">🥕</span><strong>Морковь</strong><br><small>овощ</small></div>
+      </div>
+      <div class="fruit-result" id="fruitResult">👆 Выбери фрукт или овощ, чтобы увидеть, как его «видит» нейросеть</div>
+      <div class="card">
+        <h3>🔑 Запомни</h3>
+        <p><strong>Веса</strong> — важность признаков. Увеличь вес «цвета» — и сеть при выборе будет больше смотреть на цвет, вес «размера» — на размер. <strong>Смещение</strong> — «настроение» сети, общая настройка. Выбранный объект сеть всегда узнаёт точно, а веса решают, кто второй.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6: Learning -->
+  <section class="slide" id="slide6">
+    <div class="slide-inner">
+      <div class="slide-kicker">Блок 4 · Обучение</div>
+      <h2 class="slide-title">🎓 «Нет, неправильно!»</h2>
+      <div class="card">
+        <p style="font-size:1.35rem">Свежая нейросеть угадывает <strong>случайно</strong>. Ты спрашиваешь «Это кот?» — она отвечает: «Ботинок!»</p>
+      </div>
+      <div class="feedback-demo">
+        <div class="fb-step"><div class="step-num">1</div><span class="emoji-icon">🖼️</span><h3>Картинка</h3><p>Сеть видит кота</p></div>
+        <div class="fb-step"><div class="step-num">2</div><span class="emoji-icon">🤔</span><h3>Ответ</h3><p>«Это тостер!»</p></div>
+        <div class="fb-step"><div class="step-num">3</div><span class="emoji-icon">❌</span><h3>Обратная связь</h3><p>«Нет, это кот!»</p></div>
+        <div class="fb-step"><div class="step-num">4</div><span class="emoji-icon">🔧</span><h3>Подстройка</h3><p>Сеть меняет свои веса</p></div>
+      </div>
+      <div class="card">
+        <span class="emoji-icon">📉</span>
+        <h3>Функция ошибки</h3>
+        <p>Компьютер считает, насколько сильно ошибся. Чем меньше число — тем точнее. Обучение повторяют <strong>тысячи раз</strong>, пока ошибка не станет маленькой.</p>
+      </div>
+      <div class="card">
+        <h3>🧠 Это как спорт</h3>
+        <p>Ты же не попал в корзину с первой попытки? Тренер говорит «ниже», «сильнее», «правее». Нейросеть делает то же самое — только с весами!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7: Cat or Dog game -->
+  <section class="slide" id="slide7">
+    <div class="slide-inner">
+      <div class="slide-kicker">Блок 4 · Мини-игра</div>
+      <h2 class="slide-title">🐱 Кот или собака? 🐶</h2>
+      <p style="max-width:700px;margin:0 auto 0.6rem;font-size:1.3rem">Включай признаки «животного», которые заметила нейросеть, и смотри, кого она «узнает»:</p>
+      <div class="pet-game" id="petAttrs">
+        <div class="pet-attr" data-cat="0" data-dog="2" onclick="toggleAttr(this)">🐾 Мокрый нос</div>
+        <div class="pet-attr" data-cat="3" data-dog="0" onclick="toggleAttr(this)">😼 Гибкое тело</div>
+        <div class="pet-attr" data-cat="0" data-dog="2" onclick="toggleAttr(this)">📯 Громкий лай</div>
+        <div class="pet-attr" data-cat="2" data-dog="0" onclick="toggleAttr(this)">🔊 Мурлыканье</div>
+        <div class="pet-attr" data-cat="2" data-dog="0" onclick="toggleAttr(this)">🧶 Усы длинные</div>
+        <div class="pet-attr" data-cat="0" data-dog="1" onclick="toggleAttr(this)">🦴 Виляет хвостом</div>
+      </div>
+      <div class="pet-guess">
+        <div class="pet-answer" id="petCat"><div class="emoji-icon">🐱</div><div style="opacity:.8;font-size:1.1rem">Кот</div><div class="pct" id="petCatPct">50%</div></div>
+        <div class="pet-answer" id="petDog"><div class="emoji-icon">🐶</div><div style="opacity:.8;font-size:1.1rem">Собака</div><div class="pct" id="petDogPct">50%</div></div>
+      </div>
+      <div class="pet-desc" id="petDesc">Каждый признак добавляет вес. Включи несколько и посмотри, кто победит!</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 8: Digit recognition -->
+  <section class="slide" id="slide8">
+    <div class="slide-inner">
+      <div class="slide-kicker">Блок 5 · Практика</div>
+      <h2 class="slide-title">🎮 Игра: Угадай цифру</h2>
+      <p style="max-width:720px;margin:0 auto 0.6rem;font-size:1.3rem"><strong>Зажми мышь</strong> (или палец) и веди, чтобы рисовать, как карандашом. Составь цифру (0–9) и жми <strong>«Угадать!»</strong></p>
+      <div class="digit-game">
+        <div class="digit-grid" id="digitGrid"></div>
+        <div class="digit-panel">
+          <div style="display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center">
+            <button class="btn btn-primary" onclick="predictDigit()">🔮 Угадать!</button>
+            <button class="btn btn-secondary" onclick="clearDigit()">🗑️ Очистить</button>
+          </div>
+          <div class="prediction-box" id="predBox" style="display:none">
+            <div style="opacity:0.7;font-size:0.95rem">Нейросеть думает, что это:</div>
+            <div class="big-num" id="predDigit">—</div>
+            <div class="confidence" id="predConf"></div>
+          </div>
+          <div class="prob-area">
+            <div class="prob-bars" id="probBars"></div>
+            <div class="prob-labels" id="probLabels">
+              <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+            </div>
+          </div>
+          <div class="reason" id="predReason" style="text-align:center">Зажми мышь и нарисуй цифру на сетке слева!</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🧠 Как это работает</h3>
+        <p>Сеть сравнивает твою цифру с «эталонами» — как узнаёшь буквы по картинке в прописи. <strong>Пока ты рисуешь, она считает это в реальном времени</strong>: каждое движение мыши меняет вероятности!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 9: Quiz -->
+  <section class="slide" id="slide9">
+    <div class="slide-inner">
+      <div class="slide-kicker">Проверка · Викторина</div>
+      <h2 class="slide-title">🕹️ Правда или выбор!</h2>
+      <p style="font-size:1.2rem;opacity:0.85">Ответь на вопросы. В конце — счёт!</p>
+      <div class="quiz-feedback" id="quizFb"></div>
+      <div id="quizBox"></div>
+      <div class="quiz-nav">
+        <button class="btn btn-secondary" onclick="nextQuiz(-1)">⬅ Назад</button>
+        <button class="btn btn-primary" onclick="nextQuiz(1)">Дальше ➡</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 10: Summary -->
+  <section class="slide" id="slide10">
+    <div class="slide-inner">
+      <div class="slide-kicker">Итог</div>
+      <h2 class="slide-title">🏆 Что мы сегодня узнали</h2>
+      <div class="card" style="max-width:720px">
+        <p style="text-align:left;line-height:1.9;font-size:1.25rem">
+          ✅ ИИ — программа, которая учится на примерах<br>
+          ✅ Нейросеть — слоёная структура: вход → скрытые слои → выход<br>
+          ✅ Нейрон складывает сигналы и «включается» при пороге<br>
+          ✅ Веса и смещения — «внутренние кнопки» сети<br>
+          ✅ Обучение — цикл: ответ → ошибка → подстройка<br>
+          ✅ Чем больше примеров, тем сеть умнее
+        </p>
+      </div>
+      <div class="card" style="max-width:720px">
+        <h3>📝 Домашнее задание</h3>
+        <p>Найди дома одну вещь, в которой работает ИИ (телефон, колонка, фото, поиск). Расскажи, как она училась!</p>
+      </div>
+      <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="go(8)">🎮 Играть ещё</button>
+        <button class="btn btn-primary" onclick="go(9)">🕹️ Викторина</button>
+        <button class="btn btn-secondary" onclick="go(0)">↩️ К началу</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Navigation -->
+<button class="nav-btn nav-prev" onclick="go(current-1)">◀</button>
+<button class="nav-btn nav-next" onclick="go(current+1)">▶</button>
+<div class="dots" id="dots"></div>
+<div class="slide-counter" id="counter"></div>
+<div class="kb-legend">← → листать · 0–10 переход</div>
+
+<script>
+// ===================== SLIDE ENGINE =====================
+const slides=document.querySelectorAll('.slide');
+let current=0;
+const TOTAL=slides.length;
+
+function buildDots(){
+  const c=document.getElementById('dots');
+  for(let i=0;i<TOTAL;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===0?' active':'');
+    d.onclick=()=>go(i);
+    d.title='Слайд '+i;
+    c.appendChild(d);
+  }
+}
+buildDots();
+
+function go(n){
+  if(n<0)n=TOTAL-1;if(n>=TOTAL)n=0;
+  slides[current].classList.remove('active');
+  slides[current].classList.toggle('prev',n<current);
+  slides[current].classList.toggle('next',n>current);
+  current=n;
+  slides[current].classList.add('active');
+  slides[current].classList.remove('prev','next');
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+  document.getElementById('counter').textContent=(current+1)+' / '+TOTAL;
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ')go(current+1);
+  else if(e.key==='ArrowLeft')go(current-1);
+  else if(/^\d$/.test(e.key)&&+e.key<TOTAL)go(+e.key);
+});
+
+// ===================== PARTICLES =====================
+(function(){
+  const c=document.getElementById('particles');if(!c)return;
+  for(let i=0;i<30;i++){
+    const p=document.createElement('div');p.className='particle';
+    const s=Math.random()*4+2;
+    p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${['#4a6cf7','#9b59b6','#e056a0'][i%3]};animation-duration:${Math.random()*8+6}s;animation-delay:${Math.random()*8}s`;
+    c.appendChild(p);
+  }
+})();
+
+// ===================== NEURAL NET VIZ =====================
+(function(){
+  const row=document.getElementById('nnRow');
+  const cols=[
+    {cap:'📥 Вход',cls:'in',n:3},
+    {cap:'🔮 Скрытый 1',cls:'hid',n:4},
+    {cap:'🔮 Скрытый 2',cls:'hid',n:4},
+    {cap:'📤 Выход',cls:'out',n:2}
+  ];
+  row.innerHTML=cols.map(c=>`<div class="nn-col" style="flex:1"></div>`).join('');
+  const colEls=row.querySelectorAll('.nn-col');
+  colEls.forEach((el,i)=>{
+    el.innerHTML=`<div class="cap">${cols[i].cap}</div>`+
+      [...Array(cols[i].n)].map(()=>`<div class="nn-node ${cols[i].cls}">⚙️</div>`).join('');
+  });
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','nn-lines');
+  row.appendChild(svg);
+  function drawLines(){
+    svg.innerHTML='';
+    const R=row.getBoundingClientRect();
+    for(let a=0;a<cols.length-1;a++){
+      const nA=colEls[a].querySelectorAll('.nn-node');
+      const nB=colEls[a+1].querySelectorAll('.nn-node');
+      nA.forEach(na=>{
+        const ra=na.getBoundingClientRect();
+        nB.forEach(nb=>{
+          const rb=nb.getBoundingClientRect();
+          const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+          ln.setAttribute('x1',ra.left+ra.width/2-R.left);ln.setAttribute('y1',ra.top+ra.height/2-R.top);
+          ln.setAttribute('x2',rb.left+rb.width/2-R.left);ln.setAttribute('y2',rb.top+rb.height/2-R.top);
+          svg.appendChild(ln);
+        });
+      });
+    }
+  }
+  requestAnimationFrame(drawLines);
+  window.addEventListener('resize',()=>setTimeout(drawLines,120));
+  // data balls travel from hidden layer 1 to output
+  setTimeout(function(){
+    const el=colEls[1];
+    el.querySelectorAll('.nn-node').forEach((nd,fi)=>{
+      const b=document.createElement('div');b.className='ball';
+      const ra=nd.getBoundingClientRect(),R=row.getBoundingClientRect();
+      b.style.left=(ra.left+ra.width/2-R.left)+'px';
+      b.style.top=(ra.top+ra.height/2-R.top)+'px';
+      const out=colEls[3].querySelector('.nn-node');
+      const rb=out.getBoundingClientRect();
+      const x2=rb.left+rb.width/2-R.left,y2=rb.top+rb.height/2-R.top;
+      b.animate([
+        {transform:'translate(0,0)',opacity:0},
+        {transform:'translate(0,0)',opacity:1,offset:0.1},
+        {transform:`translate(${x2-(ra.left+ra.width/2-R.left)}px,${y2-(ra.top+ra.height/2-R.top)}px)`,opacity:0}
+      ],{duration:1500+fi*250,iterations:Infinity});
+      row.appendChild(b);
+    });
+  },400);
+})();
+
+// ===================== FRUIT GAME =====================
+// Each item has three features the network can "look at": color, weight, size (0-100)
+const fruits=[
+  {name:'Яблоко',emoji:'🍎',type:'фрукт',color:80, weight:30, size:45},
+  {name:'Банан',emoji:'🍌',type:'фрукт',color:25, weight:25, size:70},
+  {name:'Помидор',emoji:'🍅',type:'овощ',color:85, weight:22, size:30},
+  {name:'Морковь',emoji:'🥕',type:'овощ',color:55, weight:18, size:75}
+];
+let selectedFruit=-1;
+function selectFruit(i){
+  selectedFruit=i;
+  document.querySelectorAll('.fruit-card').forEach((c,j)=>c.classList.toggle('active',j===i));
+  updateFruit();
+}
+function updateFruit(){
+  const wc=+wColor.value/100, ww=+wWeight.value/100, ws=+wSize.value/100, wb=+wBias.value/100;
+  vColor.textContent=wColor.value;vWeight.textContent=wWeight.value;vSize.textContent=wSize.value;vBias.textContent=wBias.value;
+  if(selectedFruit<0)return;
+  const chosen=fruits[selectedFruit];
+  // How close is each candidate to the chosen one, per feature (1 = identical)
+  const RANGE=100;
+  const scores=fruits.map(cand=>{
+    const cClose=1-Math.abs(chosen.color-cand.color)/RANGE;
+    const wClose=1-Math.abs(chosen.weight-cand.weight)/RANGE;
+    const sClose=1-Math.abs(chosen.size-cand.size)/RANGE;
+    // The sliders set HOW IMPORTANT each feature is.
+    // The chosen item is always "closest", so it gets recognised correctly.
+    return (wc*cClose + ww*wClose + ws*sClose) + wb;
+  });
+  const mx=Math.max(...scores);
+  const ex=scores.map(v=>Math.exp((v-mx)*6));
+  const sm=ex.reduce((a,b)=>a+b,0);
+  const probs=ex.map(v=>Math.round(v/sm*100));
+  document.getElementById('fruitResult').innerHTML=
+    `<strong>${chosen.emoji} ${chosen.name}</strong> (${chosen.type}) — нейросеть распознала:<br>`+
+    fruits.map((fr,i)=>`<span style="margin:0 0.5rem">${fr.emoji} ${fr.name}: <strong>${probs[i]}%</strong></span>`).join('');
+}
+
+// ===================== CAT OR DOG GAME =====================
+function toggleAttr(el){
+  el.classList.toggle('on');
+  updatePet();
+}
+function updatePet(){
+  let cat=1,dog=1;
+  document.querySelectorAll('#petAttrs .pet-attr').forEach(a=>{
+    if(a.classList.contains('on')){
+      cat+=+a.dataset.cat;dog+=+a.dataset.dog;
+    }
+  });
+  const cs=cat/(cat+dog),ds=dog/(cat+dog);
+  document.getElementById('petCatPct').textContent=Math.round(cs*100)+'%';
+  document.getElementById('petDogPct').textContent=Math.round(ds*100)+'%';
+  const cEl=document.getElementById('petCat'),dEl=document.getElementById('petDog');
+  cEl.classList.toggle('winner',cs>ds);
+  dEl.classList.toggle('winner',ds>cs);
+  let desc='Каждый признак добавляет вес в обе чаши.';
+  if(cs>ds)desc='Нейросеть думает, что это 🐱 КОТ! Больше кошачьих признаков.';
+  else if(ds>cs)desc='Нейросеть думает, что это 🐶 СОБАКА! Больше собачьих признаков.';
+  else desc='Пока ничья — добавь ещё признаков!';
+  document.getElementById('petDesc').textContent=desc;
+}
+
+// ===================== DIGIT GAME (template matching) =====================
+const N=10;
+let digitCells=new Array(N*N).fill(0);
+const dg=document.getElementById('digitGrid');
+let paintOn=false;   // while true, cells get filled (like holding the mouse)
+
+// paint a single cell (0..99). Keep it ON when drawing (no toggling) so dragging paints.
+function paintCell(idx){
+  if(digitCells[idx]===1)return; // already on
+  digitCells[idx]=1;
+  dg.querySelectorAll('.dcell')[idx].classList.add('on');
+  // live recognition while drawing
+  renderDigitUI(false,false);
+}
+for(let i=0;i<N*N;i++){
+  const c=document.createElement('div');
+  c.className='dcell';
+  c.dataset.idx=i;
+  // mouse-drag painting
+  c.addEventListener('mousedown',e=>{
+    e.preventDefault();
+    paintOn=true;
+    paintCell(i);
+  });
+  c.addEventListener('mouseenter',e=>{
+    if(paintOn)paintCell(i);
+  });
+  // touch-drag painting
+  c.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    paintOn=true;
+    paintCell(i);
+  },{passive:false});
+  c.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY);
+    if(el&&el.classList.contains('dcell'))paintCell(+el.dataset.idx);
+  },{passive:false});
+  dg.appendChild(c);
+}
+// stop painting when mouse/touch released anywhere
+function stopPaint(){paintOn=false;}
+window.addEventListener('mouseup',stopPaint);
+window.addEventListener('touchend',stopPaint,{passive:false});
+window.addEventListener('mouseleave',stopPaint);
+function clearDigit(){
+  digitCells.fill(0);
+  dg.querySelectorAll('.dcell').forEach(c=>c.classList.remove('on'));
+  document.getElementById('predBox').style.display='none';
+  document.getElementById('predReason').textContent='Зажми мышь и нарисуй цифру на сетке слева!';
+  renderProb(Array(10).fill(0.1),-1);
+}
+
+// Canonical 10x10 digit templates ('#'=filled, '.'=empty)
+const TEMPLATES=[
+"..######..", // 0
+".########.",
+"####..####",
+"####..####",
+"####..####",
+"####..####",
+"####..####",
+"####..####",
+".########.",
+"..######..",
+// 1
+"....##....",
+"...###....",
+"...###....",
+"..####....",
+"...###....",
+"...###....",
+"...###....",
+"...###....",
+"...####...",
+"...####...",
+// 2
+".########.",
+"########.#",
+"........##",
+".......##.",
+"......##..",
+".....##...",
+"....##....",
+"...##.....",
+".#########",
+"##########",
+// 3
+".########.",
+"##########",
+"........##",
+"..#######.",
+"..#######.",
+"........##",
+"........##",
+".##########",
+"#########.",
+".########.",
+// 4
+"......###.",
+".....##...",
+"....##....",
+"...###....",
+"..##......",
+".########.",
+"........###",
+"........###",
+"........###",
+"........###",
+// 5
+"##########",
+"##########",
+"##........",
+"##########",
+".########.",
+"........##",
+"........##",
+".#########",
+"##########",
+".########.",
+// 6
+"..######..",
+".#######..",
+"###.......",
+"###.......",
+"##########",
+"####..####",
+"####..####",
+"####..####",
+".########.",
+"..######..",
+// 7
+"##########",
+"##########",
+".......###",
+"......##..",
+".....##...",
+"....##....",
+"...###....",
+"..###.....",
+"..##......",
+".###......",
+// 8
+"..######..",
+".########.",
+"####..####",
+"###..####.",
+"..######..",
+".########.",
+"####..####",
+"####..####",
+".########.",
+"..######..",
+// 9
+"..######..",
+".#########",
+"####..####",
+"####..####",
+".########.",
+"..#######.",
+"........##",
+"........##",
+".########.",
+"..######.."
+];
+// parse templates into 10x10 binary arrays, one per digit (each uses 10 strings), but list above is flat 100 strings = 10 digits
+function parseTemplates(){
+  const t=[];
+  for(let d=0;d<10;d++){
+    const rows=TEMPLATES.slice(d*10,(d+1)*10);
+    const m=[];
+    for(let r=0;r<N;r++){
+      m[r]=[];
+      for(let c=0;c<N;c++)m[r][c]=(rows[r][c]==='#')?1:0;
+    }
+    t.push(m);
+  }
+  return t;
+}
+const DIAT=parseTemplates();
+
+// build input grid (10x10) from clicked cells
+function inputGrid(){
+  const g=[];
+  for(let r=0;r<N;r++){
+    g[r]=[];
+    for(let c=0;c<N;c++)g[r][c]=digitCells[r*N+c];
+  }
+  return g;
+}
+function countGrid(g){let s=0;for(let i=0;i<N;i++)for(let j=0;j<N;j++)s+=g[i][j];return s;}
+// recognition: compare to each digit template (overlap minus mismatch + density gate)
+// noise=true adds small random jitter (used on button click), false gives stable live readout
+function recognizer(inp,noise){
+  const inCount=countGrid(inp);
+  const sims=[];
+  for(let d=0;d<10;d++){
+    const t=DIAT[d];
+    const tCount=countGrid(t);
+    let overlap=0,extra=0,missing=0;
+    for(let i=0;i<N;i++)for(let j=0;j<N;j++){
+      const a=inp[i][j],b=t[i][j];
+      if(a&&b)overlap++;
+      else if(a&&!b)extra++;
+      else if(!a&&b)missing++;
+    }
+    let score=overlap*4 - extra*2 - missing*2;
+    const densityMatch=1-Math.abs(inCount-tCount)/(N*N);
+    score*=densityMatch;
+    sims.push(score);
+  }
+  const mx=Math.max(...sims);
+  const exp=sims.map(v=>Math.exp((v-mx)/30));
+  const sm=exp.reduce((a,b)=>a+b,0);
+  let probs=exp.map(v=>v/sm);
+  if(noise){
+    const noisy=probs.map(p=>p*(0.9+Math.random()*0.2));
+    const s2=noisy.reduce((a,b)=>a+b,0);
+    probs=noisy.map(p=>p/s2);
+  }
+  return probs;
+}
+function renderProb(probs,pred){
+  const bars=document.getElementById('probBars');
+  const maxP=Math.max(...probs);
+  bars.innerHTML='';
+  for(let i=0;i<10;i++){
+    const bar=document.createElement('div');
+    bar.className='prob-bar';
+    bar.style.height=Math.max(3,(probs[i]/maxP)*70)+'px';
+    if(i===pred){bar.style.boxShadow='0 0 10px var(--pink)';bar.style.background='linear-gradient(0deg,var(--pink),#ff7eb3)'}
+    bar.title=`${i}: ${(probs[i]*100).toFixed(1)}%`;
+    bars.appendChild(bar);
+  }
+}
+function renderDigitUI(showReason,noise){
+  const used=digitCells.reduce((a,b)=>a+b,0);
+  const probs=recognizer(inputGrid(),noise);
+  const pred=probs.indexOf(Math.max(...probs));
+  const conf=probs[pred]*100;
+  document.getElementById('predBox').style.display='block';
+  document.getElementById('predDigit').textContent=used===0?'??':pred;
+  document.getElementById('predConf').textContent=used===0?'Нарисуй цифру!':`Уверенность: ${conf.toFixed(1)}%`;
+  renderProb(probs,used===0?-1:pred);
+  if(showReason){
+    document.getElementById('predReason').textContent=
+      used===0?'Сетка пустая — зажми мышь и нарисуй цифру 0–9.'
+      :`Сеть сравнила твою цифру с эталонами и выбрала <strong>${pred}</strong> — у неё ${conf.toFixed(0)}% уверенности. Попробуй нарисовать другую!`;
+  } else {
+    document.getElementById('predReason').textContent='Смотри, как сеть угадывает в реальном времени!';
+  }
+}
+function predictDigit(){
+  renderDigitUI(true,true);
+}
+
+// ===================== QUIZ =====================
+const QUIZ=[
+  {q:'Из чего состоит нейросеть?',opts:['Из облаков','Из слоёв нейронов','Из батареек','Из кнопок'],a:1},
+  {q:'Что нейросеть делает с весами при обучении?',opts:['Меняет их понемногу','Стирает их','Удаляет слои','Не трогает их'],a:0},
+  {q:'На чём учится настоящая ИИ-сеть для цифр?',opts:['На списке телефонов','На 70 000 рукописных цифр','На 100 картинках','На книге рецептов'],a:1},
+  {q:'Что такое «обратная связь» в обучении?',opts:['Сообщение в чате','Подсказка «правильно / неправильно»','Лайк в соцсети','Звук колокольчика'],a:1},
+  {q:'Нейрон «включается», когда…',opts:['Сумма сигналов больше порога','Хочет спать','Получает подарок','Светит солнце'],a:0},
+  {q:'В твоей голове около…',opts:['100 нейронов','10 нейронов','86 миллиардов нейронов','5 нейронов'],a:2}
+];
+let quizIdx=0,quizScore=0,quizAnswered=false;
+function renderQuiz(){
+  const q=QUIZ[quizIdx];
+  const box=document.getElementById('quizBox');
+  box.innerHTML=`
+    <div class="quiz-q">${quizIdx+1}/${QUIZ.length} · ${q.q}</div>
+    <div class="quiz-opts">
+      ${q.opts.map((o,i)=>`<div class="quiz-opt" id="qo${i}" onclick="answerQuiz(${i})">${o}</div>`).join('')}
+    </div>`;
+  document.getElementById('quizFb').textContent='';
+  document.getElementById('quizScore')&&document.getElementById('quizScore').remove();
+  quizAnswered=false;
+}
+function answerQuiz(i){
+  if(quizAnswered)return;
+  quizAnswered=true;
+  const q=QUIZ[quizIdx];
+  const correct=document.getElementById('qo'+q.a);
+  correct.classList.add('correct');
+  if(i===q.a){quizScore++;
+    document.getElementById('quizFb').textContent='✅ Верно! Молодец!';
+  } else {
+    document.getElementById('qo'+i).classList.add('wrong');
+    document.getElementById('quizFb').textContent='❌ Почти! Правильный ответ подсвечен зелёным.';
+  }
+}
+function nextQuiz(dir){
+  if(dir>0&&quizAnswered===false&&quizIdx<QUIZ.length){document.getElementById('quizFb').textContent='Сначала выбери ответ!';return;}
+  quizIdx+=dir;
+  if(quizIdx<0)quizIdx=0;
+  if(quizIdx>=QUIZ.length){
+    const box=document.getElementById('quizBox');
+    box.innerHTML=`<div class="quiz-q">🏁 Викторина окончена!</div>
+      <div class="quiz-score">Твой счёт: ${quizScore} из ${QUIZ.length}</div>
+      <p style="font-size:1.2rem;opacity:.9">${quizScore===QUIZ.length?'🤩 Идеально! Ты — будущий инженер ИИ!':quizScore>=4?'🎉 Отлично! Почти всё верно!':'👍 Неплохо! Прокрути урок ещё раз — и станет легче.'}</p>`;
+    document.getElementById('quizFb').textContent='';
+    return;
+  }
+  renderQuiz();
+}
+renderQuiz();
+
+// init counter
+document.getElementById('counter').textContent='1 / '+TOTAL;
+</script>
+</body>
+</html>

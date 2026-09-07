@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Тренажёр: Арифметика</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #f0f4f8; --card: #ffffff; --primary: #3b82f6; --primary-light: #dbeafe;
+  --green: #22c55e; --red: #ef4444; --yellow: #eab308;
+  --text: #1e293b; --text-secondary: #64748b; --border: #e2e8f0;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08); --radius: 14px;
+}
+[data-theme="dark"] {
+  --bg: #0f172a; --card: #1e293b; --primary: #60a5fa; --primary-light: #1e3a5f;
+  --green: #4ade80; --red: #f87171; --yellow: #facc15;
+  --text: #f1f5f9; --text-secondary: #94a3b8; --border: #334155;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; overflow-x: hidden; }
+
+.header {
+  background: linear-gradient(135deg, var(--primary), #6366f1);
+  color: white; padding: 20px 16px 16px; text-align: center;
+  position: sticky; top: 0; z-index: 10;
+}
+.header h1 { font-size: 1.5rem; font-weight: 800; }
+.header .subtitle { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+.theme-btn {
+  position: absolute; top: 14px; right: 12px;
+  background: rgba(255,255,255,0.2); border: none; color: white;
+  font-size: 1.3rem; width: 40px; height: 40px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+.container { padding: 12px; max-width: 480px; margin: 0 auto; }
+
+.nav-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.nav-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px; background: var(--card); border: 2px solid var(--border);
+  border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 0.9rem;
+  color: var(--text); cursor: pointer; box-shadow: var(--shadow); transition: all 0.2s;
+}
+.nav-btn:active { transform: scale(0.96); }
+.nav-title { flex: 1; font-weight: 700; font-size: 1rem; text-align: center; color: var(--text-secondary); }
+
+.screen { display: none; animation: fadeIn 0.3s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+.menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.menu-btn {
+  background: var(--card); border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 18px 10px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow);
+}
+.menu-btn:active { transform: scale(0.96); }
+.menu-btn .icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+.menu-btn .label { font-size: 0.9rem; font-weight: 700; }
+.menu-btn .count { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+
+.stats-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.stat-box {
+  flex: 1; background: var(--card); border-radius: var(--radius);
+  padding: 14px 8px; text-align: center; box-shadow: var(--shadow);
+}
+.stat-box .stat-val { font-size: 1.6rem; font-weight: 800; }
+.stat-box .stat-label { font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; margin-top: 2px; }
+.stat-box.green .stat-val { color: var(--green); }
+.stat-box.red .stat-val { color: var(--red); }
+
+.progress-wrap { background: var(--border); border-radius: 20px; height: 28px; overflow: hidden; margin-bottom: 12px; }
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--green), #34d399);
+  border-radius: 20px; transition: width 0.4s ease;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 0.75rem; min-width: 40px;
+}
+
+.ex-card {
+  background: var(--card); border-radius: var(--radius); padding: 20px 16px;
+  box-shadow: var(--shadow); margin-bottom: 12px; text-align: center;
+}
+.ex-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px; }
+.ex-progress { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; }
+.ex-task { font-size: 2rem; font-weight: 800; margin-bottom: 20px; letter-spacing: 1px; }
+.ex-task .op { color: var(--primary); }
+
+/* ===== OPTIONS (TEST) ===== */
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+.opt-btn {
+  padding: 16px 10px; border: 2px solid var(--border); border-radius: 12px;
+  background: var(--bg); color: var(--text); font-family: inherit;
+  font-size: 1.3rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+}
+.opt-btn:active { transform: scale(0.96); }
+.opt-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+.opt-btn.selected { border-color: var(--primary); background: var(--primary); color: white; }
+.opt-btn.correct { border-color: var(--green); background: var(--green); color: white; }
+.opt-btn.wrong { border-color: var(--red); background: var(--red); color: white; }
+.opt-btn:disabled { cursor: default; opacity: 1; }
+
+.feedback {
+  margin-top: 12px; padding: 12px; border-radius: 8px;
+  font-weight: 700; font-size: 0.95rem; display: none;
+}
+.feedback.show { display: block; animation: fadeIn 0.3s ease; }
+.feedback.ok { background: #dcfce7; color: #166534; }
+.feedback.fail { background: #fee2e2; color: #991b1b; }
+[data-theme="dark"] .feedback.ok { background: #14532d; color: #bbf7d0; }
+[data-theme="dark"] .feedback.fail { background: #7f1d1d; color: #fecaca; }
+
+.timer { font-size: 0.85rem; color: var(--text-secondary); font-weight: 700; margin-bottom: 8px; }
+
+.result-card {
+  background: var(--card); border-radius: var(--radius); padding: 28px 16px;
+  box-shadow: var(--shadow); text-align: center;
+}
+.result-card h2 { font-size: 1.4rem; margin-bottom: 12px; }
+.result-big { font-size: 3rem; font-weight: 800; margin: 12px 0; }
+.result-big.green { color: var(--green); }
+.result-big.yellow { color: var(--yellow); }
+.result-big.red { color: var(--red); }
+.result-msg { font-size: 1rem; color: var(--text-secondary); margin-bottom: 20px; }
+.btn-back {
+  padding: 14px; background: var(--primary); color: white;
+  border: none; border-radius: 10px; font-family: inherit;
+  font-weight: 700; font-size: 1rem; cursor: pointer; width: 100%;
+}
+.btn-back:active { transform: scale(0.97); }
+
+.confetti-box { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
+.confetti-p { position: absolute; top: -12px; animation: cFall linear forwards; }
+@keyframes cFall { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(100dvh) rotate(720deg);opacity:0} }
+
+/* ===== REGISTRATION ===== */
+.reg-card {
+  background: var(--card); border-radius: var(--radius); padding: 28px 20px;
+  box-shadow: var(--shadow); text-align: center; margin-top: 40px;
+}
+.reg-card h2 { font-size: 1.4rem; margin-bottom: 6px; }
+.reg-card .reg-sub { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px; }
+.reg-field { margin-bottom: 14px; text-align: left; }
+.reg-field label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; }
+.reg-field input {
+  width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px;
+  font-family: inherit; font-size: 1rem; background: var(--bg); color: var(--text);
+  outline: none; transition: border 0.2s;
+}
+.reg-field input:focus { border-color: var(--primary); }
+.reg-btn {
+  width: 100%; padding: 14px; background: var(--primary); color: white;
+  border: none; border-radius: 10px; font-family: inherit;
+  font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 6px;
+}
+.reg-btn:active { transform: scale(0.97); }
+.reg-btn:disabled { opacity: 0.4; }
+.user-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.2); border-radius: 20px;
+  padding: 4px 12px 4px 8px; font-size: 0.8rem; font-weight: 700;
+  position: absolute; top: 14px; left: 12px; cursor: pointer;
+}
+.user-badge:active { background: rgba(255,255,255,0.35); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="user-badge" id="userBadge" onclick="logout()" style="display:none"></div>
+  <button class="theme-btn" onclick="toggleTheme()">🌓</button>
+  <h1>🧮 Тренажёр</h1>
+  <div class="subtitle">Арифметика с многозначными числами · 6 класс</div>
+</div>
+
+<div class="container">
+
+  <div class="screen" id="screenReg">
+    <div class="reg-card">
+      <h2>👋 Добро пожаловать!</h2>
+      <div class="reg-sub">Введи свои данные, чтобы начать</div>
+      <div class="reg-field">
+        <label>Фамилия</label>
+        <input type="text" id="regLast" placeholder="Иванов" autocomplete="family-name">
+      </div>
+      <div class="reg-field">
+        <label>Имя</label>
+        <input type="text" id="regFirst" placeholder="Иван" autocomplete="given-name">
+      </div>
+      <div class="reg-field">
+        <label>Класс</label>
+        <input type="text" id="regClass" placeholder="6А" autocomplete="off">
+      </div>
+      <button class="reg-btn" id="regBtn" onclick="register()">Начать →</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screenMenu">
+    <div class="stats-row" id="allTimeStats"></div>
+    <div class="menu" id="menuGrid"></div>
+  </div>
+
+  <div class="screen" id="screenTrain">
+    <div class="nav-bar">
+      <button class="nav-btn" onclick="confirmQuit()">← Меню</button>
+      <div class="nav-title" id="navTrainTitle"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box green"><div class="stat-val" id="statOk">0</div><div class="stat-label">Верно</div></div>
+      <div class="stat-box red"><div class="stat-val" id="statFail">0</div><div class="stat-label">Ошибки</div></div>
+      <div class="stat-box"><div class="stat-val timer" id="statTimer">0:00</div><div class="stat-label">Время</div></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="progressBar" style="width:0%">0%</div></div>
+    <div class="ex-card">
+      <div class="ex-label" id="exLabel"></div>
+      <div class="ex-progress" id="exProgress"></div>
+      <div class="ex-task" id="exTask"></div>
+      <div class="options" id="optionsGrid"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenResult">
+    <div class="nav-bar">
+      <button class="nav-btn" onclick="goMenu()">← Меню</button>
+    </div>
+    <div class="result-card">
+      <h2 id="resultTitle"></h2>
+      <div class="result-big" id="resultScore"></div>
+      <div class="result-msg" id="resultMsg"></div>
+      <div class="stats-row" id="resultStats"></div>
+      <button class="btn-back" onclick="goMenu()">← К меню</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="confetti-box" id="confettiBox"></div>
+
+<script>
+function toggleTheme() {
+  const h = document.documentElement;
+  const d = h.getAttribute('data-theme') === 'dark';
+  h.setAttribute('data-theme', d ? '' : 'dark');
+  localStorage.setItem('theme', d ? 'light' : 'dark');
+}
+(function(){ if(localStorage.getItem('theme')==='dark') document.documentElement.setAttribute('data-theme','dark'); })();
+
+// ===== REGISTRATION =====
+function getUser() {
+  try { return JSON.parse(localStorage.getItem('trainUser')); } catch(e) { return null; }
+}
+
+function register() {
+  const last = document.getElementById('regLast').value.trim();
+  const first = document.getElementById('regFirst').value.trim();
+  const cls = document.getElementById('regClass').value.trim();
+  if (!last || !first || !cls) { alert('Заполни все поля!'); return; }
+  localStorage.setItem('trainUser', JSON.stringify({ last, first, cls }));
+  showUser();
+  goMenu();
+}
+
+function showUser() {
+  const u = getUser();
+  const badge = document.getElementById('userBadge');
+  if (u) {
+    badge.textContent = u.last + ' ' + u.first[0] + '. ' + u.cls;
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function logout() {
+  if (!confirm('Выйти из аккаунта ' + getUser()?.last + '?')) return;
+  localStorage.removeItem('trainUser');
+  showUser();
+  showScreen('screenReg');
+}
+
+function checkUser() {
+  if (!getUser()) { showScreen('screenReg'); return false; }
+  showUser();
+  showScreen('screenMenu');
+  return true;
+}
+
+const modes = [
+  { id:'add2',  label:'Сложение', icon:'➕', desc:'Двухзначные + двузначные',   gen: () => { const a=rnd(10,99), b=rnd(10,99); return { q:`${a} + ${b}`, a:a+b }; } },
+  { id:'add3',  label:'Сложение', icon:'➕', desc:'Трёхзначные + трёхзначные',  gen: () => { const a=rnd(100,999), b=rnd(100,999); return { q:`${a} + ${b}`, a:a+b }; } },
+  { id:'sub2',  label:'Вычитание', icon:'➖', desc:'Двухзначные − двузначные',  gen: () => { let a=rnd(20,99), b=rnd(10,a); return { q:`${a} − ${b}`, a:a-b }; } },
+  { id:'sub3',  label:'Вычитание', icon:'➖', desc:'Трёхзначные − трёхзначные', gen: () => { let a=rnd(200,999), b=rnd(100,a); return { q:`${a} − ${b}`, a:a-b }; } },
+  { id:'mul1',  label:'Умножение', icon:'✖️', desc:'Двухзначные × однозначные',  gen: () => { const a=rnd(10,99), b=rnd(2,9); return { q:`${a} × ${b}`, a:a*b }; } },
+  { id:'mul2',  label:'Умножение', icon:'✖️', desc:'Двухзначные × двузначные',  gen: () => { const a=rnd(10,30), b=rnd(10,30); return { q:`${a} × ${b}`, a:a*b }; } },
+  { id:'div1',  label:'Деление', icon:'➗', desc:'Деление без остатка (лёгкое)',  gen: () => { const b=rnd(2,12), q=rnd(10,99), a=b*q; return { q:`${a} ÷ ${b}`, a:q }; } },
+  { id:'div2',  label:'Деление', icon:'➗', desc:'Деление без остатка (сложное)', gen: () => { const b=rnd(5,25), q=rnd(10,99), a=b*q; return { q:`${a} ÷ ${b}`, a:q }; } },
+  { id:'mix',   label:'Микс', icon:'🎲', desc:'Все действия подряд',           gen: null },
+  { id:'time10',label:'На время', icon:'⏱️', desc:'10 примеров на скорость',     gen: null },
+  { id:'time20',label:'На время', icon:'⏱️', desc:'20 примеров на скорость',     gen: null },
+  { id:'custom',label:'Свой', icon:'✏️', desc:'Количество и тип на выбор',      gen: null },
+];
+
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function genExercise(type) {
+  const m = modes.find(x => x.id === type);
+  if (m && m.gen) return m.gen();
+  const pool = modes.filter(x => x.gen);
+  return pool[rnd(0, pool.length - 1)].gen();
+}
+
+function genOptions(correct) {
+  const opts = new Set([correct]);
+  const spread = Math.max(5, Math.round(Math.abs(correct) * 0.2));
+  while (opts.size < 4) {
+    let fake = correct + rnd(-spread, spread);
+    if (fake === correct) fake = correct + rnd(1, spread);
+    if (fake >= 0) opts.add(fake);
+  }
+  const arr = [...opts];
+  for (let i = arr.length - 1; i > 0; i--) { const j = rnd(0, i); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+  return arr;
+}
+
+let state = { mode: '', total: 5, current: 0, ok: 0, fail: 0, answers: [], startTime: 0, timerInterval: null };
+let currentAnswer = null;
+let selectedIdx = -1;
+
+function renderMenu() {
+  const g = document.getElementById('menuGrid');
+  g.innerHTML = '';
+  const stats = JSON.parse(localStorage.getItem('trainStats') || '{}');
+  let totalOk = 0, totalAll = 0;
+  Object.values(stats).forEach(s => { totalOk += s.ok; totalAll += s.ok + s.fail; });
+  document.getElementById('allTimeStats').innerHTML = `
+    <div class="stat-box green"><div class="stat-val">${totalOk}</div><div class="stat-label">Всего верно</div></div>
+    <div class="stat-box"><div class="stat-val">${totalAll}</div><div class="stat-label">Всего решено</div></div>`;
+  modes.forEach(m => {
+    const s = stats[m.id]; const cnt = s ? s.ok + s.fail : 0;
+    const b = document.createElement('div');
+    b.className = 'menu-btn';
+    b.innerHTML = `<span class="icon">${m.icon}</span><div class="label">${m.label}</div><div class="count">${m.desc}${cnt ? ' · ' + cnt + ' реш.' : ''}</div>`;
+    b.onclick = () => startMode(m.id);
+    g.appendChild(b);
+  });
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goMenu() { showScreen('screenMenu'); renderMenu(); }
+
+function confirmQuit() {
+  if (state.current > 0 && state.current < state.total) {
+    if (!confirm('Тренировка не завершена. Выйти в меню?')) return;
+    clearInterval(state.timerInterval);
+  }
+  goMenu();
+}
+
+function startMode(id) {
+  if (id === 'custom') { startCustom(); return; }
+  let total = 5;
+  if (id === 'time10') total = 10;
+  if (id === 'time20') total = 20;
+  state = { mode: id, total, current: 0, ok: 0, fail: 0, answers: [], startTime: Date.now(), timerInterval: null };
+  document.getElementById('statOk').textContent = '0';
+  document.getElementById('statFail').textContent = '0';
+  document.getElementById('navTrainTitle').textContent = modes.find(m => m.id === id)?.label || 'Тренажёр';
+  showScreen('screenTrain');
+  startTimer();
+  nextExercise();
+}
+
+function startCustom() {
+  const types = ['add2','add3','sub2','sub3','mul1','mul2','div1','div2'];
+  const choice = prompt('Типы через запятую:\nadd2, add3, sub2, sub3, mul1, mul2, div1, div2\n\nПример: add2, mul1', 'add2, mul1');
+  if (!choice) return;
+  const count = parseInt(prompt('Сколько примеров?', '10'));
+  if (!count || count < 1) return;
+  state = { mode: 'custom', customTypes: choice.split(',').map(s=>s.trim()), total: count, current: 0, ok: 0, fail: 0, answers: [], startTime: Date.now(), timerInterval: null };
+  document.getElementById('statOk').textContent = '0';
+  document.getElementById('statFail').textContent = '0';
+  document.getElementById('navTrainTitle').textContent = 'Свой набор';
+  showScreen('screenTrain');
+  startTimer();
+  nextExercise();
+}
+
+function startTimer() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    const sec = Math.floor((Date.now() - state.startTime) / 1000);
+    const m = Math.floor(sec / 60), s = sec % 60;
+    document.getElementById('statTimer').textContent = m + ':' + String(s).padStart(2, '0');
+  }, 1000);
+}
+
+function nextExercise() {
+  if (state.current >= state.total) { finish(); return; }
+  selectedIdx = -1;
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback'; fb.textContent = '';
+  document.getElementById('exProgress').textContent = `${state.current + 1} из ${state.total}`;
+  const pct = Math.round((state.current / state.total) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressBar').textContent = pct + '%';
+
+  let gen, label;
+  if (state.mode === 'custom') {
+    const t = state.customTypes[rnd(0, state.customTypes.length - 1)];
+    gen = genExercise(t);
+    label = modes.find(m => m.id === t)?.desc || t;
+  } else {
+    gen = genExercise(state.mode);
+    label = modes.find(m => m.id === state.mode)?.desc || '';
+  }
+  currentAnswer = gen.a;
+  document.getElementById('exLabel').textContent = label;
+  document.getElementById('exTask').innerHTML = gen.q + ' <span class="op">=</span> ?';
+
+  const opts = genOptions(currentAnswer);
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  opts.forEach((val, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.textContent = val;
+    b.onclick = () => selectOption(i, val);
+    grid.appendChild(b);
+  });
+}
+
+function selectOption(idx, val) {
+  selectedIdx = idx;
+  document.querySelectorAll('.opt-btn').forEach((b, i) => {
+    b.classList.remove('selected');
+    if (i === idx) b.classList.add('selected');
+  });
+  submitAnswer();
+}
+
+function submitAnswer() {
+  if (selectedIdx === -1) return;
+  const fb = document.getElementById('feedback');
+  const opts = document.querySelectorAll('.opt-btn');
+  const selectedVal = parseInt(opts[selectedIdx].textContent);
+
+  opts.forEach(b => b.disabled = true);
+  state.answers.push({ q: document.getElementById('exTask').textContent, user: selectedVal, correct: currentAnswer });
+
+  if (selectedVal === currentAnswer) {
+    state.ok++;
+    opts[selectedIdx].classList.add('correct');
+    fb.className = 'feedback show ok'; fb.textContent = '✅ Верно!';
+  } else {
+    state.fail++;
+    opts[selectedIdx].classList.add('wrong');
+    opts.forEach(b => { if (parseInt(b.textContent) === currentAnswer) b.classList.add('correct'); });
+    fb.className = 'feedback show fail'; fb.textContent = '❌ Неверно. Ответ: ' + currentAnswer;
+  }
+  document.getElementById('statOk').textContent = state.ok;
+  document.getElementById('statFail').textContent = state.fail;
+  setTimeout(() => { state.current++; nextExercise(); }, 1000);
+}
+
+document.addEventListener('keydown', e => {
+  if (['1','2','3','4'].includes(e.key) && document.getElementById('screenTrain').classList.contains('active')) {
+    const idx = parseInt(e.key) - 1;
+    const opts = document.querySelectorAll('.opt-btn');
+    if (opts[idx] && !opts[idx].disabled) opts[idx].click();
+  }
+});
+
+function finish() {
+  clearInterval(state.timerInterval);
+  const sec = Math.floor((Date.now() - state.startTime) / 1000);
+  const m = Math.floor(sec / 60), s = sec % 60;
+  const pct = Math.round((state.ok / state.total) * 100);
+  let cls = 'red', msg = 'Нужно подтянуть :(', grade = 2;
+  if (pct >= 85) { cls = 'green'; msg = 'Отлично! Так держать! 🎉'; grade = 5; }
+  else if (pct >= 70) { cls = 'green'; msg = 'Хорошо!'; grade = 4; }
+  else if (pct >= 50) { cls = 'yellow'; msg = 'Неплохо, но есть над чем поработать'; grade = 3; }
+
+  document.getElementById('resultTitle').textContent = 'Результаты — ' + (getUser()?.last || 'Ученик');
+  document.getElementById('resultScore').className = 'result-big ' + cls;
+  document.getElementById('resultScore').textContent = pct + '% — оценка ' + grade;
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('resultStats').innerHTML = `
+    <div class="stat-box green"><div class="stat-val">${state.ok}</div><div class="stat-label">Верно</div></div>
+    <div class="stat-box red"><div class="stat-val">${state.fail}</div><div class="stat-label">Ошибки</div></div>
+    <div class="stat-box"><div class="stat-val">${m}:${String(s).padStart(2,'0')}</div><div class="stat-label">Время</div></div>`;
+
+  const stats = JSON.parse(localStorage.getItem('trainStats') || '{}');
+  if (!stats[state.mode]) stats[state.mode] = { ok: 0, fail: 0 };
+  stats[state.mode].ok += state.ok;
+  stats[state.mode].fail += state.fail;
+  localStorage.setItem('trainStats', JSON.stringify(stats));
+
+  showScreen('screenResult');
+  if (pct >= 85) launchConfetti();
+}
+
+function launchConfetti() {
+  const c = document.getElementById('confettiBox');
+  const colors = ['#3b82f6','#f97316','#22c55e','#ef4444','#eab308','#8b5cf6','#ec4899'];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div'); p.className = 'confetti-p';
+    p.style.left = Math.random()*100+'%';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.width = (Math.random()*6+4)+'px'; p.style.height = (Math.random()*6+4)+'px';
+    p.style.borderRadius = Math.random()>0.5?'50%':'2px';
+    p.style.animationDuration = (Math.random()*2+1.5)+'s';
+    p.style.animationDelay = (Math.random()*1)+'s';
+    c.appendChild(p);
+  }
+  setTimeout(() => c.innerHTML = '', 4000);
+}
+
+checkUser();
+renderMenu();
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('screenReg').classList.contains('active')) register();
+});
+</script>
+</body>
+</html>

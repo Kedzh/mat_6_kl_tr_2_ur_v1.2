@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Среднее арифметическое</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --primary: #3b82f6;
+  --primary-light: #dbeafe;
+  --accent: #f97316;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+[data-theme="dark"] {
+  --bg: #0f172a; --card: #1e293b; --primary: #60a5fa; --primary-light: #1e3a5f;
+  --accent: #fb923c; --green: #4ade80; --red: #f87171; --yellow: #facc15;
+  --text: #f1f5f9; --text-secondary: #94a3b8; --border: #334155;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
+  transition: background 0.3s, color 0.3s; overflow-x: hidden;
+}
+.container { max-width: 1600px; margin: 0 auto; padding: 24px 48px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+
+header {
+  background: linear-gradient(135deg, var(--primary), #6366f1);
+  color: white; padding: 32px 40px; border-radius: var(--radius);
+  margin-bottom: 24px; text-align: center; position: relative;
+  box-shadow: var(--shadow); overflow: hidden;
+}
+header::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: headerPulse 8s ease-in-out infinite;
+}
+@keyframes headerPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+header h1 { font-size: clamp(2.4rem, 4.5vw, 3.6rem); font-weight: 800; position: relative; }
+header .subtitle { font-size: 1.8rem; opacity: 0.9; margin-top: 6px; position: relative; }
+header .source { font-size: 1.3rem; opacity: 0.7; margin-top: 4px; position: relative; }
+.theme-toggle {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(255,255,255,0.2); border: none; color: white;
+  font-size: 2.2rem; width: 56px; height: 56px; border-radius: 50%;
+  cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.35); transform: scale(1.1); }
+
+nav {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;
+  position: sticky; top: 0; background: var(--bg);
+  padding: 12px 0; z-index: 100; border-bottom: 2px solid var(--border);
+}
+nav button {
+  flex: 1; min-width: 200px; padding: 16px 24px;
+  border: 2px solid var(--border); background: var(--card); color: var(--text);
+  border-radius: var(--radius-sm); font-family: inherit; font-size: 1.4rem;
+  font-weight: 700; cursor: pointer; transition: all 0.3s;
+}
+nav button:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+nav button.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
+nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
+
+.section { display: none; animation: fadeIn 0.4s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.slide { display: none; animation: fadeIn 0.4s ease; }
+.slide.active { display: block; }
+
+.slide-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; margin-top: 24px; padding-top: 20px;
+  border-top: 2px solid var(--border);
+}
+.slide-nav button {
+  padding: 12px 32px; border: 2px solid var(--primary); background: var(--card);
+  color: var(--primary); border-radius: var(--radius-sm); font-family: inherit;
+  font-size: 1.4rem; font-weight: 700; cursor: pointer; transition: all 0.3s;
+}
+.slide-nav button:hover:not(:disabled) { background: var(--primary); color: white; }
+.slide-nav button:disabled { opacity: 0.3; cursor: default; }
+.slide-dots { display: flex; gap: 10px; }
+.slide-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--border); border: none; cursor: pointer; transition: all 0.3s;
+}
+.slide-dot.active { background: var(--primary); transform: scale(1.3); }
+
+.card {
+  background: var(--card); border-radius: var(--radius); padding: 32px;
+  margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border);
+  transition: background 0.3s, border 0.3s;
+}
+.card h2 { font-size: 2.2rem; margin-bottom: 6px; color: var(--primary); }
+.card h2 .emoji { margin-right: 10px; }
+.card .card-desc { color: var(--text-secondary); font-size: 1.5rem; margin-bottom: 18px; }
+.card .card-source { font-size: 1.25rem; color: var(--text-secondary); opacity: 0.7; margin-bottom: 12px; font-style: italic; }
+
+/* ===== THEORY ===== */
+.theory-box {
+  background: var(--primary-light); border-radius: var(--radius-sm); padding: 24px;
+  margin-bottom: 20px; border-left: 4px solid var(--primary);
+}
+.theory-box h3 { font-size: 1.8rem; margin-bottom: 12px; color: var(--primary); }
+.theory-box p { font-size: 1.5rem; margin-bottom: 10px; }
+.theory-box .formula {
+  background: var(--card); border: 2px solid var(--primary); border-radius: 8px;
+  padding: 16px 24px; font-size: 1.8rem; font-weight: 700; text-align: center;
+  margin: 16px 0; color: var(--primary);
+}
+.theory-box .example {
+  background: var(--card); border-radius: 8px; padding: 16px;
+  margin-top: 12px; font-size: 1.4rem;
+}
+.theory-box .example-title { font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+
+/* ===== TRUE/FALSE ===== */
+.tf-item {
+  background: var(--bg); border-radius: var(--radius-sm); padding: 18px 24px;
+  margin-bottom: 12px; border-left: 4px solid var(--primary);
+  animation: slideIn 0.4s ease backwards;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+.tf-statement { font-weight: 600; font-size: 1.65rem; margin-bottom: 10px; }
+.tf-buttons { display: flex; gap: 12px; }
+.tf-buttons button {
+  padding: 10px 24px; border: 2px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-weight: 700; font-size: 1.5rem;
+  cursor: pointer; transition: all 0.3s; background: var(--card); color: var(--text);
+}
+.tf-buttons button.true-btn:hover { border-color: var(--green); color: var(--green); }
+.tf-buttons button.false-btn:hover { border-color: var(--red); color: var(--red); }
+.tf-buttons button.selected-true { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 2px 12px rgba(34,197,94,0.4); }
+.tf-buttons button.selected-false { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 2px 12px rgba(239,68,68,0.4); }
+.tf-buttons button:disabled { cursor: default; opacity: 0.5; }
+.tf-comment { margin-top: 10px; padding: 10px 16px; border-radius: 8px; font-size: 1.4rem; font-weight: 600; display: none; }
+.tf-comment.correct { background: #dcfce7; color: #166534; display: block; }
+.tf-comment.wrong { background: #fee2e2; color: #991b1b; display: block; }
+[data-theme="dark"] .tf-comment.correct { background: #14532d; color: #bbf7d0; }
+[data-theme="dark"] .tf-comment.wrong { background: #7f1d1d; color: #fecaca; }
+
+.progress-bar-wrap { margin-top: 20px; background: var(--bg); border-radius: 20px; overflow: hidden; height: 34px; }
+.progress-bar {
+  height: 100%; background: linear-gradient(90deg, var(--green), #34d399);
+  border-radius: 20px; transition: width 0.6s ease; display: flex;
+  align-items: center; justify-content: center; color: white;
+  font-weight: 700; font-size: 1.35rem; min-width: 65px;
+}
+
+/* ===== FIND ERROR ===== */
+.error-example { background: var(--bg); border-radius: var(--radius-sm); padding: 24px; margin-bottom: 18px; border-left: 4px solid var(--accent); }
+.error-example .example-title { font-weight: 700; color: var(--accent); margin-bottom: 8px; font-size: 1.6rem; }
+.error-example pre {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px; font-family: 'Courier New', monospace; font-size: 1.6rem;
+  overflow-x: auto; margin-bottom: 12px; white-space: pre-wrap; line-height: 1.5;
+}
+.error-example textarea {
+  width: 100%; min-height: 80px; padding: 12px; border: 2px solid var(--border);
+  border-radius: 8px; font-family: inherit; font-size: 1.5rem; resize: vertical;
+  transition: border 0.3s; background: var(--card); color: var(--text);
+}
+.error-example textarea:focus { border-color: var(--primary); outline: none; }
+.btn-check {
+  margin-top: 10px; padding: 12px 28px; background: var(--accent); color: white;
+  border: none; border-radius: 8px; font-family: inherit; font-weight: 700;
+  font-size: 1.5rem; cursor: pointer; transition: all 0.3s;
+}
+.btn-check:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(249,115,22,0.4); }
+.btn-check:disabled { opacity: 0.5; cursor: default; }
+.error-feedback { margin-top: 12px; padding: 14px; border-radius: 8px; display: none; animation: fadeIn 0.4s ease; font-size: 1.4rem; }
+.error-feedback.show { display: block; }
+.error-feedback .fb-title { font-weight: 700; margin-bottom: 6px; }
+
+/* ===== LABYRINTH ===== */
+.labyrinth-visual { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+.labyrinth-step {
+  width: 60px; height: 60px; border-radius: 50%; background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1.35rem; color: var(--text-secondary); transition: all 0.4s;
+}
+.labyrinth-step.completed { background: var(--green); color: white; box-shadow: 0 2px 12px rgba(34,197,94,0.4); }
+.labyrinth-step.current { background: var(--primary); color: white; box-shadow: 0 2px 12px rgba(59,130,246,0.4); transform: scale(1.15); }
+.labyrinth-step.future { background: var(--border); color: var(--text-secondary); }
+.labyrinth-arrow { color: var(--text-secondary); font-size: 1.8rem; }
+.lab-task { background: var(--primary-light); border-radius: var(--radius-sm); padding: 24px; text-align: center; margin-bottom: 18px; }
+.lab-task .lab-question { font-size: 1.9rem; font-weight: 700; margin-bottom: 18px; }
+.lab-input-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.lab-input {
+  width: 240px; padding: 14px 18px; border: 2px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 1.75rem; text-align: center; font-weight: 700;
+  background: var(--card); color: var(--text);
+}
+.lab-input:focus { border-color: var(--primary); outline: none; }
+.btn-lab {
+  padding: 14px 32px; background: var(--primary); color: white; border: none;
+  border-radius: 8px; font-family: inherit; font-weight: 700; font-size: 1.6rem;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-lab:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(59,130,246,0.4); }
+.lab-hint { margin-top: 12px; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 1.5rem; display: none; animation: fadeIn 0.3s ease; }
+.lab-hint.show { display: block; }
+.lab-hint.wrong { background: #fee2e2; color: #991b1b; }
+.lab-hint.correct { background: #dcfce7; color: #166534; }
+[data-theme="dark"] .lab-hint.wrong { background: #7f1d1d; color: #fecaca; }
+[data-theme="dark"] .lab-hint.correct { background: #14532d; color: #bbf7d0; }
+.lab-complete { text-align: center; padding: 32px; display: none; }
+.lab-complete.show { display: block; animation: fadeIn 0.5s ease; }
+.lab-complete h3 { font-size: 2.4rem; color: var(--green); margin-bottom: 10px; }
+.lab-complete p { font-size: 1.75rem; color: var(--text-secondary); }
+
+/* ===== INDEPENDENT WORK ===== */
+.variant-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.variant-tab {
+  flex: 1; padding: 14px; border: 2px solid var(--border); background: var(--card);
+  border-radius: var(--radius-sm); font-family: inherit; font-weight: 700;
+  font-size: 1.6rem; cursor: pointer; transition: all 0.3s; color: var(--text);
+}
+.variant-tab.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 16px rgba(249,115,22,0.3); }
+.variant-content { display: none; }
+.variant-content.active { display: block; animation: fadeIn 0.4s ease; }
+.exercise {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 10px; flex-wrap: wrap;
+}
+.exercise .ex-num {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1.35rem; flex-shrink: 0;
+}
+.exercise .ex-text { flex: 1; font-weight: 600; font-size: 1.55rem; }
+.exercise .ex-input {
+  width: 150px; padding: 10px; border: 2px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 1.6rem; text-align: center; font-weight: 700;
+  background: var(--card); color: var(--text);
+}
+.exercise .ex-input:focus { border-color: var(--primary); outline: none; }
+.exercise .ex-input.correct { border-color: var(--green); background: #dcfce7; }
+.exercise .ex-input.wrong { border-color: var(--red); background: #fee2e2; }
+[data-theme="dark"] .exercise .ex-input.correct { background: #14532d; }
+[data-theme="dark"] .exercise .ex-input.wrong { background: #7f1d1d; }
+.btn-check-all {
+  margin-top: 16px; padding: 14px 36px; background: linear-gradient(135deg, var(--accent), #ea580c);
+  color: white; border: none; border-radius: var(--radius-sm); font-family: inherit;
+  font-weight: 700; font-size: 1.65rem; cursor: pointer; transition: all 0.3s;
+  display: block; margin-left: auto; margin-right: auto;
+}
+.btn-check-all:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(249,115,22,0.4); }
+.score-display { text-align: center; margin-top: 16px; font-size: 1.9rem; font-weight: 700; display: none; animation: fadeIn 0.4s ease; }
+
+.confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
+.confetti-piece { position: absolute; width: 10px; height: 10px; top: -20px; animation: confettiFall linear forwards; }
+@keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+@media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .container { padding: 12px; } .card { padding: 18px; } header { padding: 20px 14px; }
+  nav button { min-width: 110px; padding: 10px 8px; font-size: 1.1rem; }
+  .exercise { flex-direction: column; align-items: stretch; text-align: center; }
+  .exercise .ex-input { width: 100%; }
+  .lab-input-group { flex-direction: column; align-items: center; }
+  .lab-input { width: 100%; max-width: 280px; }
+  .labyrinth-step { width: 44px; height: 44px; font-size: 1.1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">🌓</button>
+  <h1>📊 Среднее арифметическое</h1>
+  <div class="subtitle">5 класс · § 1 Вычисления и построения · Урок 4</div>
+  <div class="source">По учебнику Виленкин Н.Я., Жохов В.И., Чесноков А.С. и др. (Просвещение), стр. 14-15</div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" onclick="showSection(0)"><span class="nav-emoji">📖</span>Теория</button>
+  <button onclick="showSection(1)"><span class="nav-emoji">🔥</span>Разминка</button>
+  <button onclick="showSection(2)"><span class="nav-emoji">🔎</span>Найди ошибку</button>
+  <button onclick="showSection(3)"><span class="nav-emoji">🧩</span>Лабиринт</button>
+  <button onclick="showSection(4)"><span class="nav-emoji">📝</span>Самостоятельная</button>
+</nav>
+
+<!-- ===== SECTION 0: THEORY ===== -->
+<div class="section active" id="sec0">
+  <div class="card">
+    <h2><span class="emoji">📖</span>Теория. Среднее арифметическое</h2>
+    <p class="card-desc">Запомни определение и формулу — они пригодятся в заданиях!</p>
+
+    <div class="theory-box">
+      <h3>Определение</h3>
+      <p><strong>Средним арифметическим</strong> нескольких чисел называют частное от деления суммы этих чисел на число слагаемых.</p>
+      <div class="formula">Ср. = (a₁ + a₂ + ... + aₙ) : n</div>
+      <p>где a₁, a₂, ... aₙ — числа, а n — количество чисел.</p>
+    </div>
+
+    <div class="theory-box">
+      <h3>Пример из учебника</h3>
+      <div class="example">
+        <div class="example-title">Задача:</div>
+        <p>Три девочки собирали клубнику. Первая собрала 8 кг, вторая — 9 кг, а третья — 4 кг. Всю клубнику они поделили поровну. Сколько килограммов клубники получила каждая девочка?</p>
+      </div>
+      <div class="example">
+        <div class="example-title">Решение:</div>
+        <p>1) Сколько клубники собрали: 8 + 9 + 4 = 21 (кг)<br>
+        2) Сколько досталось каждой: 21 : 3 = 7 (кг)</p>
+        <p><strong>Ответ:</strong> 7 кг.</p>
+      </div>
+    </div>
+
+    <div class="theory-box">
+      <h3>Средняя скорость</h3>
+      <p>Средняя скорость — это расстояние, пройденное за единицу времени. Она равна частному от деления пройденного пути на время движения.</p>
+      <div class="formula">Ср. скорость = Путь : Время</div>
+      <div class="example">
+        <div class="example-title">Пример:</div>
+        <p>Катамаран плыл 4 ч со скоростью 16,1 км/ч и 3 ч со скоростью 15,4 км/ч.</p>
+        <p>1) Путь: 16,1 × 4 + 15,4 × 3 = 64,4 + 46,2 = 110,6 (км)<br>
+        2) Средняя скорость: 110,6 : 7 = 15,8 (км/ч)</p>
+      </div>
+    </div>
+
+    <div class="theory-box">
+      <h3>Где используется среднее арифметическое?</h3>
+      <p>• Средняя температура воздуха<br>
+      • Средний балл ученика за четверть<br>
+      • Средняя урожайность<br>
+      • Средняя скорость движения<br>
+      • Среднее потребление товаров</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: WARM-UP ===== -->
+<div class="section" id="sec1">
+  <div class="card">
+    <h2><span class="emoji">🔥</span>Разминка. Проверь знания!</h2>
+    <p class="card-desc">Определи, верно ли утверждение. Нажми «Верно» или «Неверно».</p>
+    <p class="card-source">Тема: среднее арифметическое</p>
+
+    <!-- SLIDE 1: TF 1-4 -->
+    <div class="slide active" id="sec1-s0">
+      <div class="two-col">
+        <div>
+          <div class="tf-item" id="tf0">
+            <div class="tf-statement">1. Среднее арифметическое чисел 4 и 6 равно 5.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(0, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(0, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-0"></div>
+          </div>
+          <div class="tf-item" id="tf1">
+            <div class="tf-statement">2. Чтобы найти среднее арифметическое, нужно умножить все числа друг на друга.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(1, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(1, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-1"></div>
+          </div>
+        </div>
+        <div>
+          <div class="tf-item" id="tf2">
+            <div class="tf-statement">3. Среднее арифметическое чисел 10, 20 и 30 равно 20.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(2, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(2, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-2"></div>
+          </div>
+          <div class="tf-item" id="tf3">
+            <div class="tf-statement">4. Средняя скорость — это расстояние, пройденное за единицу времени.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(3, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(3, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: TF 5-8 -->
+    <div class="slide" id="sec1-s1">
+      <div class="two-col">
+        <div>
+          <div class="tf-item" id="tf4">
+            <div class="tf-statement">5. Среднее арифметическое always будет целым числом.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(4, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(4, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-4"></div>
+          </div>
+          <div class="tf-item" id="tf5">
+            <div class="tf-statement">6. Если ученик получил оценки 5, 4 и 3, то его средний балл равен 4.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(5, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(5, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-5"></div>
+          </div>
+        </div>
+        <div>
+          <div class="tf-item" id="tf6">
+            <div class="tf-statement">7. Среднее арифметическое трёх чисел можно найти, разделив их сумму на 3.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(6, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(6, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-6"></div>
+          </div>
+          <div class="tf-item" id="tf7">
+            <div class="tf-statement">8. Среднее арифметическое чисел 5, 5 и 5 равно 5.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(7, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(7, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-7"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="tfProgress" style="width:0%">0 / 8</div>
+    </div>
+
+    <div class="slide-nav">
+      <button id="sec1-prev" onclick="slideNav(1,-1)" disabled>◀ Назад</button>
+      <div class="slide-dots">
+        <div class="slide-dot active" onclick="slideTo(1,0)"></div>
+        <div class="slide-dot" onclick="slideTo(1,1)"></div>
+      </div>
+      <button id="sec1-next" onclick="slideNav(1,1)">Далее ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: FIND ERROR ===== -->
+<div class="section" id="sec2">
+  <div class="card">
+    <h2><span class="emoji">🔎</span>Найди ошибку в решении</h2>
+    <p class="card-desc">Внимательно изучи каждое решение. Напиши, в чём ошибка, и укажи правильный ответ.</p>
+    <p class="card-source">Задачи на среднее арифметическое и среднюю скорость</p>
+
+    <!-- SLIDE 1: Errors 1-2 -->
+    <div class="slide active" id="sec2-s0">
+      <div class="two-col">
+        <div class="error-example" id="err0">
+          <div class="example-title">Задача 1:</div>
+          <pre>Ученик получил оценки: 5, 4, 3, 5, 4.
+Найти средний балл.
+
+Решение:
+5 + 4 + 3 + 5 + 4 = 21
+21 : 5 = 3,2
+Ответ: 3,2</pre>
+          <textarea id="errInput0" placeholder="Напиши, в чём ошибка и какой правильный ответ..."></textarea>
+          <button class="btn-check" onclick="checkError(0)">Проверить</button>
+          <div class="error-feedback" id="errFeedback0"></div>
+        </div>
+        <div class="error-example" id="err1">
+          <div class="example-title">Задача 2:</div>
+          <pre>Автомобиль проехал 120 км за 2 часа
+и 180 км за 3 часа.
+Найти среднюю скорость.
+
+Решение:
+(120 + 180) : (2 + 3) = 300 : 5 = 50
+Ответ: 50 км</pre>
+          <textarea id="errInput1" placeholder="Напиши, в чём ошибка и какой правильный ответ..."></textarea>
+          <button class="btn-check" onclick="checkError(1)">Проверить</button>
+          <div class="error-feedback" id="errFeedback1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Error 3 -->
+    <div class="slide" id="sec2-s1">
+      <div class="error-example" id="err2">
+        <div class="example-title">Задача 3:</div>
+        <pre>Три друга катались на велосипеде.
+Первый проехал 15 км, второй — 12 км,
+третий — 18 км.
+Найти среднее арифметическое пройденного пути.
+
+Решение:
+15 × 12 × 18 = 3240
+3240 : 3 = 1080
+Ответ: 1080 км</pre>
+        <textarea id="errInput2" placeholder="Напиши, в чём ошибка и какой правильный ответ..."></textarea>
+        <button class="btn-check" onclick="checkError(2)">Проверить</button>
+        <div class="error-feedback" id="errFeedback2"></div>
+      </div>
+    </div>
+
+    <div class="slide-nav">
+      <button id="sec2-prev" onclick="slideNav(2,-1)" disabled>◀ Назад</button>
+      <div class="slide-dots">
+        <div class="slide-dot active" onclick="slideTo(2,0)"></div>
+        <div class="slide-dot" onclick="slideTo(2,1)"></div>
+      </div>
+      <button id="sec2-next" onclick="slideNav(2,1)">Далее ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: LABYRINTH ===== -->
+<div class="section" id="sec3">
+  <div class="card">
+    <h2><span class="emoji">🧩</span>Математический лабиринт</h2>
+    <p class="card-desc">Реши все примеры, чтобы пройти лабиринт. Каждый правильный ответ — шаг к победе!</p>
+    <p class="card-source">Задания на среднее арифметическое</p>
+    <div class="labyrinth-visual" id="labVisual"></div>
+    <div class="lab-task" id="labTask">
+      <div class="lab-question" id="labQuestion"></div>
+      <div class="lab-input-group">
+        <input type="number" class="lab-input" id="labInput" placeholder="Ответ">
+        <button class="btn-lab" id="labBtn" onclick="checkLabStep()">Далее ➡️</button>
+      </div>
+      <div class="lab-hint" id="labHint"></div>
+    </div>
+    <div class="lab-complete" id="labComplete">
+      <h3>🎉 Поздравляем!</h3>
+      <p>Ты успешно прошёл математический лабиринт!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: INDEPENDENT WORK ===== -->
+<div class="section" id="sec4">
+  <div class="card">
+    <h2><span class="emoji">📝</span>Самостоятельная работа</h2>
+    <p class="card-desc">Выбери вариант и реши все примеры. Нажми «Проверить всё» для проверки.</p>
+    <p class="card-source">Задачи на среднее арифметическое из учебника</p>
+
+    <div class="variant-tabs">
+      <button class="variant-tab active" onclick="switchVariant(0)">Вариант 1</button>
+      <button class="variant-tab" onclick="switchVariant(1)">Вариант 2</button>
+      <button class="variant-tab" onclick="switchVariant(2)">Вариант 3</button>
+    </div>
+
+    <!-- Variant 1 -->
+    <div class="variant-content active" id="var0">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Найдите среднее арифметическое: 83,4 и 84,5</span><input type="number" step="0.1" class="ex-input" id="v0e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Найдите среднее арифметическое: 0,2; 0,3 и 0,4</span><input type="number" step="0.1" class="ex-input" id="v0e1" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">3</span><span class="ex-text">Оценки: 5, 3, 4, 4, 5, 5, 4, 3, 5, 4. Средний балл?</span><input type="number" step="0.1" class="ex-input" id="v0e2" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">4</span><span class="ex-text">Пешеход шёл 2 ч — 5,2 км/ч, 2 ч — 4,8 км/ч, 1 ч — 4,5 км/ч. Средняя скорость?</span><input type="number" step="0.1" class="ex-input" id="v0e3" placeholder="?"></div>
+    </div>
+
+    <!-- Variant 2 -->
+    <div class="variant-content" id="var1">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Найдите среднее арифметическое: 2,23; 2,26; 2,34 и 2,07</span><input type="number" step="0.01" class="ex-input" id="v1e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Найдите среднее арифметическое: 12; 15 и 18</span><input type="number" class="ex-input" id="v1e1" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">3</span><span class="ex-text">Оценки: 4, 5, 3, 4, 5, 4. Средний балл?</span><input type="number" step="0.1" class="ex-input" id="v1e2" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">4</span><span class="ex-text">Три числа: 42,43; 42,39; 42,64. Среднее арифметическое?</span><input type="number" step="0.01" class="ex-input" id="v1e3" placeholder="?"></div>
+    </div>
+
+    <!-- Variant 3 -->
+    <div class="variant-content" id="var2">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Найдите среднее арифметическое: 100; 200; 300 и 400</span><input type="number" class="ex-input" id="v2e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Найдите среднее арифметическое: 7,5; 8,5 и 9,0</span><input type="number" step="0.1" class="ex-input" id="v2e1" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">3</span><span class="ex-text">Оценки: 5, 5, 4, 3, 5, 4, 4. Средний балл?</span><input type="number" step="0.1" class="ex-input" id="v2e2" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">4</span><span class="ex-text">Автомобиль: 90 км/ч — 3 ч, 120 км/ч — 2 ч. Средняя скорость?</span><input type="number" class="ex-input" id="v2e3" placeholder="?"></div>
+    </div>
+
+    <button class="btn-check-all" onclick="checkAllExercises()">Проверить всё ✔️</button>
+    <div class="score-display" id="varScore"></div>
+  </div>
+</div>
+
+</div>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+
+// ===== NAVIGATION =====
+function showSection(idx) {
+  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i === idx));
+  document.querySelectorAll('#mainNav button').forEach((b, i) => b.classList.toggle('active', i === idx));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== SLIDE SYSTEM =====
+const slideCounts = { 1: 2, 2: 2 };
+const currentSlide = { 1: 0, 2: 0 };
+
+function slideNav(secIdx, dir) {
+  const s = currentSlide[secIdx] + dir;
+  if (s < 0 || s >= slideCounts[secIdx]) return;
+  currentSlide[secIdx] = s;
+  updateSlides(secIdx);
+}
+
+function slideTo(secIdx, s) {
+  if (s < 0 || s >= slideCounts[secIdx]) return;
+  currentSlide[secIdx] = s;
+  updateSlides(secIdx);
+}
+
+function updateSlides(secIdx) {
+  const s = currentSlide[secIdx];
+  const total = slideCounts[secIdx];
+  for (let i = 0; i < total; i++) {
+    const el = document.getElementById('sec' + secIdx + '-s' + i);
+    if (el) el.classList.toggle('active', i === s);
+  }
+  const dots = document.querySelectorAll('#sec' + secIdx + ' .slide-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === s));
+  const prev = document.getElementById('sec' + secIdx + '-prev');
+  const next = document.getElementById('sec' + secIdx + '-next');
+  if (prev) prev.disabled = s === 0;
+  if (next) next.disabled = s === total - 1;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== BLOCK 1: TRUE / FALSE =====
+const tfData = [
+  { correctAnswer: true, explanation: 'Верно! (4 + 6) : 2 = 10 : 2 = 5.' },
+  { correctAnswer: false, explanation: 'Неверно! Нужно сложить все числа и разделить на их количество.' },
+  { correctAnswer: true, explanation: 'Верно! (10 + 20 + 30) : 3 = 60 : 3 = 20.' },
+  { correctAnswer: true, explanation: 'Верно! Средняя скорость = Путь : Время.' },
+  { correctAnswer: false, explanation: 'Неверно! Среднее арифметическое может быть дробным числом. Например, (1 + 2) : 2 = 1,5.' },
+  { correctAnswer: true, explanation: 'Верно! (5 + 4 + 3) : 3 = 12 : 3 = 4.' },
+  { correctAnswer: true, explanation: 'Верно! Чтобы найти среднее арифметическое трёх чисел, нужно разделить их сумму на 3.' },
+  { correctAnswer: true, explanation: 'Верно! Если все числа одинаковые, среднее арифметическое равно этому числу.' }
+];
+let tfAnswered = 0, tfCorrect = 0;
+
+function checkTF(idx, userAnswer) {
+  const item = document.getElementById('tf' + idx);
+  const buttons = item.querySelectorAll('.tf-buttons button');
+  if (buttons[0].disabled) return;
+  buttons.forEach(b => b.disabled = true);
+  const isCorrect = userAnswer === tfData[idx].correctAnswer;
+  tfAnswered++; if (isCorrect) tfCorrect++;
+  buttons[userAnswer ? 0 : 1].classList.add(isCorrect ? 'selected-true' : 'selected-false');
+  const comment = document.getElementById('tf-comment-' + idx);
+  comment.className = 'tf-comment ' + (isCorrect ? 'correct' : 'wrong');
+  comment.innerHTML = (isCorrect ? '✅ Правильно! ' : '❌ Неправильно. ') + tfData[idx].explanation;
+  updateTFProgress();
+}
+
+function updateTFProgress() {
+  const bar = document.getElementById('tfProgress');
+  bar.style.width = (tfAnswered / 8 * 100) + '%';
+  bar.textContent = tfCorrect + ' / 8';
+  if (tfAnswered === 8) bar.style.background = tfCorrect === 8 ? 'linear-gradient(90deg,#22c55e,#34d399)' : 'linear-gradient(90deg,#eab308,#facc15)';
+}
+
+// ===== BLOCK 2: FIND ERROR =====
+const errData = [
+  { correct: 'Ошибка: средний балл не может быть 3,2 — это не оценка. Правильно: (5+4+3+5+4):5 = 21:5 = 4,2. Ответ: 4,2.', keywords: ['4,2', '4.2', 'балл', 'оценка'] },
+  { correct: 'Ошибка: в ответе указана единица расстояния (км), а нужна единица скорости (км/ч). Ответ: 60 км/ч.', keywords: ['60', 'км/ч', 'скорость', 'единица'] },
+  { correct: 'Ошибка: среднее арифметическое находят через СУММУ, а не через произведение. (15+12+18):3 = 45:3 = 15. Ответ: 15 км.', keywords: ['15', 'сумма', 'сложение', 'среднее'] }
+];
+
+function checkError(idx) {
+  const input = document.getElementById('errInput' + idx);
+  const fb = document.getElementById('errFeedback' + idx);
+  const btn = input.parentElement.querySelector('.btn-check');
+  if (input.value.trim().length < 3) { input.style.borderColor = 'var(--red)'; return; }
+  btn.disabled = true; input.disabled = true;
+  const userText = input.value.trim().toLowerCase();
+  const matchCount = errData[idx].keywords.filter(kw => userText.includes(kw.toLowerCase())).length;
+  fb.className = 'error-feedback show';
+  if (matchCount >= 1) {
+    fb.style.background = '#dcfce7'; fb.style.color = '#166534';
+    fb.innerHTML = '<div class="fb-title">✅ Хорошо! Ты нашёл ошибку!</div><div>' + errData[idx].correct + '</div>';
+  } else {
+    fb.style.background = '#fee2e2'; fb.style.color = '#991b1b';
+    fb.innerHTML = '<div class="fb-title">💡 Вот правильный ответ:</div><div>' + errData[idx].correct + '</div>';
+  }
+}
+
+// ===== BLOCK 3: LABYRINTH =====
+const labSteps = [
+  { q: '(20 + 40) : 2 = ?', a: 30 },
+  { q: 'Среднее арифметическое: 5; 10 и 15 = ?', a: 10 },
+  { q: 'Оценки: 5, 4, 3. Средний балл = ?', a: 4 },
+  { q: '(100 + 200 + 300) : 3 = ?', a: 200 },
+  { q: 'Пешеход: 6 км за 2 ч. Средняя скорость = ?', a: 3 },
+  { q: 'Среднее арифметическое: 7,5 и 8,5 = ?', a: 8 },
+  { q: '(12 + 18 + 30) : 3 = ?', a: 20 },
+  { q: 'Оценки: 4, 4, 5, 3. Средний балл = ?', a: 4 }
+];
+let labCurrent = 0, labCorrectCount = 0;
+
+function initLabyrinth() {
+  const visual = document.getElementById('labVisual');
+  visual.innerHTML = '';
+  labSteps.forEach((_, i) => {
+    if (i > 0) { const a = document.createElement('span'); a.className = 'labyrinth-arrow'; a.textContent = '→'; visual.appendChild(a); }
+    const s = document.createElement('div'); s.className = 'labyrinth-step future'; s.textContent = i + 1; s.id = 'labStep' + i; visual.appendChild(s);
+  });
+  updateLabVisual();
+  document.getElementById('labQuestion').textContent = labSteps[0].q;
+  document.getElementById('labInput').value = '';
+}
+
+function updateLabVisual() {
+  labSteps.forEach((_, i) => {
+    document.getElementById('labStep' + i).className = 'labyrinth-step ' + (i < labCurrent ? 'completed' : i === labCurrent ? 'current' : 'future');
+  });
+}
+
+function checkLabStep() {
+  const input = document.getElementById('labInput'), hint = document.getElementById('labHint');
+  const val = parseFloat(input.value);
+  if (isNaN(val)) { input.style.borderColor = 'var(--red)'; return; }
+  if (Math.abs(val - labSteps[labCurrent].a) < 0.01) {
+    labCorrectCount++; hint.className = 'lab-hint correct show'; hint.textContent = '✅ Правильно!'; labCurrent++;
+    setTimeout(() => {
+      if (labCurrent >= labSteps.length) {
+        document.getElementById('labTask').style.display = 'none';
+        document.getElementById('labComplete').classList.add('show');
+        updateLabVisual(); launchConfetti();
+      } else {
+        document.getElementById('labQuestion').textContent = labSteps[labCurrent].q;
+        input.value = ''; input.style.borderColor = 'var(--border)'; hint.className = 'lab-hint'; updateLabVisual();
+      }
+    }, 800);
+  } else {
+    hint.className = 'lab-hint wrong show'; hint.textContent = '❌ Попробуй ещё раз!';
+    input.style.borderColor = 'var(--red)'; input.value = ''; input.focus();
+    setTimeout(() => { hint.className = 'lab-hint'; }, 1500);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('sec3').classList.contains('active') && labCurrent < labSteps.length) checkLabStep();
+});
+
+// ===== BLOCK 4: INDEPENDENT WORK =====
+const variants = [
+  { answers: [83.95, 0.3, 4.2, 4.94] },
+  { answers: [2.225, 15, 4.17, 42.49] },
+  { answers: [250, 8.33, 4.29, 102] }
+];
+let activeVariant = 0;
+
+function switchVariant(idx) {
+  activeVariant = idx;
+  document.querySelectorAll('.variant-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.variant-content').forEach((v, i) => v.classList.toggle('active', i === idx));
+  document.getElementById('varScore').style.display = 'none';
+}
+
+function checkAllExercises() {
+  const v = variants[activeVariant]; let correct = 0;
+  for (let i = 0; i < 4; i++) {
+    const input = document.getElementById('v' + activeVariant + 'e' + i);
+    const val = parseFloat(input.value); input.classList.remove('correct', 'wrong');
+    if (Math.abs(val - v.answers[i]) < 0.05) { input.classList.add('correct'); correct++; } else input.classList.add('wrong');
+  }
+  const scoreEl = document.getElementById('varScore'); scoreEl.style.display = 'block';
+  const pct = Math.round((correct / 4) * 100);
+  const color = pct === 100 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+  scoreEl.innerHTML = 'Результат: <span style="color:' + color + '">' + correct + ' из 4</span> (' + pct + '%)';
+}
+
+function launchConfetti() {
+  const c = document.getElementById('confettiContainer');
+  const colors = ['#3b82f6','#f97316','#22c55e','#ef4444','#eab308','#8b5cf6','#ec4899'];
+  for (let i = 0; i < 120; i++) {
+    const p = document.createElement('div'); p.className = 'confetti-piece';
+    p.style.left = Math.random()*100+'%'; p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.width = (Math.random()*8+6)+'px'; p.style.height = (Math.random()*8+6)+'px';
+    p.style.borderRadius = Math.random()>0.5?'50%':'2px';
+    p.style.animationDuration = (Math.random()*2+2)+'s'; p.style.animationDelay = (Math.random()*1.5)+'s';
+    c.appendChild(p);
+  }
+  setTimeout(() => { c.innerHTML = ''; }, 5000);
+}
+
+initLabyrinth();
+</script>
+</body>
+</html>
