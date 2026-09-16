@@ -473,6 +473,77 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   html { touch-action: manipulation; }
 }
 
+/* ===== LESSON SCREEN ===== */
+.lesson-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.lesson-tab {
+  flex: 1; padding: 10px 6px; border: 2px solid var(--border); border-radius: 10px;
+  background: var(--card); color: var(--text); font-family: inherit; font-weight: 700;
+  font-size: 0.78rem; cursor: pointer; text-align: center; transition: all 0.2s;
+}
+.lesson-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+.lesson-tab-content { display: none; animation: fadeIn 0.3s ease; }
+.lesson-tab-content.active { display: block; }
+
+.lesson-progress { position: relative; background: var(--border); border-radius: 20px; height: 28px; overflow: hidden; margin-bottom: 12px; }
+.lesson-progress-bar { height: 100%; background: linear-gradient(90deg, var(--green), #34d399); border-radius: 20px; transition: width 0.4s ease; }
+.lesson-progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: 700; color: var(--text); }
+
+.tf-card { background: var(--card); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); margin-bottom: 8px; border-left: 4px solid var(--border); transition: border-color 0.3s; }
+.tf-card.answered-ok { border-left-color: var(--green); }
+.tf-card.answered-fail { border-left-color: var(--red); }
+.tf-statement { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; }
+.tf-btns { display: flex; gap: 8px; }
+.tf-btn { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: inherit; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+.tf-btn:active { transform: scale(0.96); }
+.tf-btn.hit { background: var(--green); color: white; border-color: var(--green); }
+.tf-btn.miss { background: var(--red); color: white; border-color: var(--red); }
+.tf-btn:disabled { opacity: 0.6; cursor: default; }
+.tf-explain { margin-top: 8px; padding: 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; display: none; }
+.tf-explain.show { display: block; animation: fadeIn 0.3s ease; }
+.tf-explain.correct { background: #dcfce7; color: #166534; }
+.tf-explain.wrong { background: #fee2e2; color: #991b1b; }
+[data-theme="dark"] .tf-explain.correct { background: #14532d; color: #bbf7d0; }
+[data-theme="dark"] .tf-explain.wrong { background: #7f1d1d; color: #fecaca; }
+
+.lab-chain { display: flex; align-items: center; gap: 3px; margin-bottom: 14px; overflow-x: auto; padding: 6px 0; }
+.lab-dot { width: 30px; height: 30px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); flex-shrink: 0; transition: all 0.3s; }
+.lab-dot.done { background: var(--green); color: white; }
+.lab-dot.current { background: var(--primary); color: white; transform: scale(1.15); box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+.lab-arrow { color: var(--text-secondary); font-size: 0.7rem; flex-shrink: 0; }
+.lab-card { background: var(--card); border-radius: var(--radius); padding: 20px 16px; box-shadow: var(--shadow); text-align: center; }
+.lab-step-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 8px; }
+.lab-question { font-size: 1.2rem; font-weight: 800; margin-bottom: 16px; }
+.lab-input-wrap { display: flex; gap: 8px; justify-content: center; }
+.lab-input { width: 130px; padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 1.2rem; font-weight: 700; text-align: center; background: var(--bg); color: var(--text); outline: none; }
+.lab-input:focus { border-color: var(--primary); }
+.lab-btn { padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 1rem; cursor: pointer; }
+.lab-btn:active { transform: scale(0.96); }
+.lab-feedback { margin-top: 10px; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; display: none; }
+.lab-feedback.show { display: block; animation: fadeIn 0.3s ease; }
+.lab-feedback.correct { background: #dcfce7; color: #166534; }
+.lab-feedback.wrong { background: #fee2e2; color: #991b1b; }
+
+.lesson-result { background: var(--card); border-radius: var(--radius); padding: 24px 16px; box-shadow: var(--shadow); text-align: center; margin-top: 12px; }
+.lesson-result h3 { font-size: 1.2rem; margin-bottom: 8px; }
+.lesson-result .big { font-size: 2.5rem; font-weight: 800; }
+.lesson-result .msg { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+.lesson-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 12px; }
+.lesson-btn:active { transform: scale(0.97); }
+
+.variant-tabs { display: flex; gap: 5px; margin-bottom: 12px; flex-wrap: wrap; }
+.variant-tab { padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-family: inherit; font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+.variant-tab.active { background: #f97316; color: white; border-color: #f97316; }
+.variant-content { display: none; }
+.variant-content.active { display: block; }
+.var-ex { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.var-ex .ve-n { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+.var-ex .ve-q { flex: 1; font-weight: 600; font-size: 0.85rem; }
+.var-ex .ve-i { width: 90px; padding: 8px; border: 2px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 700; text-align: center; background: var(--bg); color: var(--text); }
+.var-ex .ve-i.correct { border-color: var(--green); background: #dcfce7; }
+.var-ex .ve-i.wrong { border-color: var(--red); background: #fee2e2; }
+[data-theme="dark"] .var-ex .ve-i.correct { background: #14532d; }
+[data-theme="dark"] .var-ex .ve-i.wrong { background: #7f1d1d; }
+
 @media (min-width: 481px) and (max-width: 768px) {
   .g-cell { width: clamp(58px, calc((100vw - 100px) / 8 - 6px), 70px) !important; height: clamp(58px, calc((100vw - 100px) / 8 - 6px), 70px) !important; }
   .mode-grid { grid-template-columns: 1fr !important; }
@@ -543,6 +614,43 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
       <div class="stats-row" id="resultStats"></div>
       <button class="btn-back" onclick="goMenu()">← К меню</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== LESSON 7 SCREEN ===== -->
+<div class="screen" id="screenLesson">
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="goBackToTopics()">← К темам</button>
+    <span class="nav-title">📖 Урок 7: Проценты</span>
+  </div>
+  <div class="lesson-tabs">
+    <button class="lesson-tab active" onclick="switchLessonTab(0)">🔥 Разминка</button>
+    <button class="lesson-tab" onclick="switchLessonTab(1)">🚶 Лабиринт</button>
+    <button class="lesson-tab" onclick="switchLessonTab(2)">📝 Самост.</button>
+  </div>
+  <div class="lesson-tab-content active" id="lessonTab0">
+    <div class="lesson-progress"><div class="lesson-progress-bar" id="tfBar" style="width:0%"></div><span class="lesson-progress-text" id="tfText">0 / 8</span></div>
+    <div id="tfContainer"></div>
+    <div class="lesson-result" id="tfResult" style="display:none"></div>
+  </div>
+  <div class="lesson-tab-content" id="lessonTab1">
+    <div class="lab-chain" id="labChain"></div>
+    <div class="lab-card" id="labCard">
+      <div class="lab-step-label" id="labLabel">Шаг 1 из 8</div>
+      <div class="lab-question" id="labQ"></div>
+      <div class="lab-input-wrap">
+        <input type="number" step="any" class="lab-input" id="labIn" placeholder="Ответ">
+        <button class="lab-btn" onclick="labCheck()">→</button>
+      </div>
+      <div class="lab-feedback" id="labFb"></div>
+    </div>
+    <div class="lesson-result" id="labResult" style="display:none"></div>
+  </div>
+  <div class="lesson-tab-content" id="lessonTab2">
+    <div class="variant-tabs" id="varTabs"></div>
+    <div id="varContent"></div>
+    <button class="lesson-btn" onclick="checkVariants()">Проверить все</button>
+    <div class="lesson-result" id="varResult" style="display:none"></div>
   </div>
 </div>
 
@@ -784,7 +892,8 @@ function checkUser() {
 let currentTopic = '';
 const TOPICS = [
   { id:'arith', label:'Арифметика', icon:'🧮', desc:'Сложение, вычитание, умножение, деление, среднее, микс, на время' },
-  { id:'percent', label:'Проценты', icon:'💯', desc:'Найти % от числа, число по %, скидки, отношения' }
+  { id:'percent', label:'Проценты', icon:'💯', desc:'Найти % от числа, число по %, скидки' },
+  { id:'lesson7', label:'Урок 7: Проценты', icon:'📖', desc:'Разминка, лабиринт, самостоятельная работа — всё по уроку' }
 ];
 function goTopics() { showScreen('screenTopics'); renderTopics(); }
 function renderTopics() {
@@ -803,7 +912,7 @@ function renderTopics() {
     card.onclick = () => selectTopic(t.id); g.appendChild(card);
   });
 }
-function selectTopic(id) { currentTopic = id; goMenu(); }
+function selectTopic(id) { if (id === 'lesson7') { showScreen('screenLesson'); initLesson7(); return; } currentTopic = id; goMenu(); }
 function goBackToTopics() { currentTopic = ''; goTopics(); }
 
 // ===== TRAINING MODES =====
@@ -1009,6 +1118,180 @@ function launchConfetti() {
   const c = document.getElementById('confettiBox'); const colors = ['#3b82f6','#f97316','#22c55e','#ef4444','#eab308','#8b5cf6','#ec4899'];
   for (let i = 0; i < 50; i++) { const p = document.createElement('div'); p.className = 'confetti-p'; p.style.left = Math.random()*100+'%'; p.style.background = colors[Math.floor(Math.random()*colors.length)]; p.style.width = (Math.random()*6+4)+'px'; p.style.height = (Math.random()*6+4)+'px'; p.style.borderRadius = Math.random()>0.5?'50%':'2px'; p.style.animationDuration = (Math.random()*2+1.5)+'s'; p.style.animationDelay = (Math.random()*1)+'s'; c.appendChild(p); }
   setTimeout(() => c.innerHTML = '', 4000);
+}
+
+// ===== LESSON 7: ПРОЦЕНТЫ =====
+const L7_TF = [
+  { q:'1% от 800 — это 8.', a:true, ex:'Верно! 800 × 1 : 100 = 8.' },
+  { q:'50% от числа — это его половина.', a:true, ex:'Верно! 50% = 1/2, это половина числа.' },
+  { q:'30% от 2400 равно 72.', a:false, ex:'Неверно! 2400 × 30 : 100 = 720, а не 72.' },
+  { q:'20% от 100 равно 5% от 1000.', a:false, ex:'Неверно! 20% от 100 = 20, а 5% от 1000 = 50. Они НЕ равны!' },
+  { q:'15 зрителей — это 3%. Всего 500 зрителей.', a:true, ex:'Верно! 15 × 100 : 3 = 500 зрителей.' },
+  { q:'130% от 4,5 равно 5,85.', a:true, ex:'Верно! 4,5 × 130 : 100 = 5,85.' },
+  { q:'200% от 50 равно 100.', a:true, ex:'Верно! 200% от 50 = 50 × 2 = 100.' },
+  { q:'40 км — это 25% маршрута. Маршрут = 160 км.', a:true, ex:'Верно! 40 × 100 : 25 = 160 км.' }
+];
+const L7_LAB = [
+  { q:'1% от 500 = ?', a:5 },
+  { q:'25% от 60 = ?', a:15 },
+  { q:'10% от 4,5 = ?', a:0.45 },
+  { q:'8 из 40 — это сколько %?', a:20 },
+  { q:'40 кг — это 20% всего. Вес = ?', a:200 },
+  { q:'150% от 80 = ?', a:120 },
+  { q:'7 человек — 2% всех. Всего = ?', a:350 },
+  { q:'5% от 300 − 10% от 90 = ?', a:6 }
+];
+const L7_VARS = [
+  [{ q:'3% от 15 = ?', a:0.45 },{ q:'25% от 3246 = ?', a:811.5 }],
+  [{ q:'130% от 4,5 = ?', a:5.85 },{ q:'0,6% от 20 кг = ?', a:0.12 }],
+  [{ q:'0,12% от 4 = ?', a:0.0048 },{ q:'4% от 135 мин = ?', a:5.4 }],
+  [{ q:'23% числа = 138. Число = ?', a:600 },{ q:'5,6% числа = 28. Число = ?', a:500 }],
+  [{ q:'0,17% числа = 5,1. Число = ?', a:3000 },{ q:'10% числа = 1,8. Число = ?', a:18 }],
+  [{ q:'43% числа ≈ 2121. Число ≈ ?', a:4932 },{ q:'25% числа = 10,3. Число = ?', a:41.2 }]
+];
+
+let tfIdx=0, tfOk=0;
+let labIdx=0, labOk=0;
+let activeVar=0;
+
+function initLesson7() {
+  tfIdx=0; tfOk=0; labIdx=0; labOk=0; activeVar=0;
+  buildTF(); buildLab(); buildVariants();
+  document.getElementById('tfResult').style.display='none';
+  document.getElementById('labResult').style.display='none';
+  document.getElementById('varResult').style.display='none';
+}
+
+function switchLessonTab(i) {
+  document.querySelectorAll('.lesson-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.lesson-tab-content').forEach((c,j)=>c.classList.toggle('active',j===i));
+}
+
+// ===== TRUE / FALSE =====
+function buildTF() {
+  const c=document.getElementById('tfContainer'); c.innerHTML='';
+  L7_TF.forEach((item,i)=>{
+    const card=document.createElement('div'); card.className='tf-card'; card.id='tf'+i;
+    card.innerHTML=`<div class="tf-statement">${i+1}. ${item.q}</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="tfAnswer(${i},true)">✅ Верно</button><button class="tf-btn" onclick="tfAnswer(${i},false)">❌ Неверно</button></div>
+      <div class="tf-explain" id="tfEx${i}"></div>`;
+    c.appendChild(card);
+  });
+  updateTFBar();
+}
+function tfAnswer(i,ans) {
+  const card=document.getElementById('tf'+i); const btns=card.querySelectorAll('.tf-btn');
+  if(btns[0].disabled) return;
+  btns.forEach(b=>b.disabled=true);
+  const ok=ans===L7_TF[i].a; tfIdx++;
+  if(ok) tfOk++;
+  btns[ans?0:1].classList.add(ok?'hit':'miss');
+  if(!ok) btns[ans?1:0].classList.add('hit');
+  card.classList.add(ok?'answered-ok':'answered-fail');
+  const ex=document.getElementById('tfEx'+i);
+  ex.className='tf-explain show '+(ok?'correct':'wrong');
+  ex.textContent=(ok?'✅ Правильно! ':'❌ Неверно. ')+L7_TF[i].ex;
+  updateTFBar();
+  if(tfIdx===L7_TF.length) showTFResult();
+}
+function updateTFBar() {
+  document.getElementById('tfBar').style.width=Math.round(tfIdx/L7_TF.length*100)+'%';
+  document.getElementById('tfText').textContent=tfIdx+' / '+L7_TF.length;
+}
+function showTFResult() {
+  const pct=Math.round(tfOk/L7_TF.length*100);
+  let cls='red',msg='Нужно подтянуть :(';
+  if(pct>=85){cls='green';msg='Отлично! 🎉';}
+  else if(pct>=60){cls='green';msg='Хорошо!';}
+  else if(pct>=40){msg='Есть над чем поработать';}
+  const r=document.getElementById('tfResult'); r.style.display='block';
+  r.innerHTML=`<h3>Разминка завершена</h3><div class="big" style="color:var(--${cls})">${tfOk}/${L7_TF.length}</div><div class="msg">${msg}</div>`;
+}
+
+// ===== LABYRINTH =====
+function buildLab() {
+  const chain=document.getElementById('labChain'); chain.innerHTML='';
+  L7_LAB.forEach((_,i)=>{
+    if(i>0){const a=document.createElement('span');a.className='lab-arrow';a.textContent='→';chain.appendChild(a);}
+    const d=document.createElement('div');d.className='lab-dot';d.id='labDot'+i;d.textContent=i+1;chain.appendChild(d);
+  });
+  labIdx=0; labOk=0;
+  document.getElementById('labCard').style.display='';
+  document.getElementById('labResult').style.display='none';
+  updateLab();
+}
+function updateLab() {
+  L7_LAB.forEach((_,i)=>{
+    const dot=document.getElementById('labDot'+i);
+    dot.className='lab-dot'+(i<labIdx?' done':i===labIdx?' current':'');
+  });
+  document.getElementById('labLabel').textContent='Шаг '+(labIdx+1)+' из '+L7_LAB.length;
+  document.getElementById('labQ').textContent=L7_LAB[labIdx].q;
+  document.getElementById('labIn').value=''; document.getElementById('labIn').focus();
+  document.getElementById('labFb').className='lab-feedback';
+}
+function labCheck() {
+  const val=parseFloat(document.getElementById('labIn').value);
+  if(isNaN(val)){document.getElementById('labIn').style.borderColor='var(--red)';return;}
+  const ok=Math.abs(val-L7_LAB[labIdx].a)<0.1;
+  const fb=document.getElementById('labFb');
+  if(ok){labOk++;fb.className='lab-feedback show correct';fb.textContent='✅ Правильно!';labIdx++;
+    setTimeout(()=>{if(labIdx>=L7_LAB.length)labFinish();else updateLab();},600);
+  }else{fb.className='lab-feedback show wrong';fb.textContent='❌ Попробуй ещё раз!';document.getElementById('labIn').value='';document.getElementById('labIn').focus();
+    setTimeout(()=>{fb.className='lab-feedback';},1200);
+  }
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screenLesson').classList.contains('active')&&document.getElementById('lessonTab1').classList.contains('active')&&labIdx<L7_LAB.length)labCheck();});
+function labFinish() {
+  document.getElementById('labCard').style.display='none';
+  const pct=Math.round(labOk/L7_LAB.length*100);
+  let cls='red',msg='Нужно подтянуть :(';
+  if(pct>=85){cls='green';msg='Отлично! 🎉';}
+  else if(pct>=60){cls='green';msg='Хорошо!';}
+  else if(pct>=40){msg='Есть над чем поработать';}
+  const r=document.getElementById('labResult'); r.style.display='block';
+  r.innerHTML=`<h3>Лабиринт пройден!</h3><div class="big" style="color:var(--${cls})">${labOk}/${L7_LAB.length}</div><div class="msg">${msg}</div>`;
+  updateLab();
+}
+
+// ===== VARIANTS =====
+function buildVariants() {
+  const tabs=document.getElementById('varTabs'); tabs.innerHTML='';
+  const cont=document.getElementById('varContent'); cont.innerHTML='';
+  L7_VARS.forEach((v,i)=>{
+    const btn=document.createElement('button'); btn.className='variant-tab'+(i===0?' active':'');
+    btn.textContent='Вариант '+(i+1); btn.onclick=()=>switchVariant(i); tabs.appendChild(btn);
+    const div=document.createElement('div'); div.className='variant-content'+(i===0?' active':''); div.id='varC'+i;
+    v.forEach((ex,j)=>{
+      div.innerHTML+=`<div class="var-ex"><span class="ve-n">${j+1}</span><span class="ve-q">${ex.q}</span><input type="number" step="any" class="ve-i" id="ve${i}_${j}" placeholder="?"></div>`;
+    });
+    cont.appendChild(div);
+  });
+}
+function switchVariant(i) {
+  activeVar=i;
+  document.querySelectorAll('.variant-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.variant-content').forEach((c,j)=>c.classList.toggle('active',j===i));
+  document.getElementById('varResult').style.display='none';
+}
+function checkVariants() {
+  let total=0,correct=0;
+  L7_VARS.forEach((v,i)=>{
+    v.forEach((ex,j)=>{
+      total++;
+      const inp=document.getElementById('ve'+i+'_'+j); if(!inp) return;
+      const val=parseFloat(inp.value); inp.classList.remove('correct','wrong');
+      if(Math.abs(val-ex.a)<0.5){inp.classList.add('correct');correct++;}
+      else inp.classList.add('wrong');
+    });
+  });
+  const pct=Math.round(correct/total*100);
+  let cls='red',msg='Нужно подтянуть :(';
+  if(pct>=85){cls='green';msg='Отлично! 🎉';}
+  else if(pct>=60){cls='green';msg='Хорошо!';}
+  else if(pct>=40){msg='Есть над чем поработать';}
+  const r=document.getElementById('varResult'); r.style.display='block';
+  r.innerHTML=`<h3>Результат</h3><div class="big" style="color:var(--${cls})">${correct}/${total}</div><div class="msg">${msg}</div>`;
 }
 
 // ===== MATH MAZE GAME =====
