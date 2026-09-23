@@ -542,11 +542,6 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .hw-task .hw-name { font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary); }
 .hw-task .hw-cond { font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
 .hw-task .hw-hint { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; }
-.hw-answer { padding: 10px; border-radius: 8px; background: #dcfce7; color: #166534; font-size: 0.82rem; font-weight: 600; display: none; line-height: 1.5; }
-[data-theme="dark"] .hw-answer { background: #14532d; color: #bbf7d0; }
-.hw-answer.show { display: block; animation: fadeIn 0.3s ease; }
-.hw-btn { padding: 9px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-family: inherit; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
-.hw-btn:active { transform: scale(0.97); }
 
 @media (min-width: 481px) and (max-width: 768px) {
   .g-cell { width: clamp(58px, calc((100vw - 100px) / 8 - 6px), 70px) !important; height: clamp(58px, calc((100vw - 100px) / 8 - 6px), 70px) !important; }
@@ -887,9 +882,9 @@ function checkUser() { showUser(); goTopics(); return true; }
 // ===== TOPICS =====
 let currentTopic = '';
 const TOPICS = [
+  { id:'homework', label:'📌 Домашняя работа', icon:'📚', desc:'Задания на дом по урокам 4–8' },
   { id:'arith', label:'Арифметика', icon:'🧮', desc:'Сложение, вычитание, умножение, деление, среднее, микс, на время' },
   { id:'percent', label:'Проценты', icon:'💯', desc:'Найти % от числа, число по %, скидки' },
-  { id:'homework', label:'Домашняя работа', icon:'📚', desc:'Задания на дом по урокам 4–8 с ответами' },
   { id:'lesson7', label:'Урок 7: Проценты', icon:'📖', desc:'Разминка, лабиринт, самостоятельная работа — всё по уроку' },
   { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'📖', file:'../4%20%D1%83%D1%80%D0%BE%D0%BA/lesson.html' },
   { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'📖', file:'../5%20%D1%83%D1%80%D0%BE%D0%BA/lesson.html' },
@@ -941,11 +936,9 @@ const HW_LESSONS = [
     source: 'Учебник, стр. 15–16, § 1 · упр. 1.5, 1.7',
     tasks: [
       { name: 'Упр. 1.5', cond: 'У ученика за четверть по литературе стоят оценки: 5, 3, 4, 4, 5, 5, 4, 3, 5, 4. Найдите среднюю оценку ученика. (В одной строке 3 оценки не перепутаны!) Так же, как в уроке: сложи все оценки и раздели на их количество.',
-        hint: 'Сумма: 5 + 3 + 4 + 4 + 5 + 5 + 4 + 3 + 5 + 4 = ? Оценок всего 10.',
-        answer: '5+3+4+4+5+5+4+3+5+4 = 42; 42 : 10 = <strong>4,2</strong>' },
+        hint: 'Сумма: 5 + 3 + 4 + 4 + 5 + 5 + 4 + 3 + 5 + 4 = ? Оценок всего 10.' },
       { name: 'Упр. 1.7', cond: 'Пешеход шёл 2 ч со скоростью 5,2 км/ч, 2 ч со скоростью 4,8 км/ч и 1 ч со скоростью 4,5 км/ч. Чему равна его средняя скорость на всём пути?',
-        hint: 'Сложи расстояния каждого участка и раздели на общее время (2+2+1 = 5 ч).',
-        answer: 'Путь = 5,2·2 + 4,8·2 + 4,5·1 = 10,4 + 9,6 + 4,5 = 24,5 км; 24,5 : 5 = <strong>4,9 км/ч</strong>' }
+        hint: 'Сложи расстояния каждого участка и раздели на общее время (2+2+1 = 5 ч).' }
     ]
   },
   {
@@ -953,11 +946,9 @@ const HW_LESSONS = [
     source: 'Учебник, стр. 17–18 · упр. 1.32, 1.40',
     tasks: [
       { name: 'Упр. 1.32', cond: 'Велосипедист ехал 2,6 ч со скоростью 6,6 м/с, а затем 1,4 ч со скоростью 5,2 м/с. Чему равна средняя скорость на всём пути?',
-        hint: 'Переведи м/с в км/ч: умножь на 3,6. Затем путь : время.',
-        answer: '6,6 м/с = 23,76 км/ч; 5,2 м/с = 18,72 км/ч. Путь = 23,76·2,6 + 18,72·1,4 = 87,984 км; время = 4 ч; 87,984 : 4 = <strong>22 км/ч</strong>' },
+        hint: 'Переведи м/с в км/ч: умножь на 3,6. Затем путь : время.' },
       { name: 'Упр. 1.40', cond: 'Вычислите: а) 42,885 − 27,885 : (0,72 + 4,35); б) 241,18 + 258,82 : (39 − 36,5).',
-        hint: 'Сначала скобки, потом деление, потом сложение/вычитание.',
-        answer: 'а) 42,885 − 27,885 : 5,07 = 42,885 − 5,5 = <strong>37,385</strong>; б) 241,18 + 258,82 : 2,5 = 241,18 + 103,528 = <strong>344,708</strong>' }
+        hint: 'Сначала скобки, потом деление, потом сложение/вычитание.' }
     ]
   },
   {
@@ -965,11 +956,9 @@ const HW_LESSONS = [
     source: 'Учебник, стр. 24–25 · упр. 1.87, 1.89',
     tasks: [
       { name: 'Упр. 1.87', cond: 'Ученик прочитал 105 страниц, что составляет 21% числа всех страниц в книге. Сколько страниц в книге?',
-        hint: '1% = 105 : 21, затем умножь на 100.',
-        answer: '1% = 105 : 21 = 5 стр.; книга = 5 · 100 = <strong>500 страниц</strong>' },
+        hint: '1% = 105 : 21, затем умножь на 100.' },
       { name: 'Упр. 1.89', cond: 'В магазин завезли сливы, из них 15% оказались испорченными и в продажу не поступили. Сколько слив завезли, если в продажу поступило 263,5 кг слив?',
-        hint: 'В продажу поступило 100% − 15% = 85%. Найди число по его 85%.',
-        answer: '1% = 263,5 : 85 = 3,1 кг; всего = 3,1 · 100 = <strong>310 кг</strong>' }
+        hint: 'В продажу поступило 100% − 15% = 85%. Найди число по его 85%.' }
     ]
   },
   {
@@ -977,11 +966,9 @@ const HW_LESSONS = [
     source: 'Учебник, стр. 24–25 · упр. 1.87, 1.89',
     tasks: [
       { name: 'Упр. 1.87', cond: 'Ученик прочитал 105 страниц, что составляет 21% числа всех страниц в книге. Сколько страниц в книге?',
-        hint: '1% = 105 : 21, затем умножь на 100.',
-        answer: '1% = 105 : 21 = 5 стр.; книга = 5 · 100 = <strong>500 страниц</strong>' },
+        hint: '1% = 105 : 21, затем умножь на 100.' },
       { name: 'Упр. 1.89', cond: 'В магазин завезли сливы, из них 15% оказались испорченными. Сколько слив завезли, если в продажу поступило 263,5 кг слив?',
-        hint: 'В продажу поступило 85%: 263,5 : 85 × 100.',
-        answer: '1% = 263,5 : 85 = 3,1 кг; всего = 3,1 · 100 = <strong>310 кг</strong>' }
+        hint: 'В продажу поступило 85%: 263,5 : 85 × 100.' }
     ]
   },
   {
@@ -989,11 +976,9 @@ const HW_LESSONS = [
     source: 'Учебник, стр. 31 · упр. 1.122, 1.124',
     tasks: [
       { name: 'Упр. 1.122', cond: 'Вокруг школы посадили 36 деревьев: 16 берёз, 8 клёнов, а остальные — каштаны. Изобразите виды деревьев на круговой диаграмме.',
-        hint: 'Одно дерево = 360° : 36 = 10°. Каштанов: 36 − 16 − 8 = 12.',
-        answer: 'Берёзы: 16 · 10° = <strong>160°</strong>; клёны: 8 · 10° = <strong>80°</strong>; каштаны: 12 · 10° = <strong>120°</strong>. Проверка: 160 + 80 + 120 = 360°' },
+        hint: 'Одно дерево = 360° : 36 = 10°. Каштанов: 36 − 16 − 8 = 12.' },
       { name: 'Упр. 1.124', cond: 'Постройте круговую диаграмму длин крупных рек России: Обь 5,41 тыс. км, Амур 4,44, Лена 4,4, Енисей 4,1, Волга 3,53. Всего 21,88.',
-        hint: '360° : 21,88 = 16,45° на 1 тыс. км. Дальше умножь на длину каждой реки.',
-        answer: 'Обь ≈ <strong>89°</strong>, Амур ≈ <strong>73°</strong>, Лена ≈ <strong>72°</strong>, Енисей ≈ <strong>67°</strong>, Волга ≈ <strong>58°</strong>' }
+        hint: '360° : 21,88 = 16,45° на 1 тыс. км. Дальше умножь на длину каждой реки.' }
     ]
   }
 ];
@@ -1005,19 +990,11 @@ function renderHomework() {
     g.tasks.forEach((t, ti) => {
       const div = document.createElement('div'); div.className = 'hw-task';
       div.innerHTML = '<div class="hw-name">' + t.name + '</div><div class="hw-cond">' + t.cond + '</div>' +
-        '<div class="hw-hint">💡 ' + t.hint + '</div>' +
-        '<button class="hw-btn" onclick="hwShow(this)">Показать ответ</button>' +
-        '<div class="hw-answer" id="hw' + gi + '_' + ti + '">' + t.answer + '</div>';
+        '<div class="hw-hint">💡 ' + t.hint + '</div>';
       block.appendChild(div);
     });
     list.appendChild(block);
   });
-}
-function hwShow(btn) {
-  const ans = btn.nextElementSibling;
-  ans.classList.add('show');
-  btn.textContent = 'Ответ';
-  btn.disabled = true;
 }
 
 // ===== TRAINING MODES =====
