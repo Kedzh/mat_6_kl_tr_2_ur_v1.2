@@ -466,6 +466,8 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .lesson-progress { position: relative; background: var(--border); border-radius: 20px; height: 28px; overflow: hidden; margin-bottom: 12px; }
 .lesson-progress-bar { height: 100%; background: linear-gradient(90deg, var(--green), #34d399); border-radius: 20px; transition: width 0.4s ease; }
 .lesson-progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: 700; color: var(--text); }
+.test-timer { position: absolute; top: 50%; left: 14px; transform: translateY(-50%); font-size: 0.8rem; font-weight: 800; color: var(--text); z-index: 2; }
+.test-count { background: var(--primary-light); border: 2px dashed var(--primary); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-weight: 700; text-align: center; }
 
 .tf-card { background: var(--card); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); margin-bottom: 8px; border-left: 4px solid var(--border); transition: border-color 0.3s; }
 .tf-card.answered-ok { border-left-color: var(--green); }
@@ -603,6 +605,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <button class="lesson-tab active" onclick="switchLessonTab(0)">🔥 Разминка</button>
     <button class="lesson-tab" onclick="switchLessonTab(1)">🚶 Лабиринт</button>
     <button class="lesson-tab" onclick="switchLessonTab(2)">📝 Самост.</button>
+    <button class="lesson-tab" onclick="switchLessonTab(3)">⏱️ Тест</button>
   </div>
   <div class="lesson-tab-content active" id="lessonTab0">
     <div class="lesson-progress"><div class="lesson-progress-bar" id="tfBar" style="width:0%"></div><span class="lesson-progress-text" id="tfText">0 / 8</span></div>
@@ -627,6 +630,13 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div id="varContent"></div>
     <button class="lesson-btn" onclick="checkVariants()">Проверить все</button>
     <div class="lesson-result" id="varResult" style="display:none"></div>
+  </div>
+  <div class="lesson-tab-content" id="lessonTab3">
+    <div class="lesson-progress"><div class="test-timer" id="testTimer">⏱️ 5:00</div><span class="lesson-progress-text">10 вопросов · оценка 5/4/3/2</span></div>
+    <div class="test-count" id="testAlert" style="display:none"></div>
+    <div id="testContainer"></div>
+    <button class="lesson-btn" onclick="finishTest()">Завершить тест</button>
+    <div class="lesson-result" id="testResult" style="display:none"></div>
   </div>
 </div>
 
@@ -864,13 +874,13 @@ function checkUser() { showUser(); goTopics(); return true; }
 let currentTopic = '';
 const TOPICS = [
   { id:'homework', label:'📌 Домашняя работа', icon:'📚', desc:'Задания на дом по урокам 4–8' },
+  { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'🧮', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
+  { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'🧮', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
+  { id:'lesson6', label:'Урок 6: Проценты', icon:'💯', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
+  { id:'lesson7', label:'Урок 7: Проценты', icon:'📖', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
+  { id:'lesson8', label:'Урок 8: Круговые диаграммы', icon:'🥧', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
   { id:'arith', label:'Арифметика', icon:'🧮', desc:'Сложение, вычитание, умножение, деление, среднее, микс, на время' },
-  { id:'percent', label:'Проценты', icon:'💯', desc:'Найти % от числа, число по %, скидки' },
-  { id:'lesson7', label:'Урок 7: Проценты', icon:'📖', desc:'Разминка, лабиринт, самостоятельная работа — всё по уроку' },
-  { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'🧮', desc:'Разминка, лабиринт, самостоятельная работа' },
-  { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'🧮', desc:'Разминка, лабиринт, самостоятельная работа' },
-  { id:'lesson6', label:'Урок 6: Проценты', icon:'💯', desc:'Разминка, лабиринт, самостоятельная работа' },
-  { id:'lesson8', label:'Урок 8: Круговые диаграммы', icon:'🥧', desc:'Разминка, лабиринт, самостоятельная работа' }
+  { id:'percent', label:'Проценты', icon:'💯', desc:'Найти % от числа, число по %, скидки' }
 ];
 function goTopics() { showScreen('screenTopics'); renderTopics(); }
 function renderTopics() {
@@ -1200,6 +1210,18 @@ const lessonData = {
       [{ q:'23% числа = 138. Число = ?', a:600 },{ q:'5,6% числа = 28. Число = ?', a:500 }],
       [{ q:'0,17% числа = 5,1. Число = ?', a:3000 },{ q:'10% числа = 1,8. Число = ?', a:18 }],
       [{ q:'43% числа ≈ 2121. Число ≈ ?', a:4932 },{ q:'25% числа = 10,3. Число = ?', a:41.2 }]
+    ],
+    test: [
+      { q:'1% от 800 = ?', a:8 },
+      { q:'25% от 60 = ?', a:15 },
+      { q:'10% от 4,5 = ?', a:0.45 },
+      { q:'30% от 2400 = ?', a:720 },
+      { q:'8 из 40 — это сколько %?', a:20 },
+      { q:'40 кг — это 20% всего. Вес = ?', a:200 },
+      { q:'150% от 80 = ?', a:120 },
+      { q:'7 человек — 2% всех. Всего = ?', a:350 },
+      { q:'5% от 300 − 10% от 90 = ?', a:6 },
+      { q:'25% числа = 10,3. Число = ?', a:41.2 }
     ]
   },
   lesson4: {
@@ -1228,6 +1250,18 @@ const lessonData = {
       [{ q:'Найдите среднее арифметическое: 83,4 и 84,5', a:83.95 },{ q:'Найдите среднее арифметическое: 0,2; 0,3 и 0,4', a:0.3 },{ q:'Оценки: 5, 3, 4, 4, 5, 5, 4, 3, 5, 4. Средний балл?', a:4.2 },{ q:'Пешеход: 2 ч — 5,2 км/ч, 2 ч — 4,8 км/ч, 1 ч — 4,5 км/ч. Средняя скорость?', a:4.9 }],
       [{ q:'Найдите среднее арифметическое: 2,23; 2,26; 2,34 и 2,07', a:2.225 },{ q:'Найдите среднее арифметическое: 12; 15 и 18', a:15 },{ q:'Оценки: 4, 5, 3, 4, 5, 4. Средний балл?', a:4.17 },{ q:'Три числа: 42,43; 42,39; 42,64. Среднее арифметическое?', a:42.49 }],
       [{ q:'Найдите среднее арифметическое: 100; 200; 300 и 400', a:250 },{ q:'Найдите среднее арифметическое: 7,5; 8,5 и 9,0', a:8.33 },{ q:'Оценки: 5, 5, 4, 3, 5, 4, 4. Средний балл?', a:4.29 },{ q:'Автомобиль: 90 км/ч — 3 ч, 120 км/ч — 2 ч. Средняя скорость?', a:102 }]
+    ],
+    test: [
+      { q:'Среднее чисел 4 и 6 = ?', a:5 },
+      { q:'(10 + 20 + 30) : 3 = ?', a:20 },
+      { q:'Оценки: 5, 4, 3. Средний балл = ?', a:4 },
+      { q:'Среднее: 5; 10 и 15 = ?', a:10 },
+      { q:'Пешеход: 6 км за 2 ч. Средняя скорость = ?', a:3 },
+      { q:'Среднее 7,5 и 8,5 = ?', a:8 },
+      { q:'(12 + 18 + 30) : 3 = ?', a:20 },
+      { q:'Оценки: 4, 4, 5, 3. Средний балл = ?', a:4 },
+      { q:'Найди среднее: 2,23; 2,26; 2,34 и 2,07', a:2.225 },
+      { q:'Автомобиль: 90 км/ч — 3 ч, 120 км/ч — 2 ч. Средняя скорость?', a:102 }
     ]
   },
   lesson5: {
@@ -1259,6 +1293,18 @@ const lessonData = {
       [{ q:'Упр. 1.14: Теплоход: по течению 20,8 км/ч, против — 14,4 км/ч. Найдите собственную скорость.', a:17.6 },{ q:'Упр. 1.12: Среднее 14 чисел — 4,5, среднее 6 чисел — 2,75. Найдите сумму всех 20 чисел.', a:79.5 }],
       [{ q:'Упр. 1.6: Среднее арифметическое: 42,43; 42,39; 42,64 и 42,57. Округлите до десятых.', a:42.5 },{ q:'Упр. 1.13: Лыжник: 1-й участок — 3 ч, 2-й — 2 ч со скоростью 25 км/ч. Средняя — 28 км/ч. Найдите расстояние всего маршрута.', a:140 }],
       [{ q:'Упр. 1.14: Теплоход: по течению 20,8 км/ч, против — 14,4 км/ч. Найдите скорость течения.', a:3.2 },{ q:'Упр. 1.8: Теплоход: 4,3 ч — 106,4 м/мин, 2,5 ч — 24 км/ч, 1,2 ч — 10 км/ч. Найдите расстояние всего маршрута.', a:99.45 }]
+    ],
+    test: [
+      { q:'Среднее чисел: 10, 20, 30 = ?', a:20 },
+      { q:'Среднее: 5, 10, 15, 20 = ?', a:12.5 },
+      { q:'Путь 120 км за 3 ч. Средняя скорость = ?', a:40 },
+      { q:'Среднее: 100, 200, 300, 400, 500 = ?', a:300 },
+      { q:'(1,2 + 2,4 + 3,6) : 3 = ?', a:2.4 },
+      { q:'Автомобиль: 60 км/ч — 2 ч, 90 км/ч — 2 ч. Средняя скорость = ?', a:75 },
+      { q:'Среднее: 3, 7 и 10 (округли до десятых) = ?', a:6.7 },
+      { q:'Среднее 14 чисел — 4,5. Их сумма = ?', a:63 },
+      { q:'(7 + 14 + 21 + 28) : 4 = ?', a:17.5 },
+      { q:'Оценки: 5, 5, 4, 3, 5, 4, 4. Средний балл (округли до сотых) = ?', a:4.29 }
     ]
   },
   lesson6: {
@@ -1290,6 +1336,18 @@ const lessonData = {
       [{ q:'Упр. 1.50: 2420 кг слив, 5% в санаторий. Сколько на завод?', a:2299 },{ q:'Упр. 1.55: 650 км = 1% маршрута. Весь маршрут?', a:65000 }],
       [{ q:'Упр. 1.59: Кроссовки 1260 р., скидка 15%. Цена во время акции?', a:1071 },{ q:'Упр. 1.60: 650 экспонатов, 130 — робототехника. Какой %?', a:20 }],
       [{ q:'Упр. 1.57: 210 км = 15% пути. Длина пути?', a:1400 },{ q:'Упр. 1.61: Смесь: 130 г изюма, 270 г кураги, 200 г яблок. % яблок?', a:33.33 }]
+    ],
+    test: [
+      { q:'1% от 800 = ?', a:8 },
+      { q:'15% от 200 = ?', a:30 },
+      { q:'50% от 40 = ?', a:20 },
+      { q:'40% от 350 = ?', a:140 },
+      { q:'6 из 30 — это сколько %?', a:20 },
+      { q:'50 кг — это 25% всего. Вес = ?', a:200 },
+      { q:'120% от 150 = ?', a:180 },
+      { q:'12 учеников — 3% всех. Всего = ?', a:400 },
+      { q:'15% от 240 минус 10% от 300 = ?', a:6 },
+      { q:'Книга 240 р., розничная на 28% больше. Розничная цена?', a:307.2 }
     ]
   },
   lesson8: {
@@ -1321,6 +1379,18 @@ const lessonData = {
       [{ q:'Упр. 1.105: 300 л от 1 м³ — сколько %?', a:30 },{ q:'Упр. 1.106: найди число, 10% которого равны 0,4.', a:4 }],
       [{ q:'Упр. 1.106: найди число, 25% которого равны 1,6.', a:6.4 },{ q:'Упр. 1.105: 15 м от 1 км — сколько %?', a:1.5 }],
       [{ q:'Упр. 1.113: масло — 4,8% молока. Сколько коров нужно для 6 т масла за 10 дней, если корова даёт 20 кг молока в день?', a:625 },{ q:'Упр. 1.100: найди угол сектора остальных компонентов варенья (не сахара).', a:270 }]
+    ],
+    test: [
+      { q:'1% от 360° = ?', a:3.6 },
+      { q:'5% от 360° = ?', a:18 },
+      { q:'25% от 360° = ?', a:90 },
+      { q:'30% от 360° = ?', a:108 },
+      { q:'Сектор 72° — это сколько % круга?', a:20 },
+      { q:'Сектор 180° — это сколько % круга?', a:50 },
+      { q:'Евразия — 55 из 150. 1 млн км² = 2,4°. Угол сектора?', a:132 },
+      { q:'Сектор 36° — это сколько % круга?', a:10 },
+      { q:'100% круга — это сколько градусов?', a:360 },
+      { q:'Сектор 90° — это сколько % круга?', a:25 }
     ]
   }
 };
@@ -1334,7 +1404,7 @@ function initLesson(id) {
   curLesson = lessonData[id];
   tfIdx=0; tfOk=0; labIdx=0; labOk=0; activeVar=0;
   document.getElementById('lessonTitle').textContent = '📖 ' + curLesson.title;
-  buildTF(); buildLab(); buildVariants();
+  buildTF(); buildLab(); buildVariants(); buildTest();
   switchLessonTab(0);
   document.getElementById('tfResult').style.display='none';
   document.getElementById('labResult').style.display='none';
@@ -1344,6 +1414,62 @@ function initLesson(id) {
 function switchLessonTab(i) {
   document.querySelectorAll('.lesson-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
   document.querySelectorAll('.lesson-tab-content').forEach((c,j)=>c.classList.toggle('active',j===i));
+  if (i === 3) startTest();
+}
+
+// ===== TEST (10 вопросов, 5 минут, оценка) =====
+let testTime = 300, testTimer = null, testActive = false, testFinished = false;
+function buildTest() {
+  const c = document.getElementById('testContainer'); c.innerHTML = '';
+  if (!curLesson.test) return;
+  testFinished = false;
+  curLesson.test.forEach((ex, i) => {
+    const div = document.createElement('div'); div.className = 'var-ex';
+    div.innerHTML = `<span class="ve-n">${i+1}</span><span class="ve-q">${ex.q}</span><input type="number" step="any" class="ve-i" id="te${i}" placeholder="?">`;
+    c.appendChild(div);
+  });
+  renderTestTimer();
+  document.getElementById('testResult').style.display = 'none';
+  document.getElementById('testAlert').style.display = 'none';
+}
+function renderTestTimer() {
+  const m = Math.floor(testTime/60), s = testTime%60;
+  document.getElementById('testTimer').textContent = '⏱️ ' + m + ':' + (s < 10 ? '0' : '') + s;
+  document.getElementById('testTimer').style.color = testTime <= 60 ? 'var(--red)' : 'var(--text)';
+}
+function startTest() {
+  if (!curLesson.test || testActive || testFinished) return;
+  const els = document.getElementById('testContainer').querySelectorAll('.ve-i');
+  if (!els.length) { buildTest(); }
+  testActive = true; testTime = 300; renderTestTimer();
+  stopTestTimer();
+  testTimer = setInterval(() => {
+    testTime--;
+    renderTestTimer();
+    if (testTime <= 0) { stopTestTimer(); finishTest(); }
+  }, 1000);
+}
+function stopTestTimer() { if (testTimer) { clearInterval(testTimer); testTimer = null; } }
+function finishTest() {
+  if (!testActive) return;
+  stopTestTimer(); testActive = false; testFinished = true;
+  let total = 0, correct = 0;
+  if (curLesson.test) curLesson.test.forEach((ex, i) => {
+    total++;
+    const inp = document.getElementById('te' + i); if (!inp) return;
+    const val = parseFloat(inp.value); inp.classList.remove('correct','wrong');
+    if (Math.abs(val - ex.a) < 0.5) { inp.classList.add('correct'); correct++; }
+    else inp.classList.add('wrong');
+  });
+  const pct = Math.round(correct/total*100);
+  let grade = '2', cls = 'red', msg = 'Нужно подтянуть :(';
+  if (pct >= 90) { grade = '5'; cls = 'green'; msg = 'Отлично! 🎉'; }
+  else if (pct >= 75) { grade = '4'; cls = 'green'; msg = 'Хорошо!'; }
+  else if (pct >= 50) { grade = '3'; cls = 'green'; msg = 'Есть над чем поработать'; }
+  const r = document.getElementById('testResult'); r.style.display = 'block';
+  r.innerHTML = `<h3>Тест завершён</h3><div class="big" style="color:var(--${cls})">${correct}/${total}</div><div class="msg">${pct}% · Оценка: <b style="color:var(--${cls})">${grade}</b> — ${msg}</div>`;
+  const a = document.getElementById('testAlert'); a.style.display = 'block';
+  a.textContent = testTime <= 0 ? '⏱️ Время вышло — тест завершён автоматически' : '✅ Тест завершён по кнопке';
 }
 
 // ===== TRUE / FALSE =====
