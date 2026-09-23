@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=Тренажер/index.html">
 <title>Тренажёр</title>
+<script>
+var p = location.pathname;
+if (p.slice(-'/index.html'.length) === '/index.html') p = p.slice(0, -'/index.html'.length);
+if (p.slice(-1) !== '/') p += '/';
+location.replace(p + encodeURIComponent('Тренажер') + '/index.html');
+</script>
 </head>
 <body></body>
 </html>
