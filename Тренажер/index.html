@@ -523,16 +523,6 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 [data-theme="dark"] .var-ex .ve-i.correct { background: #14532d; }
 [data-theme="dark"] .var-ex .ve-i.wrong { background: #7f1d1d; }
 
-/* ===== FULLSCREEN LESSON VIEWER ===== */
-#screenLessonViewer {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: var(--bg); z-index: 100; display: none;
-  flex-direction: column;
-}
-#screenLessonViewer.active { display: flex; }
-.lv-topbar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--card); border-bottom: 2px solid var(--border); }
-.lv-frame { flex: 1; border: none; width: 100%; background: #fff; }
-
 /* ===== HOMEWORK SCREEN ===== */
 .hw-group { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; padding: 16px; border: 2px solid var(--border); }
 .hw-group h3 { font-size: 1rem; margin-bottom: 4px; }
@@ -607,7 +597,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   <div class="screen" id="screenLesson">
   <div class="nav-bar">
     <button class="nav-btn" onclick="goBackToTopics()">← К темам</button>
-    <span class="nav-title">📖 Урок 7: Проценты</span>
+    <span class="nav-title" id="lessonTitle">📖 Урок</span>
   </div>
   <div class="lesson-tabs">
     <button class="lesson-tab active" onclick="switchLessonTab(0)">🔥 Разминка</button>
@@ -651,15 +641,6 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 </div>
 
 <div class="confetti-box" id="confettiBox"></div>
-
-<!-- ===== FULLSCREEN LESSON VIEWER ===== -->
-<div id="screenLessonViewer">
-  <div class="lv-topbar">
-    <button class="nav-btn" onclick="closeLessonViewer()">← К темам</button>
-    <span class="nav-title" id="lvTitle"></span>
-  </div>
-  <iframe class="lv-frame" id="lvFrame"></iframe>
-</div>
 
 <!-- ===== MATH MAZE GAME SCREEN ===== -->
 <div id="screenGame">
@@ -886,10 +867,10 @@ const TOPICS = [
   { id:'arith', label:'Арифметика', icon:'🧮', desc:'Сложение, вычитание, умножение, деление, среднее, микс, на время' },
   { id:'percent', label:'Проценты', icon:'💯', desc:'Найти % от числа, число по %, скидки' },
   { id:'lesson7', label:'Урок 7: Проценты', icon:'📖', desc:'Разминка, лабиринт, самостоятельная работа — всё по уроку' },
-  { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'📖', file:'../4%20%D1%83%D1%80%D0%BE%D0%BA/lesson.html' },
-  { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'📖', file:'../5%20%D1%83%D1%80%D0%BE%D0%BA/lesson.html' },
-  { id:'lesson6', label:'Урок 6: Проценты', icon:'📖', file:'../6%20%D1%83%D1%80%D0%BE%D0%BA/lesson.html' },
-  { id:'lesson8', label:'Урок 8: Круговые диаграммы', icon:'📖', file:'../8%20%D1%83%D1%80%D0%BE%D0%BA/lesson.html' }
+  { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'🧮', desc:'Разминка, лабиринт, самостоятельная работа' },
+  { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'🧮', desc:'Разминка, лабиринт, самостоятельная работа' },
+  { id:'lesson6', label:'Урок 6: Проценты', icon:'💯', desc:'Разминка, лабиринт, самостоятельная работа' },
+  { id:'lesson8', label:'Урок 8: Круговые диаграммы', icon:'🥧', desc:'Разминка, лабиринт, самостоятельная работа' }
 ];
 function goTopics() { showScreen('screenTopics'); renderTopics(); }
 function renderTopics() {
@@ -909,25 +890,11 @@ function renderTopics() {
   });
 }
 function selectTopic(id) {
-  if (id === 'lesson7') { showScreen('screenLesson'); initLesson7(); return; }
+  if (lessonData[id]) { showScreen('screenLesson'); initLesson(id); return; }
   if (id === 'homework') { showScreen('screenHomework'); renderHomework(); return; }
-  const t = TOPICS.find(x => x.id === id);
-  if (t && t.file) { openLessonViewer(t); return; }
   currentTopic = id; goMenu();
 }
 function goBackToTopics() { currentTopic = ''; goTopics(); }
-
-// ===== FULLSCREEN LESSON VIEWER =====
-function openLessonViewer(t) {
-  document.getElementById('lvTitle').textContent = t.icon + ' ' + t.label;
-  document.getElementById('lvFrame').src = t.file;
-  document.getElementById('screenLessonViewer').classList.add('active');
-}
-function closeLessonViewer() {
-  document.getElementById('screenLessonViewer').classList.remove('active');
-  document.getElementById('lvFrame').src = 'about:blank';
-  goBackToTopics();
-}
 
 // ===== HOMEWORK =====
 const HW_LESSONS = [
@@ -1202,43 +1169,173 @@ function launchConfetti() {
   setTimeout(() => c.innerHTML = '', 4000);
 }
 
-// ===== LESSON 7: ПРОЦЕНТЫ =====
-const L7_TF = [
-  { q:'1% от 800 — это 8.', a:true, ex:'Верно! 800 × 1 : 100 = 8.' },
-  { q:'50% от числа — это его половина.', a:true, ex:'Верно! 50% = 1/2, это половина числа.' },
-  { q:'30% от 2400 равно 72.', a:false, ex:'Неверно! 2400 × 30 : 100 = 720, а не 72.' },
-  { q:'20% от 100 равно 5% от 1000.', a:false, ex:'Неверно! 20% от 100 = 20, а 5% от 1000 = 50. Они НЕ равны!' },
-  { q:'15 зрителей — это 3%. Всего 500 зрителей.', a:true, ex:'Верно! 15 × 100 : 3 = 500 зрителей.' },
-  { q:'130% от 4,5 равно 5,85.', a:true, ex:'Верно! 4,5 × 130 : 100 = 5,85.' },
-  { q:'200% от 50 равно 100.', a:true, ex:'Верно! 200% от 50 = 50 × 2 = 100.' },
-  { q:'40 км — это 25% маршрута. Маршрут = 160 км.', a:true, ex:'Верно! 40 × 100 : 25 = 160 км.' }
-];
-const L7_LAB = [
-  { q:'1% от 500 = ?', a:5 },
-  { q:'25% от 60 = ?', a:15 },
-  { q:'10% от 4,5 = ?', a:0.45 },
-  { q:'8 из 40 — это сколько %?', a:20 },
-  { q:'40 кг — это 20% всего. Вес = ?', a:200 },
-  { q:'150% от 80 = ?', a:120 },
-  { q:'7 человек — 2% всех. Всего = ?', a:350 },
-  { q:'5% от 300 − 10% от 90 = ?', a:6 }
-];
-const L7_VARS = [
-  [{ q:'3% от 15 = ?', a:0.45 },{ q:'25% от 3246 = ?', a:811.5 }],
-  [{ q:'130% от 4,5 = ?', a:5.85 },{ q:'0,6% от 20 кг = ?', a:0.12 }],
-  [{ q:'0,12% от 4 = ?', a:0.0048 },{ q:'4% от 135 мин = ?', a:5.4 }],
-  [{ q:'23% числа = 138. Число = ?', a:600 },{ q:'5,6% числа = 28. Число = ?', a:500 }],
-  [{ q:'0,17% числа = 5,1. Число = ?', a:3000 },{ q:'10% числа = 1,8. Число = ?', a:18 }],
-  [{ q:'43% числа ≈ 2121. Число ≈ ?', a:4932 },{ q:'25% числа = 10,3. Число = ?', a:41.2 }]
-];
+// ===== LESSONS: ПРОЦЕНТЫ И ДР. ===
+const lessonData = {
+  lesson7: {
+    title: 'Урок 7: Проценты',
+    tf: [
+      { q:'1% от 800 — это 8.', a:true, ex:'Верно! 800 × 1 : 100 = 8.' },
+      { q:'50% от числа — это его половина.', a:true, ex:'Верно! 50% = 1/2, это половина числа.' },
+      { q:'30% от 2400 равно 72.', a:false, ex:'Неверно! 2400 × 30 : 100 = 720, а не 72.' },
+      { q:'20% от 100 равно 5% от 1000.', a:false, ex:'Неверно! 20% от 100 = 20, а 5% от 1000 = 50. Они НЕ равны!' },
+      { q:'15 зрителей — это 3%. Всего 500 зрителей.', a:true, ex:'Верно! 15 × 100 : 3 = 500 зрителей.' },
+      { q:'130% от 4,5 равно 5,85.', a:true, ex:'Верно! 4,5 × 130 : 100 = 5,85.' },
+      { q:'200% от 50 равно 100.', a:true, ex:'Верно! 200% от 50 = 50 × 2 = 100.' },
+      { q:'40 км — это 25% маршрута. Маршрут = 160 км.', a:true, ex:'Верно! 40 × 100 : 25 = 160 км.' }
+    ],
+    lab: [
+      { q:'1% от 500 = ?', a:5 },
+      { q:'25% от 60 = ?', a:15 },
+      { q:'10% от 4,5 = ?', a:0.45 },
+      { q:'8 из 40 — это сколько %?', a:20 },
+      { q:'40 кг — это 20% всего. Вес = ?', a:200 },
+      { q:'150% от 80 = ?', a:120 },
+      { q:'7 человек — 2% всех. Всего = ?', a:350 },
+      { q:'5% от 300 − 10% от 90 = ?', a:6 }
+    ],
+    vars: [
+      [{ q:'3% от 15 = ?', a:0.45 },{ q:'25% от 3246 = ?', a:811.5 }],
+      [{ q:'130% от 4,5 = ?', a:5.85 },{ q:'0,6% от 20 кг = ?', a:0.12 }],
+      [{ q:'0,12% от 4 = ?', a:0.0048 },{ q:'4% от 135 мин = ?', a:5.4 }],
+      [{ q:'23% числа = 138. Число = ?', a:600 },{ q:'5,6% числа = 28. Число = ?', a:500 }],
+      [{ q:'0,17% числа = 5,1. Число = ?', a:3000 },{ q:'10% числа = 1,8. Число = ?', a:18 }],
+      [{ q:'43% числа ≈ 2121. Число ≈ ?', a:4932 },{ q:'25% числа = 10,3. Число = ?', a:41.2 }]
+    ]
+  },
+  lesson4: {
+    title: 'Урок 4: Среднее арифметическое',
+    tf: [
+      { q:'Среднее арифметическое чисел 4 и 6 равно 5.', a:true, ex:'Верно! (4 + 6) : 2 = 10 : 2 = 5.' },
+      { q:'Чтобы найти среднее арифметическое, нужно умножить все числа друг на друга.', a:false, ex:'Неверно! Нужно сложить все числа и разделить на их количество.' },
+      { q:'Среднее арифметическое чисел 10, 20 и 30 равно 20.', a:true, ex:'Верно! (10 + 20 + 30) : 3 = 60 : 3 = 20.' },
+      { q:'Средняя скорость — это расстояние, пройденное за единицу времени.', a:true, ex:'Верно! Средняя скорость = Путь : Время.' },
+      { q:'Среднее арифметическое всегда будет целым числом.', a:false, ex:'Неверно! Среднее арифметическое может быть дробным. Например, (1 + 2) : 2 = 1,5.' },
+      { q:'Если ученик получил оценки 5, 4 и 3, то его средний балл равен 4.', a:true, ex:'Верно! (5 + 4 + 3) : 3 = 12 : 3 = 4.' },
+      { q:'Среднее арифметическое трёх чисел можно найти, разделив их сумму на 3.', a:true, ex:'Верно! Чтобы найти среднее арифметическое трёх чисел, нужно разделить их сумму на 3.' },
+      { q:'Среднее арифметическое чисел 5, 5 и 5 равно 5.', a:true, ex:'Верно! Если все числа одинаковые, среднее арифметическое равно этому числу.' }
+    ],
+    lab: [
+      { q:'(20 + 40) : 2 = ?', a:30 },
+      { q:'Среднее арифметическое: 5; 10 и 15 = ?', a:10 },
+      { q:'Оценки: 5, 4, 3. Средний балл = ?', a:4 },
+      { q:'(100 + 200 + 300) : 3 = ?', a:200 },
+      { q:'Пешеход: 6 км за 2 ч. Средняя скорость = ?', a:3 },
+      { q:'Среднее арифметическое: 7,5 и 8,5 = ?', a:8 },
+      { q:'(12 + 18 + 30) : 3 = ?', a:20 },
+      { q:'Оценки: 4, 4, 5, 3. Средний балл = ?', a:4 }
+    ],
+    vars: [
+      [{ q:'Найдите среднее арифметическое: 83,4 и 84,5', a:83.95 },{ q:'Найдите среднее арифметическое: 0,2; 0,3 и 0,4', a:0.3 },{ q:'Оценки: 5, 3, 4, 4, 5, 5, 4, 3, 5, 4. Средний балл?', a:4.2 },{ q:'Пешеход: 2 ч — 5,2 км/ч, 2 ч — 4,8 км/ч, 1 ч — 4,5 км/ч. Средняя скорость?', a:4.9 }],
+      [{ q:'Найдите среднее арифметическое: 2,23; 2,26; 2,34 и 2,07', a:2.225 },{ q:'Найдите среднее арифметическое: 12; 15 и 18', a:15 },{ q:'Оценки: 4, 5, 3, 4, 5, 4. Средний балл?', a:4.17 },{ q:'Три числа: 42,43; 42,39; 42,64. Среднее арифметическое?', a:42.49 }],
+      [{ q:'Найдите среднее арифметическое: 100; 200; 300 и 400', a:250 },{ q:'Найдите среднее арифметическое: 7,5; 8,5 и 9,0', a:8.33 },{ q:'Оценки: 5, 5, 4, 3, 5, 4, 4. Средний балл?', a:4.29 },{ q:'Автомобиль: 90 км/ч — 3 ч, 120 км/ч — 2 ч. Средняя скорость?', a:102 }]
+    ]
+  },
+  lesson5: {
+    title: 'Урок 5: Среднее арифметическое — уровень 2',
+    tf: [
+      { q:'Среднее арифметическое чисел 3, 7 и 10 равно 6.', a:true, ex:'Верно! (3 + 7 + 10) : 3 = 20 : 3 = 6,67 ≈ 6.' },
+      { q:'Если все числа одинаковые, среднее арифметическое равно любому из них.', a:true, ex:'Верно! Если все числа равны a, то (a+a+...+a) : n = a.' },
+      { q:'Средняя скорость — это среднее арифметическое двух скоростей.', a:false, ex:'Неверно! Средняя скорость = Путь : Время. Она равна среднему арифметическому только если время на каждом участке одинаковое.' },
+      { q:'Среднее арифметическое 10 чисел можно найти, разделив их сумму на 10.', a:true, ex:'Верно! Среднее арифметическое n чисел = их сумма : n.' },
+      { q:'Среднее арифметическое чисел 2, 4, 6, 8, 10 равно 6.', a:true, ex:'Верно! (2 + 4 + 6 + 8 + 10) : 5 = 30 : 5 = 6.' },
+      { q:'Если средний балл ученика 4,5, значит он получил только оценки 4 и 5.', a:false, ex:'Неверно! Средний балл 4,5 может быть, например, из оценок 5, 5, 4, 4, 5 — не обязательно только 4 и 5.' },
+      { q:'Среднее арифметическое чисел 1, 2, 3, 4, 5 равно 3.', a:true, ex:'Верно! (1 + 2 + 3 + 4 + 5) : 5 = 15 : 5 = 3.' },
+      { q:'Автомобиль проехал100 км со скоростью 50 км/ч и 100 км со скоростью 100 км/ч. Средняя скорость равна 75 км/ч.', a:false, ex:'Неверно! Средняя скорость = 200 : (2 + 1,33) = 200 : 3,33 ≈ 60 км/ч, а не 75.' }
+    ],
+    lab: [
+      { q:'(10 + 20 + 30) : 3 = ?', a:20 },
+      { q:'Среднее: 5, 10, 15, 20 = ?', a:12.5 },
+      { q:'5 учеников: 3 получили «5», 2 — «4». Средний балл = ?', a:4.6 },
+      { q:'Путь 120 км за 3 ч. Средняя скорость = ?', a:40 },
+      { q:'(1,2 + 2,4 + 3,6) : 3 = ?', a:2.4 },
+      { q:'Среднее: 100, 200, 300, 400, 500 = ?', a:300 },
+      { q:'Автомобиль: 60 км/ч — 2 ч, 90 км/ч — 2 ч. Средняя скорость = ?', a:75 },
+      { q:'(7 + 14 + 21 + 28) : 4 = ?', a:17.5 }
+    ],
+    vars: [
+      [{ q:'Упр. 1.3в: Найдите среднее арифметическое: 2,23; 2,26; 2,34 и 2,07', a:2.225 },{ q:'Упр. 1.6: Среднее арифметическое: 42,43; 42,39; 42,64 и 42,57. Округлите до сотых.', a:42.51 }],
+      [{ q:'Упр. 1.3г: Среднее арифметическое: 6,276; 5,864; 7,223; 9,106; 8,728 и 3,003', a:6.7 },{ q:'Упр. 1.12: Среднее 14 чисел — 4,5, среднее 6 чисел — 2,75. Среднее всех 20 чисел?', a:3.975 }],
+      [{ q:'Упр. 1.8: Теплоход: 4,3 ч — 106,4 м/мин, 2,5 ч — 24 км/ч, 1,2 ч — 10 км/ч. Средняя скорость?', a:12.43 },{ q:'Упр. 1.13: Лыжник: 1-й участок — 3 ч, 2-й — 2 ч со скоростью 25 км/ч. Средняя — 28 км/ч. Скорость на 1-м участке?', a:30 }],
+      [{ q:'Упр. 1.14: Теплоход: по течению 20,8 км/ч, против — 14,4 км/ч. Найдите собственную скорость.', a:17.6 },{ q:'Упр. 1.12: Среднее 14 чисел — 4,5, среднее 6 чисел — 2,75. Найдите сумму всех 20 чисел.', a:79.5 }],
+      [{ q:'Упр. 1.6: Среднее арифметическое: 42,43; 42,39; 42,64 и 42,57. Округлите до десятых.', a:42.5 },{ q:'Упр. 1.13: Лыжник: 1-й участок — 3 ч, 2-й — 2 ч со скоростью 25 км/ч. Средняя — 28 км/ч. Найдите расстояние всего маршрута.', a:140 }],
+      [{ q:'Упр. 1.14: Теплоход: по течению 20,8 км/ч, против — 14,4 км/ч. Найдите скорость течения.', a:3.2 },{ q:'Упр. 1.8: Теплоход: 4,3 ч — 106,4 м/мин, 2,5 ч — 24 км/ч, 1,2 ч — 10 км/ч. Найдите расстояние всего маршрута.', a:99.45 }]
+    ]
+  },
+  lesson6: {
+    title: 'Урок 6: Проценты',
+    tf: [
+      { q:'1% от 500 равно 5.', a:true, ex:'Верно! 500 × 1 : 100 = 5.' },
+      { q:'Чтобы найти 25% числа, нужно разделить его на 4.', a:true, ex:'Верно! 25% = 25/100 = 1/4, значит делим на 4.' },
+      { q:'50% от 200 больше, чем 25% от 400.', a:false, ex:'Неверно! 50% от 200 = 100, а 25% от 400 = 100. Они равны!' },
+      { q:'100% числа 42 равно 42.', a:true, ex:'Верно! 100% числа — это само число.' },
+      { q:'0,5% от 1000 равно 5.', a:true, ex:'Верно! 1000 × 0,5 : 100 = 5.' },
+      { q:'Если 20% класса — 8 учеников, то в классе 40 учеников.', a:true, ex:'Верно! 8 × 100 : 20 = 40 учеников.' },
+      { q:'200% от 50 равно 25.', a:false, ex:'Неверно! 200% от 50 = 50 × 200 : 100 = 100, а не 25.' },
+      { q:'Чтобы найти число по его процентам, нужно часть умножить на 100 и разделить на процент.', a:true, ex:'Верно! Формула: Число = часть × 100 : N.' }
+    ],
+    lab: [
+      { q:'1% от 800 = ?', a:8 },
+      { q:'15% от 200 = ?', a:30 },
+      { q:'50 кг — это 25% всего. Вес = ?', a:200 },
+      { q:'40% от 350 = ?', a:140 },
+      { q:'6 из 30 — это сколько %?', a:20 },
+      { q:'120% от 150 = ?', a:180 },
+      { q:'12 учеников — 3% всех. Всего = ?', a:400 },
+      { q:'15% от 240 минус 10% от 300 = ?', a:6 }
+    ],
+    vars: [
+      [{ q:'Упр. 1.41: Переведите в число: 37%', a:0.37 },{ q:'Упр. 1.49: В бочке 450 л воды. Ушло 60%. Сколько осталось?', a:180 }],
+      [{ q:'Упр. 1.51: Книга 240 р., розничная на 28% больше. Розничная цена?', a:307.2 },{ q:'Упр. 1.54: 2% посетителей = 8 чел. Сколько всего?', a:400 }],
+      [{ q:'Упр. 1.45: 500 кг яблок, 1% продали 1-й день, 1/100 — 2-й. Сколько продали за 2 дня?', a:10 },{ q:'Упр. 1.56: Комната 18 м2 = 40% квартиры. Площадь квартиры?', a:45 }],
+      [{ q:'Упр. 1.50: 2420 кг слив, 5% в санаторий. Сколько на завод?', a:2299 },{ q:'Упр. 1.55: 650 км = 1% маршрута. Весь маршрут?', a:65000 }],
+      [{ q:'Упр. 1.59: Кроссовки 1260 р., скидка 15%. Цена во время акции?', a:1071 },{ q:'Упр. 1.60: 650 экспонатов, 130 — робототехника. Какой %?', a:20 }],
+      [{ q:'Упр. 1.57: 210 км = 15% пути. Длина пути?', a:1400 },{ q:'Упр. 1.61: Смесь: 130 г изюма, 270 г кураги, 200 г яблок. % яблок?', a:33.33 }]
+    ]
+  },
+  lesson8: {
+    title: 'Урок 8: Круговые диаграммы',
+    tf: [
+      { q:'В круге 360°, то есть 100%.', a:true, ex:'Верно! 180° + 180° = 360° = 100%.' },
+      { q:'25% круга — это сектор 90°.', a:true, ex:'Верно! 25 × 3,6 = 90°.' },
+      { q:'1% круга равен 3,6°.', a:true, ex:'Верно! 360 : 100 = 3,6°.' },
+      { q:'50% от 360° равно 90°.', a:false, ex:'Неверно! 50% — это половина: 360 : 2 = 180°, а не 90°.' },
+      { q:'30% от 360° равно 108°.', a:true, ex:'Верно! 3,6 × 30 = 108°.' },
+      { q:'Сектор 180° — это 20% круга.', a:false, ex:'Неверно! 180° : 3,6 = 50% круга.' },
+      { q:'Сумма углов секторов диаграммы всегда равна 360°.', a:true, ex:'Верно! Все части вместе составляют целый круг 360°.' },
+      { q:'Сектор 36° — это 10% круга.', a:true, ex:'Верно! 36 : 3,6 = 10%.' }
+    ],
+    lab: [
+      { q:'1% от 360° = ?', a:3.6 },
+      { q:'5% от 360° = ?', a:18 },
+      { q:'25% от 360° = ?', a:90 },
+      { q:'30% от 360° = ?', a:108 },
+      { q:'Сектор 72° — это сколько % круга?', a:20 },
+      { q:'Сектор 180° — это сколько % круга?', a:50 },
+      { q:'Евразия — 55 млн км² из 150. 1 млн км² = 2,4°. Какой угол?', a:132 },
+      { q:'Сектор 36° — это сколько % круга?', a:10 }
+    ],
+    vars: [
+      [{ q:'Упр. 1.100: в варенье сахар — 25% массы. Найди угол сектора сахара.', a:90 },{ q:'Упр. 1.102: железняк содержит 0,7 железа. Найди угол сектора железа.', a:252 }],
+      [{ q:'Упр. 1.104: найди 50% от 180°.', a:90 },{ q:'Упр. 1.105: 15 мин от 1 ч — сколько %?', a:25 }],
+      [{ q:'Упр. 1.104: найди 10% от 90°.', a:9 },{ q:'Упр. 1.105: 8 г от 1 кг — сколько %?', a:0.8 }],
+      [{ q:'Упр. 1.105: 300 л от 1 м³ — сколько %?', a:30 },{ q:'Упр. 1.106: найди число, 10% которого равны 0,4.', a:4 }],
+      [{ q:'Упр. 1.106: найди число, 25% которого равны 1,6.', a:6.4 },{ q:'Упр. 1.105: 15 м от 1 км — сколько %?', a:1.5 }],
+      [{ q:'Упр. 1.113: масло — 4,8% молока. Сколько коров нужно для 6 т масла за 10 дней, если корова даёт 20 кг молока в день?', a:625 },{ q:'Упр. 1.100: найди угол сектора остальных компонентов варенья (не сахара).', a:270 }]
+    ]
+  }
+};
 
+let curLesson = null;
 let tfIdx=0, tfOk=0;
 let labIdx=0, labOk=0;
 let activeVar=0;
 
-function initLesson7() {
+function initLesson(id) {
+  curLesson = lessonData[id];
   tfIdx=0; tfOk=0; labIdx=0; labOk=0; activeVar=0;
+  document.getElementById('lessonTitle').textContent = '📖 ' + curLesson.title;
   buildTF(); buildLab(); buildVariants();
+  switchLessonTab(0);
   document.getElementById('tfResult').style.display='none';
   document.getElementById('labResult').style.display='none';
   document.getElementById('varResult').style.display='none';
@@ -1252,7 +1349,7 @@ function switchLessonTab(i) {
 // ===== TRUE / FALSE =====
 function buildTF() {
   const c=document.getElementById('tfContainer'); c.innerHTML='';
-  L7_TF.forEach((item,i)=>{
+  curLesson.tf.forEach((item,i)=>{
     const card=document.createElement('div'); card.className='tf-card'; card.id='tf'+i;
     card.innerHTML=`<div class="tf-statement">${i+1}. ${item.q}</div>
       <div class="tf-btns"><button class="tf-btn" onclick="tfAnswer(${i},true)">✅ Верно</button><button class="tf-btn" onclick="tfAnswer(${i},false)">❌ Неверно</button></div>
@@ -1265,35 +1362,35 @@ function tfAnswer(i,ans) {
   const card=document.getElementById('tf'+i); const btns=card.querySelectorAll('.tf-btn');
   if(btns[0].disabled) return;
   btns.forEach(b=>b.disabled=true);
-  const ok=ans===L7_TF[i].a; tfIdx++;
+  const ok=ans===curLesson.tf[i].a; tfIdx++;
   if(ok) tfOk++;
   btns[ans?0:1].classList.add(ok?'hit':'miss');
   if(!ok) btns[ans?1:0].classList.add('hit');
   card.classList.add(ok?'answered-ok':'answered-fail');
   const ex=document.getElementById('tfEx'+i);
   ex.className='tf-explain show '+(ok?'correct':'wrong');
-  ex.textContent=(ok?'✅ Правильно! ':'❌ Неверно. ')+L7_TF[i].ex;
+  ex.textContent=(ok?'✅ Правильно! ':'❌ Неверно. ')+curLesson.tf[i].ex;
   updateTFBar();
-  if(tfIdx===L7_TF.length) showTFResult();
+  if(tfIdx===curLesson.tf.length) showTFResult();
 }
 function updateTFBar() {
-  document.getElementById('tfBar').style.width=Math.round(tfIdx/L7_TF.length*100)+'%';
-  document.getElementById('tfText').textContent=tfIdx+' / '+L7_TF.length;
+  document.getElementById('tfBar').style.width=Math.round(tfIdx/curLesson.tf.length*100)+'%';
+  document.getElementById('tfText').textContent=tfIdx+' / '+curLesson.tf.length;
 }
 function showTFResult() {
-  const pct=Math.round(tfOk/L7_TF.length*100);
+  const pct=Math.round(tfOk/curLesson.tf.length*100);
   let cls='red',msg='Нужно подтянуть :(';
   if(pct>=85){cls='green';msg='Отлично! 🎉';}
   else if(pct>=60){cls='green';msg='Хорошо!';}
   else if(pct>=40){msg='Есть над чем поработать';}
   const r=document.getElementById('tfResult'); r.style.display='block';
-  r.innerHTML=`<h3>Разминка завершена</h3><div class="big" style="color:var(--${cls})">${tfOk}/${L7_TF.length}</div><div class="msg">${msg}</div>`;
+  r.innerHTML=`<h3>Разминка завершена</h3><div class="big" style="color:var(--${cls})">${tfOk}/${curLesson.tf.length}</div><div class="msg">${msg}</div>`;
 }
 
 // ===== LABYRINTH =====
 function buildLab() {
   const chain=document.getElementById('labChain'); chain.innerHTML='';
-  L7_LAB.forEach((_,i)=>{
+  curLesson.lab.forEach((_,i)=>{
     if(i>0){const a=document.createElement('span');a.className='lab-arrow';a.textContent='→';chain.appendChild(a);}
     const d=document.createElement('div');d.className='lab-dot';d.id='labDot'+i;d.textContent=i+1;chain.appendChild(d);
   });
@@ -1303,36 +1400,36 @@ function buildLab() {
   updateLab();
 }
 function updateLab() {
-  L7_LAB.forEach((_,i)=>{
+  curLesson.lab.forEach((_,i)=>{
     const dot=document.getElementById('labDot'+i);
     dot.className='lab-dot'+(i<labIdx?' done':i===labIdx?' current':'');
   });
-  document.getElementById('labLabel').textContent='Шаг '+(labIdx+1)+' из '+L7_LAB.length;
-  document.getElementById('labQ').textContent=L7_LAB[labIdx].q;
+  document.getElementById('labLabel').textContent='Шаг '+(labIdx+1)+' из '+curLesson.lab.length;
+  document.getElementById('labQ').textContent=curLesson.lab[labIdx].q;
   document.getElementById('labIn').value=''; document.getElementById('labIn').focus();
   document.getElementById('labFb').className='lab-feedback';
 }
 function labCheck() {
   const val=parseFloat(document.getElementById('labIn').value);
   if(isNaN(val)){document.getElementById('labIn').style.borderColor='var(--red)';return;}
-  const ok=Math.abs(val-L7_LAB[labIdx].a)<0.1;
+  const ok=Math.abs(val-curLesson.lab[labIdx].a)<0.1;
   const fb=document.getElementById('labFb');
   if(ok){labOk++;fb.className='lab-feedback show correct';fb.textContent='✅ Правильно!';labIdx++;
-    setTimeout(()=>{if(labIdx>=L7_LAB.length)labFinish();else updateLab();},600);
+    setTimeout(()=>{if(labIdx>=curLesson.lab.length)labFinish();else updateLab();},600);
   }else{fb.className='lab-feedback show wrong';fb.textContent='❌ Попробуй ещё раз!';document.getElementById('labIn').value='';document.getElementById('labIn').focus();
     setTimeout(()=>{fb.className='lab-feedback';},1200);
   }
 }
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screenLesson').classList.contains('active')&&document.getElementById('lessonTab1').classList.contains('active')&&labIdx<L7_LAB.length)labCheck();});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screenLesson').classList.contains('active')&&document.getElementById('lessonTab1').classList.contains('active')&&labIdx<curLesson.lab.length)labCheck();});
 function labFinish() {
   document.getElementById('labCard').style.display='none';
-  const pct=Math.round(labOk/L7_LAB.length*100);
+  const pct=Math.round(labOk/curLesson.lab.length*100);
   let cls='red',msg='Нужно подтянуть :(';
   if(pct>=85){cls='green';msg='Отлично! 🎉';}
   else if(pct>=60){cls='green';msg='Хорошо!';}
   else if(pct>=40){msg='Есть над чем поработать';}
   const r=document.getElementById('labResult'); r.style.display='block';
-  r.innerHTML=`<h3>Лабиринт пройден!</h3><div class="big" style="color:var(--${cls})">${labOk}/${L7_LAB.length}</div><div class="msg">${msg}</div>`;
+  r.innerHTML=`<h3>Лабиринт пройден!</h3><div class="big" style="color:var(--${cls})">${labOk}/${curLesson.lab.length}</div><div class="msg">${msg}</div>`;
   updateLab();
 }
 
@@ -1340,7 +1437,7 @@ function labFinish() {
 function buildVariants() {
   const tabs=document.getElementById('varTabs'); tabs.innerHTML='';
   const cont=document.getElementById('varContent'); cont.innerHTML='';
-  L7_VARS.forEach((v,i)=>{
+  curLesson.vars.forEach((v,i)=>{
     const btn=document.createElement('button'); btn.className='variant-tab'+(i===0?' active':'');
     btn.textContent='Вариант '+(i+1); btn.onclick=()=>switchVariant(i); tabs.appendChild(btn);
     const div=document.createElement('div'); div.className='variant-content'+(i===0?' active':''); div.id='varC'+i;
@@ -1358,7 +1455,7 @@ function switchVariant(i) {
 }
 function checkVariants() {
   let total=0,correct=0;
-  L7_VARS.forEach((v,i)=>{
+  curLesson.vars.forEach((v,i)=>{
     v.forEach((ex,j)=>{
       total++;
       const inp=document.getElementById('ve'+i+'_'+j); if(!inp) return;
