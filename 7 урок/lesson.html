@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Проценты — Визуальное решение — Урок 7</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --primary: #3b82f6;
+  --primary-light: #dbeafe;
+  --accent: #f97316;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+[data-theme="dark"] {
+  --bg: #0f172a; --card: #1e293b; --primary: #60a5fa; --primary-light: #1e3a5f;
+  --accent: #fb923c; --green: #4ade80; --red: #f87171; --yellow: #facc15;
+  --text: #f1f5f9; --text-secondary: #94a3b8; --border: #334155;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
+  transition: background 0.3s, color 0.3s; overflow-x: hidden;
+}
+.container { max-width: 1600px; margin: 0 auto; padding: 24px 48px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+
+header {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #6366f1, #0ea5e9);
+  background-size: 300% 300%;
+  animation: gradientDrift 10s ease infinite;
+  color: white; padding: 32px 40px; border-radius: var(--radius);
+  margin-bottom: 24px; text-align: center; position: relative;
+  box-shadow: var(--shadow); overflow: hidden;
+}
+header::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: headerPulse 5s ease-in-out infinite;
+}
+header::after {
+  content: '✦'; position: absolute; top: 18px; left: 24px; font-size: 2.6rem;
+  opacity: 0.4; animation: floaty 4s ease-in-out infinite;
+}
+@keyframes gradientDrift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+@keyframes headerPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+@keyframes floaty { 0%,100%{transform:translateY(0) rotate(-6deg)} 50%{transform:translateY(-12px) rotate(6deg)} }
+header h1 { font-size: clamp(2.4rem, 4.5vw, 3.6rem); font-weight: 800; position: relative; animation: popIn 0.7s cubic-bezier(0.34,1.56,0.64,1); }
+header h1 .emoji { display: inline-block; animation: spinEmoji 6s linear infinite; }
+@keyframes spinEmoji { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+@keyframes popIn { 0%{opacity:0;transform:scale(0.5)} 100%{opacity:1;transform:scale(1)} }
+header .subtitle { font-size: 1.8rem; opacity: 0.9; margin-top: 6px; position: relative; animation: fadeUp 0.8s ease 0.15s backwards; }
+header .source { font-size: 1.3rem; opacity: 0.7; margin-top: 4px; position: relative; animation: fadeUp 0.8s ease 0.3s backwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.theme-toggle {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(255,255,255,0.2); border: none; color: white;
+  font-size: 2.2rem; width: 56px; height: 56px; border-radius: 50%;
+  cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.35); transform: scale(1.1) rotate(20deg); }
+
+nav {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;
+  position: sticky; top: 0; background: var(--bg);
+  padding: 12px 0; z-index: 100; border-bottom: 2px solid var(--border);
+}
+nav button {
+  flex: 1; min-width: 180px; padding: 16px 20px;
+  border: 2px solid var(--border); background: var(--card); color: var(--text);
+  border-radius: var(--radius-sm); font-family: inherit; font-size: 1.3rem;
+  font-weight: 700; cursor: pointer; transition: all 0.3s;
+}
+nav button:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+nav button.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
+nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
+
+.section { display: none; animation: fadeIn 0.4s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.slide { display: none; animation: fadeIn 0.4s ease; }
+.slide.active { display: block; }
+
+.slide-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; margin-top: 24px; padding-top: 20px;
+  border-top: 2px solid var(--border);
+}
+.slide-nav button {
+  padding: 12px 32px; border: 2px solid var(--primary); background: var(--card);
+  color: var(--primary); border-radius: var(--radius-sm); font-family: inherit;
+  font-size: 1.4rem; font-weight: 700; cursor: pointer; transition: all 0.3s;
+}
+.slide-nav button:hover:not(:disabled) { background: var(--primary); color: white; }
+.slide-nav button:disabled { opacity: 0.3; cursor: default; }
+.slide-dots { display: flex; gap: 10px; }
+.slide-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--border); border: none; cursor: pointer; transition: all 0.3s;
+}
+.slide-dot.active { background: var(--primary); transform: scale(1.3); }
+
+.card {
+  background: var(--card); border-radius: var(--radius); padding: 32px;
+  margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border);
+  transition: background 0.3s, border 0.3s;
+}
+.card.reveal { animation: cardIn 0.6s ease backwards; }
+.card.reveal:nth-child(2) { animation-delay: 0.1s; }
+.card.reveal:nth-child(3) { animation-delay: 0.2s; }
+.card.reveal:nth-child(4) { animation-delay: 0.3s; }
+@keyframes cardIn { from{opacity:0;transform:translateY(40px) scale(0.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+.card h2 { font-size: 2.2rem; margin-bottom: 6px; color: var(--primary); }
+.card h2 .emoji { margin-right: 10px; display: inline-block; animation: emojiWave 3s ease-in-out infinite; }
+@keyframes emojiWave { 0%,100%{transform:rotate(-8deg)} 50%{transform:rotate(8deg) translateY(-4px)} }
+.card .card-desc { color: var(--text-secondary); font-size: 1.5rem; margin-bottom: 18px; }
+.card .card-source { font-size: 1.25rem; color: var(--text-secondary); opacity: 0.7; margin-bottom: 12px; font-style: italic; }
+
+.theory-box {
+  background: var(--primary-light); border-radius: var(--radius-sm); padding: 24px;
+  margin-bottom: 20px; border-left: 4px solid var(--primary);
+}
+.theory-box h3 { font-size: 1.8rem; margin-bottom: 12px; color: var(--primary); animation: fadeUp 0.5s ease backwards; }
+.theory-box h3::before { content: '🔹 '; display: inline-block; animation: emojiWave 3s ease-in-out infinite; }
+.theory-box p { font-size: 1.5rem; margin-bottom: 10px; }
+.theory-box .formula {
+  background: var(--card); border: 2px solid var(--primary); border-radius: 8px;
+  padding: 16px 24px; font-size: 1.8rem; font-weight: 700; text-align: center;
+  margin: 16px 0; color: var(--primary);
+}
+.theory-box .example {
+  background: var(--card); border-radius: 8px; padding: 16px;
+  margin-top: 12px; font-size: 1.4rem;
+}
+.theory-box .example-title { font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+
+/* ===== VISUAL BAR DIAGRAMS ===== */
+.vis-block { margin: 16px 0; }
+.vis-title { font-weight: 800; font-size: 1.5rem; margin-bottom: 8px; color: var(--text); }
+.vis-bar {
+  display: flex; width: 100%; height: 56px; border-radius: 10px;
+  overflow: hidden; border: 2px solid var(--border); background: var(--bg);
+}
+.vis-seg {
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 800; font-size: 1.15rem; text-align: center;
+  padding: 4px; transition: flex-grow 0.6s ease; white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4); line-height: 1.2;
+  position: relative; overflow: hidden;
+}
+.vis-seg::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+  animation: shine 3s ease-in-out infinite;
+}
+@keyframes shine { 0%{transform:translateX(-100%)} 60%,100%{transform:translateX(100%)} }
+.vis-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; font-size: 1.25rem; }
+.vis-legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.vis-legend-color { width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; animation: huePulse 3s ease-in-out infinite; }
+@keyframes huePulse { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.25)} }
+.vis-note { margin-top: 8px; font-size: 1.25rem; color: var(--text-secondary); font-style: italic; }
+.vis-steps { margin-top: 10px; }
+.vis-steps li { font-size: 1.4rem; margin-left: 20px; margin-bottom: 4px; animation: fadeUp 0.5s ease backwards; }
+.vis-steps li:nth-child(1){animation-delay:0s} .vis-steps li:nth-child(2){animation-delay:0.1s} .vis-steps li:nth-child(3){animation-delay:0.2s}
+
+.tf-item {
+  background: var(--bg); border-radius: var(--radius-sm); padding: 18px 24px;
+  margin-bottom: 12px; border-left: 4px solid var(--primary);
+  animation: slideIn 0.4s ease backwards;
+}
+.tf-item.correct-answer { border-left-color: var(--green); animation: popGreen 0.5s ease; }
+.tf-item.wrong-answer { border-left-color: var(--red); animation: shake 0.5s ease; }
+@keyframes popGreen { 0%{transform:scale(1)} 40%{transform:scale(1.03)} 100%{transform:scale(1)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+.tf-statement { font-weight: 600; font-size: 1.65rem; margin-bottom: 10px; }
+.tf-buttons { display: flex; gap: 12px; }
+.tf-buttons button {
+  padding: 10px 24px; border: 2px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-weight: 700; font-size: 1.5rem;
+  cursor: pointer; transition: all 0.3s; background: var(--card); color: var(--text);
+}
+.tf-buttons button.true-btn:hover { border-color: var(--green); color: var(--green); transform: translateY(-2px); }
+.tf-buttons button.false-btn:hover { border-color: var(--red); color: var(--red); transform: translateY(-2px); }
+.tf-buttons button.selected-true { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 2px 12px rgba(34,197,94,0.4); animation: pop 0.3s ease; }
+.tf-buttons button.selected-false { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 2px 12px rgba(239,68,68,0.4); animation: pop 0.3s ease; }
+@keyframes pop { 0%{transform:scale(0.9)} 60%{transform:scale(1.1)} 100%{transform:scale(1)} }
+.tf-buttons button:disabled { cursor: default; opacity: 0.5; }
+.tf-comment { margin-top: 10px; padding: 10px 16px; border-radius: 8px; font-size: 1.4rem; font-weight: 600; display: none; }
+.tf-comment.correct { background: #dcfce7; color: #166534; display: block; }
+.tf-comment.wrong { background: #fee2e2; color: #991b1b; display: block; }
+[data-theme="dark"] .tf-comment.correct { background: #14532d; color: #bbf7d0; }
+[data-theme="dark"] .tf-comment.wrong { background: #7f1d1d; color: #fecaca; }
+
+.progress-bar-wrap { margin-top: 20px; background: var(--bg); border-radius: 20px; overflow: hidden; height: 34px; position: relative; }
+.progress-bar {
+  height: 100%; background: linear-gradient(90deg, var(--green), #34d399);
+  border-radius: 20px; transition: width 0.6s ease; display: flex;
+  align-items: center; justify-content: center; color: white;
+  font-weight: 700; font-size: 1.35rem; min-width: 65px;
+  background-size: 200% 100%;
+  animation: progressShine 2.5s linear infinite;
+  position: relative;
+}
+@keyframes progressShine { 0%{background-position:0% 0} 100%{background-position:200% 0} }
+
+.error-example { background: var(--bg); border-radius: var(--radius-sm); padding: 24px; margin-bottom: 18px; border-left: 4px solid var(--accent); }
+.error-example .example-title { font-weight: 700; color: var(--accent); margin-bottom: 8px; font-size: 1.6rem; }
+.error-example pre {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px; font-family: 'Courier New', monospace; font-size: 1.6rem;
+  overflow-x: auto; margin-bottom: 12px; white-space: pre-wrap; line-height: 1.5;
+}
+.error-example textarea {
+  width: 100%; min-height: 80px; padding: 12px; border: 2px solid var(--border);
+  border-radius: 8px; font-family: inherit; font-size: 1.5rem; resize: vertical;
+  transition: border 0.3s; background: var(--card); color: var(--text);
+}
+.error-example textarea:focus { border-color: var(--primary); outline: none; }
+.btn-check {
+  margin-top: 10px; padding: 12px 28px; background: var(--accent); color: white;
+  border: none; border-radius: 8px; font-family: inherit; font-weight: 700;
+  font-size: 1.5rem; cursor: pointer; transition: all 0.3s;
+}
+.btn-check:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(249,115,22,0.4); }
+.btn-check:disabled { opacity: 0.5; cursor: default; }
+.error-feedback { margin-top: 12px; padding: 14px; border-radius: 8px; display: none; animation: fadeIn 0.4s ease; font-size: 1.4rem; }
+.error-feedback.show { display: block; }
+.error-feedback .fb-title { font-weight: 700; margin-bottom: 6px; }
+
+.labyrinth-visual { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+.labyrinth-step {
+  width: 60px; height: 60px; border-radius: 50%; background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1.35rem; color: var(--text-secondary); transition: all 0.4s;
+  border: 3px solid transparent;
+}
+.labyrinth-step.completed { background: var(--green); color: white; box-shadow: 0 2px 12px rgba(34,197,94,0.4); animation: stepDone 0.6s ease; }
+@keyframes stepDone { 0%{transform:scale(0.5) rotate(-90deg)} 60%{transform:scale(1.2) rotate(8deg)} 100%{transform:scale(1) rotate(0)} }
+.labyrinth-step.current { background: var(--primary); color: white; box-shadow: 0 2px 12px rgba(59,130,246,0.4); transform: scale(1.15); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1.15)} 50%{transform:scale(1.28)} }
+.labyrinth-step.future { background: var(--border); color: var(--text-secondary); }
+.labyrinth-arrow { color: var(--text-secondary); font-size: 1.8rem; animation: arrowNudge 1.2s ease-in-out infinite; }
+@keyframes arrowNudge { 0%,100%{transform:translateX(0)} 50%{transform:translateX(4px)} }
+.lab-task { background: var(--primary-light); border-radius: var(--radius-sm); padding: 24px; text-align: center; margin-bottom: 18px; }
+.lab-task .lab-question { font-size: 1.9rem; font-weight: 700; margin-bottom: 18px; }
+.lab-input-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.lab-input {
+  width: 240px; padding: 14px 18px; border: 2px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 1.75rem; text-align: center; font-weight: 700;
+  background: var(--card); color: var(--text);
+}
+.lab-input:focus { border-color: var(--primary); outline: none; }
+.btn-lab {
+  padding: 14px 32px; background: var(--primary); color: white; border: none;
+  border-radius: 8px; font-family: inherit; font-weight: 700; font-size: 1.6rem;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-lab:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(59,130,246,0.4); }
+.lab-hint { margin-top: 12px; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 1.5rem; display: none; animation: fadeIn 0.3s ease; }
+.lab-hint.show { display: block; }
+.lab-hint.wrong { background: #fee2e2; color: #991b1b; }
+.lab-hint.correct { background: #dcfce7; color: #166534; }
+[data-theme="dark"] .lab-hint.wrong { background: #7f1d1d; color: #fecaca; }
+[data-theme="dark"] .lab-hint.correct { background: #14532d; color: #bbf7d0; }
+.lab-complete { text-align: center; padding: 32px; display: none; }
+.lab-complete.show { display: block; animation: fadeIn 0.5s ease; }
+.lab-complete h3 { font-size: 2.4rem; color: var(--green); margin-bottom: 10px; }
+.lab-complete p { font-size: 1.75rem; color: var(--text-secondary); }
+
+.variant-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.variant-tab {
+  flex: 1; padding: 14px; border: 2px solid var(--border); background: var(--card);
+  border-radius: var(--radius-sm); font-family: inherit; font-weight: 700;
+  font-size: 1.6rem; cursor: pointer; transition: all 0.3s; color: var(--text);
+}
+.variant-tab.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 16px rgba(249,115,22,0.3); animation: tabPop 0.35s ease; }
+@keyframes tabPop { 0%{transform:scale(0.9)} 60%{transform:scale(1.05)} 100%{transform:scale(1)} }
+.variant-content { display: none; }
+.variant-content.active { display: block; animation: fadeIn 0.4s ease; }
+.exercise {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 10px; flex-wrap: wrap;
+}
+.exercise .ex-num {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1.35rem; flex-shrink: 0;
+}
+.exercise .ex-text { flex: 1; font-weight: 600; font-size: 1.45rem; }
+.exercise .ex-input {
+  width: 150px; padding: 10px; border: 2px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 1.6rem; text-align: center; font-weight: 700;
+  background: var(--card); color: var(--text);
+}
+.exercise .ex-input:focus { border-color: var(--primary); outline: none; }
+.exercise .ex-input.correct { border-color: var(--green); background: #dcfce7; animation: inputPop 0.4s ease; }
+.exercise .ex-input.wrong { border-color: var(--red); background: #fee2e2; animation: inputShake 0.4s ease; }
+@keyframes inputPop { 0%{transform:scale(1)} 40%{transform:scale(1.12)} 100%{transform:scale(1)} }
+@keyframes inputShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-4px)} }
+[data-theme="dark"] .exercise .ex-input.correct { background: #14532d; }
+[data-theme="dark"] .exercise .ex-input.wrong { background: #7f1d1d; }
+.btn-check-all {
+  margin-top: 16px; padding: 14px 36px; background: linear-gradient(135deg, var(--accent), #ea580c);
+  color: white; border: none; border-radius: var(--radius-sm); font-family: inherit;
+  font-weight: 700; font-size: 1.65rem; cursor: pointer; transition: all 0.3s;
+  display: block; margin-left: auto; margin-right: auto;
+}
+.btn-check-all:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 4px 16px rgba(249,115,22,0.4); animation: btnBounce 0.4s ease; }
+.btn-check-all:active { transform: scale(0.96); }
+@keyframes btnBounce { 0%{transform:translateY(0)} 40%{transform:translateY(-4px)} 100%{transform:translateY(-2px)} }
+.score-display {
+  text-align: center; margin-top: 16px; font-size: 1.9rem; font-weight: 700; display: none;
+  animation: scorePop 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes scorePop { 0%{opacity:0;transform:scale(0.5) rotate(-6deg)} 100%{opacity:1;transform:scale(1) rotate(0)} }
+
+.btn-show-answer { position: relative; overflow: hidden; }
+.btn-show-answer:hover::after { content: '✨'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); animation: sparkle 0.6s infinite; }
+@keyframes sparkle { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+.emoji-bounce { display: inline-block; animation: emojiWave 3s ease-in-out infinite; }
+
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.6;
+  background-image:
+    radial-gradient(circle, var(--primary) 2px, transparent 2px),
+    radial-gradient(circle, var(--accent) 2px, transparent 2px);
+  background-size: 46px 46px; background-position: 0 0, 23px 23px;
+  animation: bgDrift 40s linear infinite; mask-image: radial-gradient(ellipse 60% 50% at 50% 0, black 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0, black 0%, transparent 100%);
+}
+@keyframes bgDrift { from{background-position:0 0, 23px 23px} to{background-position:46px 46px, 69px 69px} }
+
+.hw-answer {
+  margin-top: 12px; padding: 16px; border-radius: 8px;
+  background: #dcfce7; color: #166534; font-size: 1.4rem; font-weight: 600;
+  animation: hwReveal 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes hwReveal { 0%{opacity:0;transform:translateY(20px) scale(0.9)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+[data-theme="dark"] .hw-answer { background: #14532d; color: #bbf7d0; }
+
+.confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
+.confetti-piece { position: absolute; width: 10px; height: 10px; top: -20px; animation: confettiFall linear forwards; }
+@keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+@media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ===== INTERACTIVE TOUCH BOARD ===== */
+.iob-top-actions { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+.iob-hint { font-size: 1.5rem; font-weight: 700; color: var(--text-secondary); text-align: center; margin-bottom: 10px; }
+.iob-btn-mini {
+  padding: 12px 26px; border: 2px solid var(--border); border-radius: 12px;
+  background: var(--card); color: var(--text); font-family: inherit; font-size: 1.35rem;
+  font-weight: 700; cursor: pointer; transition: all 0.3s;
+}
+.iob-btn-mini:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+.iob-btn-mini:disabled { opacity: 0.4; cursor: default; transform: none; }
+.iob-big-btn {
+  min-width: 64px; min-height: 64px; font-size: 2rem; font-weight: 800; border-radius: 16px;
+  border: 2px solid var(--border); background: var(--card); color: var(--text);
+  cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;
+}
+.iob-big-btn:hover { border-color: var(--primary); background: var(--primary-light); transform: scale(1.06); }
+.iob-big-btn:active { transform: scale(0.94); }
+.iob-big-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+/* ——— Slide 0: paint-fill diagram ——— */
+.fill-stage { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; }
+.fill-rect {
+  position: relative; width: min(620px, 100%); height: 300px; border-radius: 28px;
+  border: 5px solid var(--primary); background: var(--primary-light); overflow: hidden;
+  touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none;
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.08);
+}
+.fill-rect.dragging { border-color: var(--accent); box-shadow: 0 0 0 6px rgba(249,115,22,0.25), inset 0 0 60px rgba(0,0,0,0.08); }
+.fill-water {
+  position: absolute; left: 0; bottom: 0; height: 100%; width: 0%;
+  background: linear-gradient(180deg, #60a5fa, #3b82f6);
+  transition: width 0.12s linear; border-right: 3px solid rgba(255,255,255,0.6);
+  display: flex; align-items: center; justify-content: center;
+}
+.fill-water::after {
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.65), transparent);
+}
+.fill-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 3.4rem; font-weight: 800; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.4); pointer-events: none; z-index: 2; }
+.fill-grid { position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: 0.5;
+  background-image: linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
+  background-size: 10% 100%; }
+.fill-readout {
+  min-width: 260px; text-align: center; background: var(--card); border: 3px solid var(--primary);
+  border-radius: 20px; padding: 24px 28px; box-shadow: var(--shadow);
+}
+.fill-readout .fr-pct { font-size: 4rem; font-weight: 800; color: var(--primary); line-height: 1.1; }
+.fill-readout .fr-frac { font-size: 2rem; font-weight: 700; color: var(--text); margin-top: 6px; }
+.fill-readout .fr-dec { font-size: 2rem; font-weight: 700; color: var(--accent); margin-top: 4px; }
+.fill-readout .fr-note { font-size: 1.3rem; color: var(--text-secondary); margin-top: 8px; }
+.fill-emojis { font-size: 2.2rem; margin-top: 10px; min-height: 2.4rem; }
+@keyframes frPop { 0%{transform:scale(1)} 40%{transform:scale(1.12)} 100%{transform:scale(1)} }
+.fr-pop { animation: frPop 0.25s ease; }
+
+/* ——— Slide 1: drag & drop ——— */
+.dnd-wrap { display: flex; flex-direction: column; gap: 26px; }
+.dnd-deck { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; min-height: 120px; align-items: flex-start; }
+.dnd-card {
+  width: 220px; min-height: 110px; padding: 18px; border-radius: 18px;
+  border: 3px solid var(--primary); background: var(--card); color: var(--text);
+  font-size: 1.55rem; font-weight: 700; text-align: center;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  box-shadow: var(--shadow); transition: transform 0.25s ease; display: flex; align-items: center; justify-content: center;
+}
+.dnd-card.grabbing { opacity: 0.45; border-color: var(--accent); }
+.dnd-card.dragging { opacity: 0.95; transform: scale(1.05) rotate(-1.5deg); border-color: var(--accent); box-shadow: 0 12px 34px rgba(0,0,0,0.28); cursor: grabbing; }
+.dnd-card.returning { transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1); border-color: var(--accent); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.dnd-card.placed { pointer-events: none; visibility: hidden; }
+@keyframes cardPlaced { 0%{transform:scale(1)} 40%{transform:scale(1.12)} 100%{transform:scale(1)} }
+.dnd-cards-zone { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; min-height: 140px; }
+.dnd-slots { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; }
+.dnd-slot {
+  width: 220px; min-height: 110px; border-radius: 18px; border: 3px dashed var(--text-secondary);
+  background: var(--bg); color: var(--text); font-size: 1.55rem; font-weight: 700;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px;
+  transition: all 0.25s; position: relative; text-align: center; gap: 4px;
+}
+.dnd-slot .slot-badge {
+  font-size: 2.6rem; font-weight: 800; color: var(--primary);
+  background: var(--primary-light); border-radius: 50%;
+  width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;
+  border: 3px solid var(--primary);
+}
+.dnd-slot .slot-match {
+  font-size: 1.2rem; font-weight: 700; color: var(--text-secondary); display: none; line-height: 1.25;
+}
+.dnd-slot.over { border-color: var(--green); background: var(--primary-light); transform: scale(1.04); }
+.dnd-slot.over .slot-badge { border-color: var(--green); color: var(--green); }
+.dnd-slot.filled { border-style: solid; border-color: var(--green); background: #dcfce7; animation: slotFill 0.45s ease; }
+.dnd-slot.filled .slot-badge { background: var(--green); color: white; border-color: var(--green); }
+.dnd-slot.filled .slot-match { display: block; color: #166534; }
+.dnd-slot.wrong { border-color: var(--red); animation: shake 0.5s ease; background: #fee2e2; }
+@keyframes slotFill { 0%{transform:scale(0.9)} 55%{transform:scale(1.08)} 100%{transform:scale(1)} }
+[data-theme="dark"] .dnd-slot.filled { background: #14532d; }
+[data-theme="dark"] .dnd-slot.filled .slot-match { color: #bbf7d0; }
+[data-theme="dark"] .dnd-slot.wrong { background: #7f1d1d; }
+.dnd-slot .slot-check { position: absolute; top: -8px; left: 50%; transform: translateX(-50%) scale(0); font-size: 2rem; transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); z-index: 2; }
+.dnd-slot.filled .slot-check { transform: translateX(-50%) scale(1); }
+.dnd-zone-label { font-size: 1.5rem; font-weight: 800; color: var(--primary); text-align: center; margin-bottom: 8px; }
+.dnd-msg { text-align: center; font-size: 1.7rem; font-weight: 800; min-height: 2.4rem; margin-top: 6px; }
+.dnd-msg.bad { color: var(--red); animation: frPop 0.3s ease; }
+.dnd-msg.good { color: var(--green); animation: frPop 0.3s ease; }
+
+/* ——— Slide 2: interactive scale + percent ring ——— */
+.sync-stage { display: flex; align-items: center; justify-content: center; gap: 46px; flex-wrap: wrap; }
+.ring-wrap { position: relative; width: 340px; height: 340px; }
+.ring {
+  width: 100%; height: 100%; border-radius: 50%;
+  background: conic-gradient(var(--green) calc(var(--p) * 1%), var(--bg) 0);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow); position: relative; transition: background 0.15s linear;
+}
+.ring::before { content: ''; position: absolute; inset: 26px; border-radius: 50%; background: var(--card); box-shadow: inset 0 0 30px rgba(0,0,0,0.06); }
+.ring .ring-center { position: relative; text-align: center; z-index: 2; }
+.ring .ring-center .rc-num { font-size: 4.2rem; font-weight: 800; color: var(--green); line-height: 1.05; }
+.ring .ring-center .rc-label { font-size: 1.4rem; color: var(--text-secondary); font-weight: 600; }
+.ring .ring-center .rc-part { font-size: 2.6rem; font-weight: 800; color: var(--accent); }
+.ring-ticks { position: absolute; inset: 0; border-radius: 50%; z-index: 3; pointer-events: none; }
+.sync-controls { min-width: 340px; }
+.sync-bigval { text-align: center; font-size: 5.2rem; font-weight: 800; color: var(--primary); line-height: 1.1; }
+.sync-bigval span { font-size: 2rem; font-weight: 700; color: var(--text-secondary); }
+.sync-slider {
+  width: 100%; height: 64px; appearance: none; -webkit-appearance: none; margin: 26px 0; background: transparent; touch-action: none;
+}
+.sync-slider::-webkit-slider-runnable-track { height: 18px; border-radius: 10px; background: var(--bg); border: 2px solid var(--border); }
+.sync-slider::-webkit-slider-thumb {
+  appearance: none; -webkit-appearance: none; width: 54px; height: 54px; margin-top: -20px;
+  border-radius: 50%; background: linear-gradient(135deg, var(--primary), #6366f1); border: 4px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.3); cursor: grab;
+}
+.sync-slider::-moz-range-track { height: 18px; border-radius: 10px; background: var(--bg); border: 2px solid var(--border); }
+.sync-slider::-moz-range-thumb { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #6366f1); border: 4px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.3); cursor: grab; }
+.sync-btns { display: flex; justify-content: center; gap: 18px; margin-top: 10px; }
+.sync-info { text-align: center; margin-top: 22px; font-size: 2rem; font-weight: 800; color: var(--text); }
+
+/* ——— Slide 3: find error by circling ——— */
+.trap-canvas-wrap { position: relative; border: 4px solid var(--border); border-radius: 20px; overflow: hidden; background: var(--card); }
+.trap-canvas-wrap .trap-grid {
+  display: flex; flex-direction: column; gap: 0; align-items: stretch; padding: 0;
+}
+.trap-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px 28px; border-bottom: 1px solid var(--border); font-size: 1.7rem; font-weight: 600;
+  position: relative; min-height: 92px;
+}
+.trap-row:last-child { border-bottom: none; }
+.trap-row .trap-step { font-weight: 800; color: var(--text-secondary); font-size: 1.3rem; min-width: 74px; }
+.trap-row.wrong-step { background: var(--primary-light); }
+.trap-row.selected-ok { background: #dcfce7; animation: slotFill 0.5s ease; }
+.trap-row.selected-bad { background: #fee2e2; animation: shake 0.5s ease; }
+[data-theme="dark"] .trap-row.selected-ok { background: #14532d; }
+[data-theme="dark"] .trap-row.selected-bad { background: #7f1d1d; }
+.trap-row.selected-ok::after { content: '✅'; position: absolute; right: 14px; font-size: 2rem; animation: frPop 0.4s ease; }
+.trap-row.selected-bad::after { content: '❌'; position: absolute; right: 14px; font-size: 2rem; animation: frPop 0.4s ease; }
+.trap-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; touch-action: none; z-index: 5; }
+.trap-explain {
+  margin-top: 18px; padding: 18px 22px; border-radius: 16px; background: #dcfce7; color: #166534;
+  font-size: 1.6rem; font-weight: 600; display: none;
+}
+.trap-explain.show { display: block; animation: fadeIn 0.4s ease; }
+[data-theme="dark"] .trap-explain { background: #14532d; color: #bbf7d0; }
+.trap-redo { margin-top: 14px; text-align: center; }
+@media (max-width: 600px) {
+  .container { padding: 12px; } .card { padding: 18px; } header { padding: 20px 14px; }
+  nav button { min-width: 100px; padding: 10px 6px; font-size: 1.1rem; }
+  .exercise { flex-direction: column; align-items: stretch; text-align: center; }
+  .exercise .ex-input { width: 100%; }
+  .lab-input-group { flex-direction: column; align-items: center; }
+  .lab-input { width: 100%; max-width: 280px; }
+  .labyrinth-step { width: 44px; height: 44px; font-size: 1.1rem; }
+  .vis-seg { font-size: 0.8rem; }
+  .fill-rect { height: 220px; }
+  .fill-readout { min-width: 100%; }
+  .ring-wrap { width: 240px; height: 240px; }
+  .ring .ring-center .rc-num { font-size: 3rem; }
+  .sync-bigval { font-size: 4rem; }
+  .dnd-card, .dnd-slot { width: 46%; min-height: 96px; font-size: 1.25rem; padding: 12px; }
+  .trap-row { font-size: 1.3rem; padding: 14px 16px; flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">🌓</button>
+  <h1>📊 Проценты и визуальное решение задач</h1>
+  <div class="subtitle">6 класс · § 2 Проценты · Урок 7</div>
+  <div class="source">По учебнику Виленкин Н.Я., Жохов В.И., Чесноков А.С. и др. (Просвещение)</div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" onclick="showSection(0)"><span class="nav-emoji">📖</span>Теория</button>
+  <button onclick="showSection(1)"><span class="nav-emoji">🔥</span>Разминка</button>
+  <button onclick="showSection(2)"><span class="nav-emoji">🔎</span>Найди ошибку</button>
+  <button onclick="showSection(3)"><span class="nav-emoji">🧩</span>Лабиринт</button>
+  <button onclick="showSection(4)"><span class="nav-emoji">📝</span>Самостоятельная</button>
+  <button onclick="showSection(5)"><span class="nav-emoji">📚</span>Домашняя</button>
+  <button onclick="showSection(6)"><span class="nav-emoji">🎨</span>Интерактив</button>
+</nav>
+
+<!-- ===== SECTION 0: THEORY ===== -->
+<div class="section active" id="sec0">
+  <div class="card">
+    <h2><span class="emoji">📖</span>Теория. Проценты — решаем наглядно</h2>
+    <p class="card-desc">Нарисуем отрезки-«полоски», чтобы легко решать задачи на проценты!</p>
+
+    <div class="theory-box">
+      <h3>Как «рисовать» проценты?</h3>
+      <p>Любое число можно представить как полоску, разбитую на 100 равных клеточек (или на части). Сама полоска — это 100%. Закрашенные части — нужные проценты. Так видно, что мы ищем: часть от числа, число целиком или проценты.</p>
+    </div>
+
+    <div class="theory-box">
+      <h3>Задача 1. Найти N% от числа (нарисовали — и готово!)</h3>
+      <p>Найдём 45% от 1500 книг.</p>
+      <div class="vis-block">
+        <div class="vis-title">Рисуем полоску: 1500 книг = 100%</div>
+        <div class="vis-bar">
+          <div class="vis-seg" style="flex-grow:45; background:#3b82f6;">45%<br>675</div>
+          <div class="vis-seg" style="flex-grow:55; background:#94a3b8;">55%<br>825</div>
+        </div>
+        <div class="vis-legend">
+          <span class="vis-legend-item"><span class="vis-legend-color" style="background:#3b82f6"></span>Новинки (45%) = 1500 : 100 × 45 = 675</span>
+          <span class="vis-legend-item"><span class="vis-legend-color" style="background:#94a3b8"></span>Остальное (55%)</span>
+        </div>
+      </div>
+      <ul class="vis-steps">
+        <li>1) Находим 1%: 1500 : 100 = 15</li>
+        <li>2) Умножаем: 15 × 45 = 675</li>
+        <li><strong>Ответ: 675 книг.</strong></li>
+      </ul>
+    </div>
+
+    <div class="theory-box">
+      <h3>Задача 2. Найти число по его проценту</h3>
+      <p>80 учеников — это 20% всех учеников школы. Сколько всего учеников?</p>
+      <div class="vis-block">
+        <div class="vis-title">Рисуем полоску: вся школа = 100%</div>
+        <div class="vis-bar">
+          <div class="vis-seg" style="flex-grow:20; background:#22c55e;">20%<br>80 уч.</div>
+          <div class="vis-seg" style="flex-grow:80; background:#94a3b8;">80%<br>?</div>
+        </div>
+        <div class="vis-legend">
+          <span class="vis-legend-item"><span class="vis-legend-color" style="background:#22c55e"></span>80 учеников = 20%</span>
+          <span class="vis-legend-item"><span class="vis-legend-color" style="background:#94a3b8"></span>Остальные (80%)</span>
+        </div>
+      </div>
+      <ul class="vis-steps">
+        <li>1) 1% = 80 : 20 = 4 (ученика)</li>
+        <li>2) Вся школа: 4 × 100 = 400</li>
+        <li><strong>Ответ: 400 учеников.</strong></li>
+      </ul>
+    </div>
+
+    <div class="theory-box">
+      <h3>Задача 3. Сколько процентов составляет одна часть от другой?</h3>
+      <p>В лесу 1600 деревьев, из них елей — 528. Какой процент составляют ели?</p>
+      <div class="vis-block">
+        <div class="vis-title">Рисуем полоску: 1600 деревьев = 100%</div>
+        <div class="vis-bar">
+          <div class="vis-seg" style="flex-grow:33; background:#f97316;">33%<br>ели 528</div>
+          <div class="vis-seg" style="flex-grow:67; background:#94a3b8;">67%<br>другие</div>
+        </div>
+      </div>
+      <ul class="vis-steps">
+        <li>1) Доля елей: 528 : 1600 = 0,33</li>
+        <li>2) В процентах: 0,33 × 100 = 33%</li>
+        <li><strong>Ответ: 33%.</strong></li>
+      </ul>
+    </div>
+
+    <div class="theory-box">
+      <h3>Задача 4. «Ступенчатые» проценты (в два действия)</h3>
+      <p>В парке 2400 деревьев. 30% — берёзы, из которых 10% посадили волонтёры. Сколько берёз посадили волонтёры?</p>
+      <div class="vis-block">
+        <div class="vis-title">Шаг 1. Находим берёзы (30% от 2400)</div>
+        <div class="vis-bar">
+          <div class="vis-seg" style="flex-grow:30; background:#22c55e;">30% берёзы<br>720</div>
+          <div class="vis-seg" style="flex-grow:70; background:#94a3b8;">70% другие</div>
+        </div>
+        <div class="vis-note">2400 × 0,3 = 720 берёз</div>
+      </div>
+      <div class="vis-block">
+        <div class="vis-title">Шаг 2. Из берёз берём 10% (волонтёрские)</div>
+        <div class="vis-bar">
+          <div class="vis-seg" style="flex-grow:10; background:#f97316;">10%<br>72</div>
+          <div class="vis-seg" style="flex-grow:90; background:#86efac;">90%<br>648</div>
+        </div>
+        <div class="vis-note">720 × 0,1 = 72 берёзы посадили волонтёры</div>
+      </div>
+      <ul class="vis-steps">
+        <li>1) Берёзы: 2400 × 30 : 100 = 720</li>
+        <li>2) Волонтёрские: 720 × 10 : 100 = 72</li>
+        <li><strong>Ответ: 72 берёзы.</strong></li>
+      </ul>
+    </div>
+
+    <div class="theory-box">
+      <h3>Важно помнить!</h3>
+      <p>• Вся полоска — это 100% (само число)<br>
+      • 1% — это одна сотая часть (полоска ÷ 100)<br>
+      • 50% — половина полоски, 25% — четвертинка<br>
+      • В задаче «найти число по %» ищем всю полоску (100%)<br>
+      • В «сложных» задачах проценты берём не от всей полоски, а от её части!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: WARM-UP ===== -->
+<div class="section" id="sec1">
+  <div class="card">
+    <h2><span class="emoji">🔥</span>Разминка. Проверь знания!</h2>
+    <p class="card-desc">Определи, верно ли утверждение.</p>
+
+    <div class="slide active" id="sec1-s0">
+      <div class="two-col">
+        <div>
+          <div class="tf-item" id="tf0">
+            <div class="tf-statement">1. 1% от 800 — это 8.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(0, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(0, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-0"></div>
+          </div>
+          <div class="tf-item" id="tf1">
+            <div class="tf-statement">2. 50% от числа — это его половина.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(1, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(1, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-1"></div>
+          </div>
+        </div>
+        <div>
+          <div class="tf-item" id="tf2">
+            <div class="tf-statement">3. 30% от 2400 равно 72.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(2, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(2, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-2"></div>
+          </div>
+          <div class="tf-item" id="tf3">
+            <div class="tf-statement">4. 20% от 100 равно 5% от 1000.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(3, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(3, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="sec1-s1">
+      <div class="two-col">
+        <div>
+          <div class="tf-item" id="tf4">
+            <div class="tf-statement">5. Если 3% зрителей — 15 человек, то всего 500 зрителей.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(4, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(4, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-4"></div>
+          </div>
+          <div class="tf-item" id="tf5">
+            <div class="tf-statement">6. 130% от 4,5 равно 5,85.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(5, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(5, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-5"></div>
+          </div>
+        </div>
+        <div>
+          <div class="tf-item" id="tf6">
+            <div class="tf-statement">7. 200% от 50 равно 100.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(6, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(6, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-6"></div>
+          </div>
+          <div class="tf-item" id="tf7">
+            <div class="tf-statement">8. Если 25% пути — это 40 км, то весь путь 160 км.</div>
+            <div class="tf-buttons">
+              <button class="true-btn" onclick="checkTF(7, true)">✅ Верно</button>
+              <button class="false-btn" onclick="checkTF(7, false)">❌ Неверно</button>
+            </div>
+            <div class="tf-comment" id="tf-comment-7"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="tfProgress" style="width:0%">0 / 8</div>
+    </div>
+
+    <div class="slide-nav">
+      <button id="sec1-prev" onclick="slideNav(1,-1)" disabled>◀ Назад</button>
+      <div class="slide-dots">
+        <div class="slide-dot active" onclick="slideTo(1,0)"></div>
+        <div class="slide-dot" onclick="slideTo(1,1)"></div>
+      </div>
+      <button id="sec1-next" onclick="slideNav(1,1)">Далее ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: FIND ERROR ===== -->
+<div class="section" id="sec2">
+  <div class="card">
+    <h2><span class="emoji">🔎</span>Найди ошибку в решении</h2>
+    <p class="card-desc">Внимательно изучи каждое решение. Напиши, в чём ошибка.</p>
+
+    <div class="slide active" id="sec2-s0">
+      <div class="two-col">
+        <div class="error-example" id="err0">
+          <div class="example-title">Задача 1:</div>
+          <pre>В кинотеатре 3% зрителей
+составляло 15 человек.
+Сколько всего зрителей?
+
+Решение:
+15 × 3 = 45
+Ответ: 45 зрителей</pre>
+          <textarea id="errInput0" placeholder="Напиши, в чём ошибка..."></textarea>
+          <button class="btn-check" onclick="checkError(0)">Проверить</button>
+          <div class="error-feedback" id="errFeedback0"></div>
+        </div>
+        <div class="error-example" id="err1">
+          <div class="example-title">Задача 2:</div>
+          <pre>В бочке 450 л воды.
+Ушло 60% воды.
+Сколько литров осталось?
+
+Решение:
+450 × 60 = 27000
+Ответ: 27000 л</pre>
+          <textarea id="errInput1" placeholder="Напиши, в чём ошибка..."></textarea>
+          <button class="btn-check" onclick="checkError(1)">Проверить</button>
+          <div class="error-feedback" id="errFeedback1"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="sec2-s1">
+      <div class="error-example" id="err2">
+        <div class="example-title">Задача 3:</div>
+        <pre>Оценки на контрольной:
+«5» — 9 учеников,
+«4» — 12 учеников,
+«3» — остальные.
+В классе 36 учеников.
+Сколько % «5»?
+
+Решение:
+9 + 36 = 45
+45 : 100 = 0,45%
+Ответ: 0,45%</pre>
+        <textarea id="errInput2" placeholder="Напиши, в чём ошибка..."></textarea>
+        <button class="btn-check" onclick="checkError(2)">Проверить</button>
+        <div class="error-feedback" id="errFeedback2"></div>
+      </div>
+    </div>
+
+    <div class="slide-nav">
+      <button id="sec2-prev" onclick="slideNav(2,-1)" disabled>◀ Назад</button>
+      <div class="slide-dots">
+        <div class="slide-dot active" onclick="slideTo(2,0)"></div>
+        <div class="slide-dot" onclick="slideTo(2,1)"></div>
+      </div>
+      <button id="sec2-next" onclick="slideNav(2,1)">Далее ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: LABYRINTH ===== -->
+<div class="section" id="sec3">
+  <div class="card">
+    <h2><span class="emoji">🧩</span>Математический лабиринт</h2>
+    <p class="card-desc">Реши все примеры, чтобы пройти лабиринт!</p>
+    <div class="labyrinth-visual" id="labVisual"></div>
+    <div class="lab-task" id="labTask">
+      <div class="lab-question" id="labQuestion"></div>
+      <div class="lab-input-group">
+        <input type="number" class="lab-input" id="labInput" placeholder="Ответ">
+        <button class="btn-lab" id="labBtn" onclick="checkLabStep()">Далее ➡️</button>
+      </div>
+      <div class="lab-hint" id="labHint"></div>
+    </div>
+    <div class="lab-complete" id="labComplete">
+      <h3>🎉 Поздравляем!</h3>
+      <p>Ты успешно прошёл математический лабиринт!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: INDEPENDENT WORK ===== -->
+<div class="section" id="sec4">
+  <div class="card">
+    <h2><span class="emoji">📝</span>Самостоятельная работа</h2>
+    <p class="card-desc">Выбери вариант и реши все примеры.</p>
+
+    <div class="variant-tabs">
+      <button class="variant-tab active" onclick="switchVariant(0)">Вариант 1</button>
+      <button class="variant-tab" onclick="switchVariant(1)">Вариант 2</button>
+      <button class="variant-tab" onclick="switchVariant(2)">Вариант 3</button>
+      <button class="variant-tab" onclick="switchVariant(3)">Вариант 4</button>
+      <button class="variant-tab" onclick="switchVariant(4)">Вариант 5</button>
+      <button class="variant-tab" onclick="switchVariant(5)">Вариант 6</button>
+    </div>
+
+    <div class="variant-content active" id="var0">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Пр.р.№2: Найдите 3% от 15</span><input type="number" step="0.01" class="ex-input" id="v0e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Пр.р.№2: 25% от 3246 р.</span><input type="number" step="0.01" class="ex-input" id="v0e1" placeholder="?"></div>
+    </div>
+
+    <div class="variant-content" id="var1">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Пр.р.№2: 130% от 4,5</span><input type="number" step="0.01" class="ex-input" id="v1e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Пр.р.№2: 0,6% от 20 кг</span><input type="number" step="0.01" class="ex-input" id="v1e1" placeholder="?"></div>
+    </div>
+
+    <div class="variant-content" id="var2">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Пр.р.№2: 0,12% от 4</span><input type="number" step="0.001" class="ex-input" id="v2e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Пр.р.№2: 4% от 2 ч 15 мин (в минутах)</span><input type="number" step="0.1" class="ex-input" id="v2e1" placeholder="?"></div>
+    </div>
+
+    <div class="variant-content" id="var3">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Пр.р.№2: 23% числа равны 138. Найдите число.</span><input type="number" class="ex-input" id="v3e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Пр.р.№2: 5,6% числа равны 28. Найдите число.</span><input type="number" class="ex-input" id="v3e1" placeholder="?"></div>
+    </div>
+
+    <div class="variant-content" id="var4">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Пр.р.№2: 0,17% числа равны 5,1. Найдите число.</span><input type="number" class="ex-input" id="v4e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Пр.р.№2: 10% числа равны 1,8. Найдите число.</span><input type="number" step="0.1" class="ex-input" id="v4e1" placeholder="?"></div>
+    </div>
+
+    <div class="variant-content" id="var5">
+      <div class="exercise"><span class="ex-num">1</span><span class="ex-text">Пр.р.№2: 43% числа равны 2121. Найдите число.</span><input type="number" step="0.5" class="ex-input" id="v5e0" placeholder="?"></div>
+      <div class="exercise"><span class="ex-num">2</span><span class="ex-text">Пр.р.№2: 25% числа равны 10,3. Найдите число.</span><input type="number" step="0.1" class="ex-input" id="v5e1" placeholder="?"></div>
+    </div>
+
+    <button class="btn-check-all" onclick="checkAllExercises()">Проверить всё ✔️</button>
+    <div class="score-display" id="varScore"></div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: HOMEWORK ===== -->
+<div class="section" id="sec5">
+  <div class="card">
+    <h2><span class="emoji">📚</span>Домашняя работа</h2>
+    <p class="card-desc">Упражнения 1.80–1.96 (учебник, стр. 24–25)</p>
+
+    <div class="theory-box">
+      <h3>Упр. 1.87</h3>
+      <div class="example">
+        <div class="example-title">Условие:</div>
+        <p>Ученик прочитал 105 страниц, что составляет 21% числа всех страниц в книге. Сколько страниц в книге?</p>
+      </div>
+      <div class="example">
+        <div class="example-title">Подсказка:</div>
+        <p>Если 21% = 105 стр., то 1% = 105 : 21. Найди 100%.</p>
+      </div>
+      <div class="hw-answer" id="hw1Answer" style="display:none">
+        <p><strong>Решение:</strong><br>
+        1) 1% от числа: 105 : 21 = 5 (стр.)<br>
+        2) 100% (всё число): 5 × 100 = <strong>500 страниц</strong></p>
+      </div>
+      <button class="btn-check btn-show-answer" onclick="revealAnswer('hw1Answer', this)">Показать ответ</button>
+    </div>
+
+    <div class="theory-box">
+      <h3>Упр. 1.89</h3>
+      <div class="example">
+        <div class="example-title">Условие:</div>
+        <p>В магазин завезли сливы, из них 15% оказались испорченными и в продажу не поступили. Сколько слив было завезено в магазин, если в продажу поступило 263,5 кг слив?</p>
+      </div>
+      <div class="example">
+        <div class="example-title">Подсказка:</div>
+        <p>Если 15% испорчено, то в продажу поступило 85%. Найди число, 85% которого равно 263,5.</p>
+      </div>
+      <div class="hw-answer" id="hw2Answer" style="display:none">
+        <p><strong>Решение:</strong><br>
+        1) В продажу поступило: 100% − 15% = 85%<br>
+        2) 1% от числа: 263,5 : 85 = 3,1 (кг)<br>
+        3) Всего завезено: 3,1 × 100 = <strong>310 кг</strong></p>
+      </div>
+      <button class="btn-check btn-show-answer" onclick="revealAnswer('hw2Answer', this)">Показать ответ</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== SECTION 6: INTERACTIVE TOUCH BOARD ===== -->
+<div class="section" id="sec6">
+  <div class="card">
+    <h2><span class="emoji">🎨</span>Интерактивная доска</h2>
+    <p class="card-desc">Заполняй, перетаскивай, двигай ползунок и обводи ошибку — всё на сенсорной доске!</p>
+
+    <!-- SLIDE 6-0: PAINT FILL -->
+    <div class="slide active" id="sec6-s0">
+      <div class="iob-hint">👆 Проведи пальцем по прямоугольнику слева направо и залей его на нужный процент</div>
+      <div class="fill-stage">
+        <div class="fill-rect" id="fillRect">
+          <div class="fill-grid"></div>
+          <div class="fill-water" id="fillWater"><div class="fill-label" id="fillLabel">0%</div></div>
+        </div>
+        <div class="fill-readout">
+          <div class="fr-pct" id="frPct">0%</div>
+          <div class="fr-frac" id="frFrac">0/100</div>
+          <div class="fr-dec" id="frDec">= 0</div>
+          <div class="fr-note">Процент · Дробь · Десятичная запись</div>
+          <div class="fill-emojis" id="fillEmojis">🌱</div>
+        </div>
+      </div>
+      <div class="iob-top-actions" style="margin-top:22px">
+        <button class="iob-btn-mini" onclick="resizeFill(0)">🪄 Сбросить</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 6-1: DRAG & DROP -->
+    <div class="slide" id="sec6-s1">
+      <div class="iob-hint">👆 Перетащи карточку с заданием к правильному ответу</div>
+      <div class="dnd-wrap">
+        <div>
+          <div class="dnd-zone-label">📋 Задания</div>
+          <div class="dnd-cards-zone" id="dndCards"></div>
+        </div>
+        <div class="dnd-msg" id="dndMsg">Задания ждут! ✅</div>
+        <div>
+          <div class="dnd-zone-label">🎯 Вставь свой ответ</div>
+          <div class="dnd-slots" id="dndSlots"></div>
+        </div>
+      </div>
+      <div class="iob-top-actions" style="margin-top:22px">
+        <button class="iob-btn-mini" onclick="resetDnd()">🔄 Заново</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 6-2: INTERACTIVE SCALE -->
+    <div class="slide" id="sec6-s2">
+      <div class="iob-hint">👆 Двигай ползунок и смотри, как меняется круг!</div>
+      <div class="sync-stage">
+        <div class="ring-wrap">
+          <div class="ring" id="syncRing">
+            <div class="ring-center">
+              <div class="rc-part" id="rcPart">0</div>
+              <div class="rc-num" id="rcNum">0</div>
+              <div class="rc-label">из 100 / 100%</div>
+            </div>
+          </div>
+        </div>
+        <div class="sync-controls">
+          <div class="sync-bigval"><span id="syncLabel">Значение:</span> <span id="syncVal">0</span></div>
+          <input type="range" class="sync-slider" id="syncSlider" min="0" max="100" value="0" step="1">
+          <div class="sync-btns">
+            <button class="iob-big-btn" onclick="nudgeSync(-10)">−10</button>
+            <button class="iob-big-btn" onclick="nudgeSync(10)">+10</button>
+          </div>
+          <div class="sync-info" id="syncInfo">0% от 100 = 0</div>
+        </div>
+      </div>
+      <div class="iob-top-actions" style="margin-top:22px">
+        <button class="iob-btn-mini" onclick="resetSync()">🪄 Сбросить</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 6-3: FIND ERROR BY CIRCLING -->
+    <div class="slide" id="sec6-s3">
+      <div class="iob-hint">👆 Обведи пальцем строку, где допущена ошибка</div>
+      <div class="trap-canvas-wrap">
+        <div class="trap-grid" id="trapGrid"></div>
+        <canvas class="trap-canvas" id="trapCanvas"></canvas>
+      </div>
+      <div class="trap-explain" id="trapExplain"></div>
+      <div class="trap-redo">
+        <button class="iob-btn-mini" onclick="resetTrap()">🔄 Попробовать ещё раз</button>
+      </div>
+    </div>
+
+    <div class="slide-nav">
+      <button id="sec6-prev" onclick="slideNav(6,-1)" disabled>◀ Назад</button>
+      <div class="slide-dots">
+        <div class="slide-dot active" onclick="slideTo(6,0)"></div>
+        <div class="slide-dot" onclick="slideTo(6,1)"></div>
+        <div class="slide-dot" onclick="slideTo(6,2)"></div>
+        <div class="slide-dot" onclick="slideTo(6,3)"></div>
+      </div>
+      <button id="sec6-next" onclick="slideNav(6,1)">Далее ▶</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+
+function showSection(idx) {
+  document.querySelectorAll('.section').forEach((s, i) => {
+    s.classList.toggle('active', i === idx);
+    if (i === idx) {
+      s.querySelectorAll('.card').forEach((c, j) => {
+        c.classList.remove('reveal'); void c.offsetWidth; c.classList.add('reveal');
+        c.style.animationDelay = (j * 0.12) + 's';
+      });
+    }
+  });
+  document.querySelectorAll('#mainNav button').forEach((b, i) => b.classList.toggle('active', i === idx));
+  if (idx === 6) sizeTrapCanvas();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const slideCounts = { 1: 2, 2: 2, 6: 4 };
+const currentSlide = { 1: 0, 2: 0, 6: 0 };
+
+function slideNav(secIdx, dir) {
+  const s = currentSlide[secIdx] + dir;
+  if (s < 0 || s >= slideCounts[secIdx]) return;
+  currentSlide[secIdx] = s;
+  updateSlides(secIdx);
+}
+
+function slideTo(secIdx, s) {
+  if (s < 0 || s >= slideCounts[secIdx]) return;
+  currentSlide[secIdx] = s;
+  updateSlides(secIdx);
+}
+
+function updateSlides(secIdx) {
+  const s = currentSlide[secIdx];
+  const total = slideCounts[secIdx];
+  for (let i = 0; i < total; i++) {
+    const el = document.getElementById('sec' + secIdx + '-s' + i);
+    if (el) el.classList.toggle('active', i === s);
+  }
+  const dots = document.querySelectorAll('#sec' + secIdx + ' .slide-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === s));
+  const prev = document.getElementById('sec' + secIdx + '-prev');
+  const next = document.getElementById('sec' + secIdx + '-next');
+  if (prev) prev.disabled = s === 0;
+  if (next) next.disabled = s === total - 1;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const tfData = [
+  { correctAnswer: true, explanation: 'Верно! 800 × 1 : 100 = 8.' },
+  { correctAnswer: true, explanation: 'Верно! 50% = 1/2, это половина числа.' },
+  { correctAnswer: false, explanation: 'Неверно! 2400 × 30 : 100 = 720, а не 72.' },
+  { correctAnswer: false, explanation: 'Неверно! 20% от 100 = 20, а 5% от 1000 = 50. Они НЕ равны — не попадись в капкан!' },
+  { correctAnswer: true, explanation: 'Верно! 15 × 100 : 3 = 500 зрителей.' },
+  { correctAnswer: true, explanation: 'Верно! 4,5 × 130 : 100 = 5,85.' },
+  { correctAnswer: true, explanation: 'Верно! 200% от 50 = 50 × 2 = 100.' },
+  { correctAnswer: true, explanation: 'Верно! 40 × 100 : 25 = 160 км.' }
+];
+
+let tfAnswered = 0, tfCorrect = 0;
+
+function checkTF(idx, userAnswer) {
+  const item = document.getElementById('tf' + idx);
+  const buttons = item.querySelectorAll('.tf-buttons button');
+  if (buttons[0].disabled) return;
+  buttons.forEach(b => b.disabled = true);
+  const isCorrect = userAnswer === tfData[idx].correctAnswer;
+  tfAnswered++; if (isCorrect) tfCorrect++;
+  buttons[userAnswer ? 0 : 1].classList.add(isCorrect ? 'selected-true' : 'selected-false');
+  const comment = document.getElementById('tf-comment-' + idx);
+  comment.className = 'tf-comment ' + (isCorrect ? 'correct' : 'wrong');
+  comment.innerHTML = (isCorrect ? '✅ Правильно! ' : '❌ Неправильно. ') + tfData[idx].explanation;
+  item.classList.add(isCorrect ? 'correct-answer' : 'wrong-answer');
+  if (isCorrect) launchConfetti(true);
+  updateTFProgress();
+  if (tfAnswered === 8) {
+    if (tfCorrect === 8) { burstEmoji('confettiContainer', '🏆', 14); launchConfetti(false); }
+    else if (tfCorrect >= 6) burstEmoji('confettiContainer', '🌟', 8);
+  }
+}
+
+function updateTFProgress() {
+  const bar = document.getElementById('tfProgress');
+  bar.style.width = (tfAnswered / 8 * 100) + '%';
+  bar.textContent = tfCorrect + ' / 8';
+  if (tfAnswered === 8) bar.style.background = tfCorrect === 8 ? 'linear-gradient(90deg,#22c55e,#34d399)' : 'linear-gradient(90deg,#eab308,#facc15)';
+}
+
+const errData = [
+  { correct: 'Ошибка: нужно 15 × 100 : 3 = 500 зрителей. 3% — это часть, а не число, на которое умножают!', keywords: ['500', '100', '3'] },
+  { correct: 'Ошибка: нужно 450 × 60 : 100 = 270 л воды ушло. Осталось: 450 − 270 = 180 л. Забыли разделить на 100 и вычесть!', keywords: ['180', '100', '270'] },
+  { correct: 'Ошибка: чтобы найти процент, нужно 9 : 36 × 100 = 25%. А не складывать число с его процентом!', keywords: ['25', '9', '100'] }
+];
+
+function checkError(idx) {
+  const input = document.getElementById('errInput' + idx);
+  const fb = document.getElementById('errFeedback' + idx);
+  const btn = input.parentElement.querySelector('.btn-check');
+  if (input.value.trim().length < 3) { input.style.borderColor = 'var(--red)'; return; }
+  btn.disabled = true; input.disabled = true;
+  const userText = input.value.trim().toLowerCase();
+  const matchCount = errData[idx].keywords.filter(kw => userText.includes(kw.toLowerCase())).length;
+  fb.className = 'error-feedback show';
+  if (matchCount >= 1) {
+    fb.style.background = '#dcfce7'; fb.style.color = '#166534';
+    fb.innerHTML = '<div class="fb-title">✅ Хорошо! Ты нашёл ошибку!</div><div>' + errData[idx].correct + '</div>';
+  } else {
+    fb.style.background = '#fee2e2'; fb.style.color = '#991b1b';
+    fb.innerHTML = '<div class="fb-title">💡 Вот правильный ответ:</div><div>' + errData[idx].correct + '</div>';
+  }
+}
+
+const labSteps = [
+  { q: '1% от 500 = ?', a: 5 },
+  { q: '25% от 60 = ?', a: 15 },
+  { q: '10% от 4,5 = ?', a: 0.45 },
+  { q: '8 из 40 — это сколько %?', a: 20 },
+  { q: '40 кг — это 20% всего. Вес = ?', a: 200 },
+  { q: '150% от 80 = ?', a: 120 },
+  { q: '7 человек — 2% всех. Всего = ?', a: 350 },
+  { q: '5% от 300 минус 10% от 90 = ?', a: 6 }
+];
+let labCurrent = 0, labCorrectCount = 0;
+
+function initLabyrinth() {
+  const visual = document.getElementById('labVisual');
+  visual.innerHTML = '';
+  labSteps.forEach((_, i) => {
+    if (i > 0) { const a = document.createElement('span'); a.className = 'labyrinth-arrow'; a.textContent = '→'; visual.appendChild(a); }
+    const s = document.createElement('div'); s.className = 'labyrinth-step future'; s.textContent = i + 1; s.id = 'labStep' + i; visual.appendChild(s);
+  });
+  updateLabVisual();
+  document.getElementById('labQuestion').textContent = labSteps[0].q;
+  document.getElementById('labInput').value = '';
+}
+
+function updateLabVisual() {
+  labSteps.forEach((_, i) => {
+    document.getElementById('labStep' + i).className = 'labyrinth-step ' + (i < labCurrent ? 'completed' : i === labCurrent ? 'current' : 'future');
+  });
+}
+
+function revealAnswer(id, btn) {
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  btn.disabled = true;
+  btn.textContent = '✅ Ответ показан';
+  launchConfetti(true);
+}
+
+function checkLabStep() {
+  const input = document.getElementById('labInput'), hint = document.getElementById('labHint');
+  const val = parseFloat(input.value);
+  if (isNaN(val)) { input.style.borderColor = 'var(--red)'; return; }
+  if (Math.abs(val - labSteps[labCurrent].a) < 0.1) {
+    labCorrectCount++; hint.className = 'lab-hint correct show'; hint.textContent = '✅ Правильно!'; labCurrent++;
+    setTimeout(() => {
+      if (labCurrent >= labSteps.length) {
+        document.getElementById('labTask').style.display = 'none';
+        document.getElementById('labComplete').classList.add('show');
+        updateLabVisual(); launchConfetti();
+      } else {
+        document.getElementById('labQuestion').textContent = labSteps[labCurrent].q;
+        input.value = ''; input.style.borderColor = 'var(--border)'; hint.className = 'lab-hint'; updateLabVisual();
+      }
+    }, 800);
+  } else {
+    hint.className = 'lab-hint wrong show'; hint.textContent = '❌ Попробуй ещё раз!';
+    input.style.borderColor = 'var(--red)'; input.value = ''; input.focus();
+    setTimeout(() => { hint.className = 'lab-hint'; }, 1500);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('sec3').classList.contains('active') && labCurrent < labSteps.length) checkLabStep();
+});
+
+const variants = [
+  { answers: [0.45, 811.5] },
+  { answers: [5.85, 0.12] },
+  { answers: [0.0048, 5.4] },
+  { answers: [600, 500] },
+  { answers: [3000, 18] },
+  { answers: [4932.5, 41.2] }
+];
+let activeVariant = 0;
+
+function switchVariant(idx) {
+  activeVariant = idx;
+  document.querySelectorAll('.variant-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.variant-content').forEach((v, i) => v.classList.toggle('active', i === idx));
+  const scoreEl = document.getElementById('varScore');
+  scoreEl.style.animation = 'none'; void scoreEl.offsetWidth;
+  scoreEl.style.display = 'none';
+}
+
+function checkAllExercises() {
+  const v = variants[activeVariant]; let correct = 0;
+  for (let i = 0; i < 2; i++) {
+    const input = document.getElementById('v' + activeVariant + 'e' + i);
+    const val = parseFloat(input.value); input.classList.remove('correct', 'wrong');
+    let tolerance = 0.5;
+    if (activeVariant === 5 && i === 0) tolerance = 5;
+    if (Math.abs(val - v.answers[i]) < tolerance) { input.classList.add('correct'); correct++; } else input.classList.add('wrong');
+  }
+  const scoreEl = document.getElementById('varScore');
+  scoreEl.style.animation = 'none'; void scoreEl.offsetWidth;
+  scoreEl.style.display = 'block';
+  scoreEl.style.animation = '';
+  const pct = Math.round((correct / 2) * 100);
+  const color = pct === 100 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+  scoreEl.innerHTML = 'Результат: <span style="color:' + color + '">' + correct + ' из 2</span> (' + pct + '%)';
+  if (correct === 2) { launchConfetti(false); burstEmoji('confettiContainer', '🎉', 10); }
+  else if (correct === 1) launchConfetti(true);
+}
+
+function launchConfetti(burst) {
+  const c = document.getElementById('confettiContainer');
+  const colors = ['#6366f1','#8b5cf6','#22c55e','#ef4444','#eab308','#3b82f6','#ec4899'];
+  const count = burst ? 8 : 120;
+  const total = count + (burst ? 12 : 0);
+  for (let i = 0; i < total; i++) {
+    const p = document.createElement('div'); p.className = 'confetti-piece';
+    p.style.left = burst ? (30 + Math.random()*40)+'%' : Math.random()*100+'%';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.width = (Math.random()*8+6)+'px'; p.style.height = (Math.random()*8+6)+'px';
+    p.style.borderRadius = Math.random()>0.5?'50%':'2px';
+    p.style.animationDuration = (Math.random()*2+2)+'s'; p.style.animationDelay = (Math.random()*1)+'s';
+    p.style.top = burst ? (-20 - Math.random()*80)+'px' : '-20px';
+    c.appendChild(p);
+  }
+  setTimeout(() => { c.innerHTML = ''; }, 5000);
+}
+
+function burstEmoji(containerId, emoji, n) {
+  const c = document.getElementById(containerId);
+  const colors = ['#f97316','#22c55e','#6366f1','#eab308','#ec4899'];
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('div'); p.className = 'confetti-piece';
+    p.style.left = 40 + Math.random()*20 + '%';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.width = '28px'; p.style.height = '28px';
+    p.style.borderRadius = '50%';
+    p.style.display = 'flex'; p.style.alignItems = 'center'; p.style.justifyContent = 'center';
+    p.style.fontSize = '16px'; p.style.background = 'transparent';
+    p.style.animationDuration = (Math.random()*1.5+1.5)+'s';
+    p.textContent = emoji;
+    c.appendChild(p);
+  }
+  setTimeout(() => { c.innerHTML = ''; }, 4000);
+}
+
+/* ===== SOUND FEEDBACK (Web Audio, no files) ===== */
+let _ac = null;
+function tone(freq, dur, type, vol) {
+  try {
+    _ac = _ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = _ac.createOscillator(), g = _ac.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || 0.15, _ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, _ac.currentTime + (dur || 0.2));
+    o.connect(g); g.connect(_ac.destination); o.start(); o.stop(_ac.currentTime + (dur || 0.2));
+  } catch (e) {}
+}
+function soundGood() { tone(660, 0.15); setTimeout(() => tone(880, 0.22), 120); }
+function soundBad() { tone(220, 0.35, 'sawtooth', 0.12); }
+function soundTap() { tone(440, 0.08, 'square', 0.06); }
+
+/* ===== SLIDE 6-0: PAINT FILL ===== */
+let fillPct = 0;
+function fillEmojiFor(p) {
+  if (p === 0) return '🌱';
+  if (p < 25) return '🌤️';
+  if (p < 50) return '🌙';
+  if (p < 75) return '🌗';
+  if (p < 100) return '🌕';
+  return '💯';
+}
+function applyFill(p) {
+  p = Math.round(Math.max(0, Math.min(100, p)));
+  fillPct = p;
+  const water = document.getElementById('fillWater');
+  const label = document.getElementById('fillLabel');
+  if (!water) return;
+  water.style.width = p + '%';
+  label.textContent = p + '%';
+  const frPct = document.getElementById('frPct');
+  frPct.textContent = p + '%';
+  const dec = (p / 100).toFixed(2).replace('.', ',');
+  document.getElementById('frFrac').textContent = p + '/100' + (p === 100 ? ' = 1' : '');
+  document.getElementById('frDec').textContent = '= ' + (p === 100 ? '1' : dec.replace(/0$/,'').replace(/,$/,''));
+  if (p === 100) document.getElementById('frDec').textContent = '= 1';
+  const em = document.getElementById('fillEmojis');
+  em.textContent = fillEmojiFor(p);
+  if (p % 5 === 0) soundTap();
+  document.getElementById('frPct').classList.remove('fr-pop'); void document.getElementById('frPct').offsetWidth;
+  document.getElementById('frPct').classList.add('fr-pop');
+}
+function resizeFill(v) {
+  const rect = document.getElementById('fillRect').getBoundingClientRect();
+  applyFill(v);
+}
+function initFill() {
+  const rect = document.getElementById('fillRect');
+  let dragging = false;
+  function moveFill(e) {
+    const r = rect.getBoundingClientRect();
+    let x = e.clientX - r.left;
+    applyFill((x / r.width) * 100);
+  }
+  rect.addEventListener('pointerdown', e => {
+    dragging = true; rect.classList.add('dragging'); rect.setPointerCapture(e.pointerId); moveFill(e);
+  });
+  rect.addEventListener('pointermove', e => { if (dragging) moveFill(e); });
+  rect.addEventListener('pointerup', e => { dragging = false; rect.classList.remove('dragging'); soundGood(); });
+  rect.addEventListener('pointercancel', () => { dragging = false; rect.classList.remove('dragging'); });
+}
+
+/* ===== SLIDE 6-1: DRAG & DROP ===== */
+const dndTasks = [
+  { task: 'Найди 20% от 50', answer: 10 },
+  { task: 'Найди 25% от 60', answer: 15 },
+  { task: 'Найди 50% от 40', answer: 20 },
+  { task: 'Найди 10% от 90', answer: 9 }
+];
+let dndPlaced = 0;
+function buildDnd() {
+  const cardsZone = document.getElementById('dndCards');
+  const slotsZone = document.getElementById('dndSlots');
+  cardsZone.innerHTML = ''; slotsZone.innerHTML = ''; dndPlaced = 0;
+  dndTasks.forEach((t, i) => {
+    const c = document.createElement('div');
+    c.className = 'dnd-card'; c.id = 'dndCard' + i; c.dataset.idx = i;
+    c.innerHTML = t.task;
+    cardsZone.appendChild(c);
+  });
+  const answers = dndTasks.map(t => t.answer).sort(() => Math.random() - 0.5);
+  answers.forEach((a) => {
+    const s = document.createElement('div');
+    s.className = 'dnd-slot'; s.dataset.answer = a;
+    s.innerHTML = '<span class="slot-badge">' + a + '</span><span class="slot-match"></span><span class="slot-check">✅</span>';
+    slotsZone.appendChild(s);
+  });
+  attachDnd();
+}
+function attachDnd() {
+  const deck = document.getElementById('dndCards');
+  deck.addEventListener('pointerdown', e => {
+    const card = e.target.closest('.dnd-card');
+    if (!card || card.classList.contains('placed') || card.classList.contains('grabbing')) return;
+    e.preventDefault();
+    const rect = card.getBoundingClientRect();
+    card.classList.add('grabbing');
+    card.setPointerCapture(e.pointerId);
+    window._dnd = {
+      card, offX: e.clientX - rect.left, offY: e.clientY - rect.top,
+      cw: rect.width, ch: rect.height,
+      clone: null, slots: Array.from(document.querySelectorAll('#dndSlots .dnd-slot'))
+    };
+    const clone = card.cloneNode(true);
+    clone.classList.add('dragging'); clone.style.width = rect.width + 'px'; clone.style.height = rect.height + 'px';
+    clone.style.position = 'fixed'; clone.style.left = rect.left + 'px'; clone.style.top = rect.top + 'px';
+    clone.style.margin = '0'; clone.style.zIndex = '1000';
+    document.body.appendChild(clone);
+    window._dnd.clone = clone;
+  });
+  deck.addEventListener('pointermove', e => {
+    const d = window._dnd;
+    if (!d || !d.clone) return;
+    e.preventDefault();
+    d.clone.style.left = (e.clientX - d.offX) + 'px';
+    d.clone.style.top = (e.clientY - d.offY) + 'px';
+    const cx = e.clientX - d.offX + d.cw / 2;
+    const cy = e.clientY - d.offY + d.ch / 2;
+    d.slots.forEach(s => {
+      const r = s.getBoundingClientRect();
+      const over = cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
+      s.classList.toggle('over', over && !s.classList.contains('filled'));
+    });
+  });
+  deck.addEventListener('pointerup', e => {
+    const d = window._dnd;
+    if (!d || !d.clone) return;
+    e.preventDefault();
+    const cx = e.clientX - d.offX + d.cw / 2;
+    const cy = e.clientY - d.offY + d.ch / 2;
+    const target = d.slots.find(s => {
+      if (s.classList.contains('filled')) return false;
+      const r = s.getBoundingClientRect();
+      return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
+    });
+    const task = dndTasks[parseInt(d.card.dataset.idx)];
+    d.slots.forEach(s => s.classList.remove('over'));
+    if (target && parseFloat(target.dataset.answer) === task.answer) {
+      d.clone.remove();
+      d.card.classList.remove('grabbing'); d.card.classList.add('placed');
+      d.card.style.visibility = 'hidden';
+      target.classList.add('filled');
+      target.querySelector('.slot-match').textContent = task.task;
+      dndPlaced++;
+      const msg = document.getElementById('dndMsg');
+      msg.className = 'dnd-msg good'; msg.textContent = '✅ Верно! ' + task.task + ' = ' + task.answer;
+      soundGood(); launchConfetti(true);
+      setTimeout(resetDndIfDone, 300);
+    } else {
+      const rect = d.card.getBoundingClientRect();
+      d.clone.classList.add('returning');
+      d.clone.style.transition = 'left 0.45s cubic-bezier(0.34,1.56,0.64,1), top 0.45s cubic-bezier(0.34,1.56,0.64,1)';
+      d.clone.style.left = rect.left + 'px'; d.clone.style.top = rect.top + 'px';
+      setTimeout(() => { d.clone.remove(); }, 470);
+      if (target) { target.classList.add('wrong'); setTimeout(() => target.classList.remove('wrong'), 600); }
+      const msg = document.getElementById('dndMsg');
+      msg.className = 'dnd-msg bad';
+      msg.textContent = '❌ Не то! Правильный ответ: ' + task.answer + '. ' + task.task;
+      soundBad();
+    }
+    window._dnd = null;
+  });
+  deck.addEventListener('pointercancel', () => {
+    const d = window._dnd;
+    if (!d) return;
+    if (d.clone) d.clone.remove();
+    d.card.classList.remove('grabbing');
+    d.slots.forEach(s => s.classList.remove('over'));
+    window._dnd = null;
+  });
+}
+function resetDndIfDone() {
+  if (dndPlaced === dndTasks.length) {
+    const msg = document.getElementById('dndMsg');
+    msg.className = 'dnd-msg good'; msg.textContent = '🎉 Все задания решены!';
+    burstEmoji('confettiContainer', '🎯', 12); soundGood();
+  }
+}
+function resetDnd() { buildDnd(); document.getElementById('dndMsg').className = 'dnd-msg'; document.getElementById('dndMsg').textContent = 'Задания ждут! ✅'; }
+
+/* ===== SLIDE 6-2: INTERACTIVE SCALE ===== */
+const SYNC_BASE = 200;
+function syncValue(p) {
+  document.getElementById('syncVal').textContent = p;
+  document.getElementById('syncLabel').textContent = 'Проценты:';
+  const ring = document.getElementById('syncRing');
+  ring.style.setProperty('--p', p);
+  document.getElementById('rcPart').textContent = Math.round(p / 100 * SYNC_BASE);
+  document.getElementById('rcNum').textContent = p + '%';
+  document.getElementById('syncInfo').textContent = p + '% от ' + SYNC_BASE + ' = ' + Math.round(p / 100 * SYNC_BASE);
+  document.querySelector('.rc-label').textContent = 'из ' + SYNC_BASE + ' / часть';
+}
+function nudgeSync(d) {
+  const s = document.getElementById('syncSlider');
+  s.value = Math.max(0, Math.min(100, parseInt(s.value) + d));
+  syncValue(parseInt(s.value)); soundTap();
+}
+function resetSync() {
+  const s = document.getElementById('syncSlider'); s.value = 0; syncValue(0);
+}
+function initSync() {
+  const s = document.getElementById('syncSlider');
+  s.addEventListener('input', () => { syncValue(parseInt(s.value)); });
+  syncValue(0);
+}
+
+/* ===== SLIDE 6-3: FIND ERROR BY CIRCLING ===== */
+const trapRowsData = [
+  { step: 'Шаг 1', text: '500 : 3 = 166,67', isError: true },
+  { step: 'Шаг 2', text: '166,67 × 100 = 16666,67', isError: false },
+  { step: 'Ответ', text: '16666,67 отличников', isError: false }
+];
+let trapSolved = false;
+function buildTrap() {
+  const grid = document.getElementById('trapGrid');
+  grid.innerHTML = '';
+  const expl = document.getElementById('trapExplain');
+  expl.removeAttribute('style'); expl.className = 'trap-explain';
+  expl.innerHTML = '';
+  trapRowsData.forEach((r, i) => {
+    const row = document.createElement('div');
+    row.className = 'trap-row' + (r.isError ? ' wrong-step' : '');
+    row.id = 'trapRow' + i;
+    row.innerHTML = '<span class="trap-step">' + r.step + '</span><span class="trap-text">' + r.text + '</span>';
+    grid.appendChild(row);
+  });
+  document.getElementById('trapExplain').className = 'trap-explain';
+  document.getElementById('trapExplain').innerHTML = '';
+  trapSolved = false;
+  document.querySelectorAll('.trap-row').forEach(r => r.classList.remove('selected-ok', 'selected-bad'));
+  sizeTrapCanvas();
+}
+let trapPts = [];
+function sizeTrapCanvas() {
+  const wrap = document.querySelector('.trap-canvas-wrap');
+  const cv = document.getElementById('trapCanvas');
+  if (!wrap) return;
+  cv.width = wrap.clientWidth; cv.height = wrap.clientHeight;
+}
+function trapInitDraw() {
+  const cv = document.getElementById('trapCanvas');
+  const ctx = cv.getContext('2d');
+  let drawing = false;
+  cv.addEventListener('pointerdown', e => {
+    if (trapSolved) return;
+    drawing = true; trapPts = [];
+    const r = cv.getBoundingClientRect();
+    trapPts.push([e.clientX - r.left, e.clientY - r.top]);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    cv.setPointerCapture(e.pointerId);
+    soundTap();
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const r = cv.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    trapPts.push([x, y]);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    trapPts.forEach((pt, i) => i ? ctx.lineTo(pt[0], pt[1]) : ctx.moveTo(pt[0], pt[1]));
+    if (trapPts.length > 1) ctx.closePath();
+    ctx.stroke();
+  });
+  cv.addEventListener('pointerup', () => { if (drawing) { drawing = false; evalTrap(); } });
+  cv.addEventListener('pointercancel', () => { drawing = false; });
+  window.addEventListener('resize', sizeTrapCanvas);
+}
+function pointInPoly(pts, x, y) {
+  let inside = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function evalTrap() {
+  const cv = document.getElementById('trapCanvas');
+  const cRect = cv.getBoundingClientRect();
+  const rows = document.querySelectorAll('.trap-row');
+  let picked = -1;
+  const midX = (trapPts.reduce((a, p) => a + p[0], 0) / trapPts.length);
+  const midY = (trapPts.reduce((a, p) => a + p[1], 0) / trapPts.length);
+  const bounding = x => Math.max(...trapPts.map(p => p[0])) - Math.min(...trapPts.map(p => p[0]));
+  const isBig = Math.max(bounding('x'), Math.max(...trapPts.map(p => p[1])) - Math.min(...trapPts.map(p => p[1]))) > 30;
+  rows.forEach((row, i) => {
+    const r = row.getBoundingClientRect();
+    const cx = r.left - cRect.left + r.width / 2;
+    const cy = r.top - cRect.top + r.height / 2;
+    if (isBig ? pointInPoly(trapPts, cx, cy) : Math.abs(midX - cx) < r.width / 2.2 && Math.abs(midY - cy) < r.height / 1.8) picked = i;
+  });
+  const ctx = cv.getContext('2d');
+  const expl = document.getElementById('trapExplain');
+  if (picked >= 0 && trapRowsData[picked].isError) {
+    trapSolved = true;
+    document.getElementById('trapRow' + picked).classList.add('selected-ok');
+    document.querySelectorAll('.trap-row').forEach((r, i) => { if (i !== picked) r.classList.add('placed'); });
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    expl.className = 'trap-explain show';
+    expl.innerHTML = '<strong>🎯 Верно! Ошибка здесь.</strong><br>Нужно: 500 : 100 = 5 (это 1%). Тогда отличники: 5 × 3 = <strong>15 человек</strong>. Ученик делил на 3 вместо 100!';
+    soundGood(); launchConfetti(false);
+    setTimeout(() => { if (confirm('Молодец! Найти ошибку в новом примере?')) resetTrap(); }, 1400);
+  } else {
+    const target = document.getElementById('trapRow' + (picked >= 0 ? picked : 0));
+    if (target) target.classList.add('selected-bad');
+    setTimeout(() => { if (target) target.classList.remove('selected-bad'); }, 700);
+    expl.className = 'trap-explain show';
+    expl.style.background = '#fee2e2'; expl.style.color = '#991b1b';
+    expl.innerHTML = '💡 Подумай ещё! Найди действие, где делили <strong>не на 100</strong>.';
+    soundBad();
+    setTimeout(() => { expl.className = 'trap-explain'; }, 2200);
+  }
+}
+function resetTrap() {
+  document.getElementById('trapCanvas').getContext('2d').clearRect(0, 0, document.getElementById('trapCanvas').width, document.getElementById('trapCanvas').height);
+  buildTrap();
+}
+
+initLabyrinth();
+initFill();
+buildDnd();
+initSync();
+buildTrap();
+trapInitDraw();
+</script>
+</body>
+</html>
