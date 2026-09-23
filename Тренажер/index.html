@@ -529,6 +529,8 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 [data-theme="dark"] .var-ex .ve-i.wrong { background: #7f1d1d; }
 
 /* ===== HOMEWORK SCREEN ===== */
+#hwGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+#hwDetail .nav-btn { margin-bottom: 12px; }
 .hw-group { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; padding: 16px; border: 2px solid var(--border); }
 .hw-group h3 { font-size: 1rem; margin-bottom: 4px; }
 .hw-source { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 12px; }
@@ -649,7 +651,11 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
       <button class="nav-btn" onclick="goBackToTopics()">← К темам</button>
       <span class="nav-title">📚 Домашняя работа</span>
     </div>
-    <div id="hwList"></div>
+    <div id="hwGrid"></div>
+    <div id="hwDetail" style="display:none">
+      <button class="nav-btn" id="hwBack" onclick="hwShowList()">← К списку заданий</button>
+      <div id="hwDetailBody"></div>
+    </div>
   </div>
 </div>
 
@@ -963,18 +969,34 @@ const HW_LESSONS = [
   }
 ];
 function renderHomework() {
-  const list = document.getElementById('hwList'); list.innerHTML = '';
+  const grid = document.getElementById('hwGrid'); grid.innerHTML = '';
   HW_LESSONS.forEach((g, gi) => {
-    const block = document.createElement('div'); block.className = 'hw-group';
-    block.innerHTML = '<h3>' + g.title + '</h3><div class="hw-source">' + g.source + '</div>';
-    g.tasks.forEach((t, ti) => {
-      const div = document.createElement('div'); div.className = 'hw-task';
-      div.innerHTML = '<div class="hw-name">' + t.name + '</div><div class="hw-cond">' + t.cond + '</div>' +
-        '<div class="hw-hint">💡 ' + t.hint + '</div>';
-      block.appendChild(div);
-    });
-    list.appendChild(block);
+    const card = document.createElement('div'); card.className = 'topic-card';
+    card.innerHTML = '<div class="tc-icon">📚</div><div class="tc-title">' + g.title + '</div>' +
+      '<div class="tc-desc">' + g.source + '</div><div class="tc-desc">Заданий: ' + g.tasks.length + '</div>';
+    card.onclick = () => hwOpen(gi);
+    grid.appendChild(card);
   });
+  hwShowList();
+}
+function hwShowList() {
+  document.getElementById('hwGrid').style.display = 'grid';
+  document.getElementById('hwDetail').style.display = 'none';
+}
+function hwOpen(gi) {
+  const g = HW_LESSONS[gi];
+  document.getElementById('hwGrid').style.display = 'none';
+  document.getElementById('hwDetail').style.display = 'block';
+  const body = document.getElementById('hwDetailBody'); body.innerHTML = '';
+  const block = document.createElement('div'); block.className = 'hw-group';
+  block.innerHTML = '<h3>' + g.title + '</h3><div class="hw-source">' + g.source + '</div>';
+  g.tasks.forEach((t, ti) => {
+    const div = document.createElement('div'); div.className = 'hw-task';
+    div.innerHTML = '<div class="hw-name">' + t.name + '</div><div class="hw-cond">' + t.cond + '</div>' +
+      '<div class="hw-hint">💡 ' + t.hint + '</div>';
+    block.appendChild(div);
+  });
+  body.appendChild(block);
 }
 
 // ===== TRAINING MODES =====
