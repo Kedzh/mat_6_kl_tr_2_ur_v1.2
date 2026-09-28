@@ -511,11 +511,6 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .lesson-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 12px; }
 .lesson-btn:active { transform: scale(0.97); }
 
-.variant-tabs { display: flex; gap: 5px; margin-bottom: 12px; flex-wrap: wrap; }
-.variant-tab { padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-family: inherit; font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
-.variant-tab.active { background: #f97316; color: white; border-color: #f97316; }
-.variant-content { display: none; }
-.variant-content.active { display: block; }
 .var-ex { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
 .var-ex .ve-n { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
 .var-ex .ve-q { flex: 1; font-weight: 600; font-size: 0.85rem; }
@@ -609,8 +604,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   <div class="lesson-tabs">
     <button class="lesson-tab active" onclick="switchLessonTab(0)">🔥 Разминка</button>
     <button class="lesson-tab" onclick="switchLessonTab(1)">🚶 Лабиринт</button>
-    <button class="lesson-tab" onclick="switchLessonTab(2)">📝 Самост.</button>
-    <button class="lesson-tab" onclick="switchLessonTab(3)">⏱️ Тест</button>
+    <button class="lesson-tab" onclick="switchLessonTab(2)">⏱️ Тест</button>
   </div>
   <div class="lesson-tab-content active" id="lessonTab0">
     <div class="lesson-progress"><div class="lesson-progress-bar" id="tfBar" style="width:0%"></div><span class="lesson-progress-text" id="tfText">0 / 8</span></div>
@@ -631,12 +625,6 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div class="lesson-result" id="labResult" style="display:none"></div>
   </div>
   <div class="lesson-tab-content" id="lessonTab2">
-    <div class="variant-tabs" id="varTabs"></div>
-    <div id="varContent"></div>
-    <button class="lesson-btn" onclick="checkVariants()">Проверить все</button>
-    <div class="lesson-result" id="varResult" style="display:none"></div>
-  </div>
-  <div class="lesson-tab-content" id="lessonTab3">
     <div class="lesson-progress"><div class="test-timer" id="testTimer">⏱️ 5:00</div><span class="lesson-progress-text">10 вопросов · оценка 5/4/3/2</span></div>
     <div class="test-count" id="testAlert" style="display:none"></div>
     <div id="testContainer"></div>
@@ -1250,14 +1238,6 @@ const lessonData = {
       { q:'7 человек — 2% всех. Всего = ?', a:350 },
       { q:'5% от 300 − 10% от 90 = ?', a:6 }
     ],
-    vars: [
-      [{ q:'3% от 15 = ?', a:0.45 },{ q:'25% от 3246 = ?', a:811.5 }],
-      [{ q:'130% от 4,5 = ?', a:5.85 },{ q:'0,6% от 20 кг = ?', a:0.12 }],
-      [{ q:'0,12% от 4 = ?', a:0.0048 },{ q:'4% от 135 мин = ?', a:5.4 }],
-      [{ q:'23% числа = 138. Число = ?', a:600 },{ q:'5,6% числа = 28. Число = ?', a:500 }],
-      [{ q:'0,17% числа = 5,1. Число = ?', a:3000 },{ q:'10% числа = 1,8. Число = ?', a:18 }],
-      [{ q:'43% числа ≈ 2121. Число ≈ ?', a:4932 },{ q:'25% числа = 10,3. Число = ?', a:41.2 }]
-    ],
     test: [
       { q:'1% от 800 = ?', a:8, opt:[8, 0.8, 80, 0.08] },
       { q:'25% от 60 = ?', a:15, opt:[15, 24, 30, 6] },
@@ -1292,11 +1272,6 @@ const lessonData = {
       { q:'Среднее арифметическое: 7,5 и 8,5 = ?', a:8 },
       { q:'(12 + 18 + 30) : 3 = ?', a:20 },
       { q:'Оценки: 4, 4, 5, 3. Средний балл = ?', a:4 }
-    ],
-    vars: [
-      [{ q:'Найдите среднее арифметическое: 83,4 и 84,5', a:83.95 },{ q:'Найдите среднее арифметическое: 0,2; 0,3 и 0,4', a:0.3 },{ q:'Оценки: 5, 3, 4, 4, 5, 5, 4, 3, 5, 4. Средний балл?', a:4.2 },{ q:'Пешеход: 2 ч — 5,2 км/ч, 2 ч — 4,8 км/ч, 1 ч — 4,5 км/ч. Средняя скорость?', a:4.9 }],
-      [{ q:'Найдите среднее арифметическое: 2,23; 2,26; 2,34 и 2,07', a:2.225 },{ q:'Найдите среднее арифметическое: 12; 15 и 18', a:15 },{ q:'Оценки: 4, 5, 3, 4, 5, 4. Средний балл?', a:4.17 },{ q:'Три числа: 42,43; 42,39; 42,64. Среднее арифметическое?', a:42.49 }],
-      [{ q:'Найдите среднее арифметическое: 100; 200; 300 и 400', a:250 },{ q:'Найдите среднее арифметическое: 7,5; 8,5 и 9,0', a:8.33 },{ q:'Оценки: 5, 5, 4, 3, 5, 4, 4. Средний балл?', a:4.29 },{ q:'Автомобиль: 90 км/ч — 3 ч, 120 км/ч — 2 ч. Средняя скорость?', a:102 }]
     ],
     test: [
       { q:'Среднее чисел 4 и 6 = ?', a:5, opt:[5, 4, 6, 10] },
@@ -1333,14 +1308,6 @@ const lessonData = {
       { q:'Автомобиль: 60 км/ч — 2 ч, 90 км/ч — 2 ч. Средняя скорость = ?', a:75 },
       { q:'(7 + 14 + 21 + 28) : 4 = ?', a:17.5 }
     ],
-    vars: [
-      [{ q:'Упр. 1.3в: Найдите среднее арифметическое: 2,23; 2,26; 2,34 и 2,07', a:2.225 },{ q:'Упр. 1.6: Среднее арифметическое: 42,43; 42,39; 42,64 и 42,57. Округлите до сотых.', a:42.51 }],
-      [{ q:'Упр. 1.3г: Среднее арифметическое: 6,276; 5,864; 7,223; 9,106; 8,728 и 3,003', a:6.7 },{ q:'Упр. 1.12: Среднее 14 чисел — 4,5, среднее 6 чисел — 2,75. Среднее всех 20 чисел?', a:3.975 }],
-      [{ q:'Упр. 1.8: Теплоход: 4,3 ч — 106,4 м/мин, 2,5 ч — 24 км/ч, 1,2 ч — 10 км/ч. Средняя скорость?', a:12.43 },{ q:'Упр. 1.13: Лыжник: 1-й участок — 3 ч, 2-й — 2 ч со скоростью 25 км/ч. Средняя — 28 км/ч. Скорость на 1-м участке?', a:30 }],
-      [{ q:'Упр. 1.14: Теплоход: по течению 20,8 км/ч, против — 14,4 км/ч. Найдите собственную скорость.', a:17.6 },{ q:'Упр. 1.12: Среднее 14 чисел — 4,5, среднее 6 чисел — 2,75. Найдите сумму всех 20 чисел.', a:79.5 }],
-      [{ q:'Упр. 1.6: Среднее арифметическое: 42,43; 42,39; 42,64 и 42,57. Округлите до десятых.', a:42.5 },{ q:'Упр. 1.13: Лыжник: 1-й участок — 3 ч, 2-й — 2 ч со скоростью 25 км/ч. Средняя — 28 км/ч. Найдите расстояние всего маршрута.', a:140 }],
-      [{ q:'Упр. 1.14: Теплоход: по течению 20,8 км/ч, против — 14,4 км/ч. Найдите скорость течения.', a:3.2 },{ q:'Упр. 1.8: Теплоход: 4,3 ч — 106,4 м/мин, 2,5 ч — 24 км/ч, 1,2 ч — 10 км/ч. Найдите расстояние всего маршрута.', a:99.45 }]
-    ],
     test: [
       { q:'Среднее чисел: 10, 20, 30 = ?', a:20, opt:[20, 30, 15, 60] },
       { q:'Среднее: 5, 10, 15, 20 = ?', a:12.5, opt:[12.5, 12, 15, 50] },
@@ -1375,14 +1342,6 @@ const lessonData = {
       { q:'120% от 150 = ?', a:180 },
       { q:'12 учеников — 3% всех. Всего = ?', a:400 },
       { q:'15% от 240 минус 10% от 300 = ?', a:6 }
-    ],
-    vars: [
-      [{ q:'Упр. 1.41: Переведите в число: 37%', a:0.37 },{ q:'Упр. 1.49: В бочке 450 л воды. Ушло 60%. Сколько осталось?', a:180 }],
-      [{ q:'Упр. 1.51: Книга 240 р., розничная на 28% больше. Розничная цена?', a:307.2 },{ q:'Упр. 1.54: 2% посетителей = 8 чел. Сколько всего?', a:400 }],
-      [{ q:'Упр. 1.45: 500 кг яблок, 1% продали 1-й день, 1/100 — 2-й. Сколько продали за 2 дня?', a:10 },{ q:'Упр. 1.56: Комната 18 м2 = 40% квартиры. Площадь квартиры?', a:45 }],
-      [{ q:'Упр. 1.50: 2420 кг слив, 5% в санаторий. Сколько на завод?', a:2299 },{ q:'Упр. 1.55: 650 км = 1% маршрута. Весь маршрут?', a:65000 }],
-      [{ q:'Упр. 1.59: Кроссовки 1260 р., скидка 15%. Цена во время акции?', a:1071 },{ q:'Упр. 1.60: 650 экспонатов, 130 — робототехника. Какой %?', a:20 }],
-      [{ q:'Упр. 1.57: 210 км = 15% пути. Длина пути?', a:1400 },{ q:'Упр. 1.61: Смесь: 130 г изюма, 270 г кураги, 200 г яблок. % яблок?', a:33.33 }]
     ],
     test: [
       { q:'1% от 800 = ?', a:8, opt:[8, 0.8, 80, 800] },
@@ -1419,14 +1378,6 @@ const lessonData = {
       { q:'Евразия — 55 млн км² из 150. 1 млн км² = 2,4°. Какой угол?', a:132 },
       { q:'Сектор 36° — это сколько % круга?', a:10 }
     ],
-    vars: [
-      [{ q:'Упр. 1.100: в варенье сахар — 25% массы. Найди угол сектора сахара.', a:90 },{ q:'Упр. 1.102: железняк содержит 0,7 железа. Найди угол сектора железа.', a:252 }],
-      [{ q:'Упр. 1.104: найди 50% от 180°.', a:90 },{ q:'Упр. 1.105: 15 мин от 1 ч — сколько %?', a:25 }],
-      [{ q:'Упр. 1.104: найди 10% от 90°.', a:9 },{ q:'Упр. 1.105: 8 г от 1 кг — сколько %?', a:0.8 }],
-      [{ q:'Упр. 1.105: 300 л от 1 м³ — сколько %?', a:30 },{ q:'Упр. 1.106: найди число, 10% которого равны 0,4.', a:4 }],
-      [{ q:'Упр. 1.106: найди число, 25% которого равны 1,6.', a:6.4 },{ q:'Упр. 1.105: 15 м от 1 км — сколько %?', a:1.5 }],
-      [{ q:'Упр. 1.113: масло — 4,8% молока. Сколько коров нужно для 6 т масла за 10 дней, если корова даёт 20 кг молока в день?', a:625 },{ q:'Упр. 1.100: найди угол сектора остальных компонентов варенья (не сахара).', a:270 }]
-    ],
     test: [
       { q:'1% от 360° = ?', a:3.6, opt:[3.6, 36, 0.36, 360] },
       { q:'5% от 360° = ?', a:18, opt:[18, 36, 1.8, 9] },
@@ -1461,14 +1412,6 @@ const lessonData = {
       { q:'Угол в 170° — тупой? (1 да, 2 нет)', a:1 },
       { q:'Угол в 60° — тупой? (1 да, 2 нет)', a:2 },
       { q:'Угол 45° + угол 45° = ?°', a:90 }
-    ],
-    vars: [
-      [{ q:'Упр. 1.109а: KND — острый (45°). MNK — какой? (острый=1/прямой=2/тупой=3)', a:3 },{ q:'Упр. 1.111: KOT = 30° + 45° = ?°', a:75 }],
-      [{ q:'Упр. 1.109б: KND — тупой (110°). MNK — какой? (острый=1/прямой=2/тупой=3)', a:1 },{ q:'Прямой угол + 30° = ?°', a:120 }],
-      [{ q:'Упр. 1.110а: Верно ли «угол меньший тупого — острый»? (1 да, 2 нет)', a:2 },{ q:'Упр. 1.110б: Половина тупого угла — острый? (1 да, 2 нет)', a:1 }],
-      [{ q:'Упр. 1.110в: Верно ли «угол больший прямого — тупой»? (1 да, 2 нет)', a:2 },{ q:'Упр. 1.110г: Сумма острых углов 30°+50° = ?° (больше 90°?)', a:80 }],
-      [{ q:'Упр. 1.126а: Угол между стрелками в 6 ч = ?°', a:180 },{ q:'Упр. 1.126б: Угол между стрелками в 3 ч = ?°', a:90 }],
-      [{ q:'Упр. 1.126г: Угол между стрелками в 10 ч = ?°', a:60 },{ q:'Упр. 1.112а: Построй MNK = 60°. Чему равны углы при основании (NB=NC)?', a:60 }]
     ],
     test: [
       { q:'Угол, меньший прямого, называют…', a:'острым', opt:['острым','тупым','развёрнутым','прямым'] },
@@ -1505,14 +1448,6 @@ const lessonData = {
       { q:'Треугольник 30°, 30°, 120°. Какой он по сторонам? (равнобедренный=1 / разносторонний=2)', a:1 },
       { q:'Сумма углов равностороннего треугольника = ?°', a:180 }
     ],
-    vars: [
-      [{ q:'Упр. 1.134а: Назовите вид треугольника по углам, если его углы 50°, 60°, 70°. (остроугольный=1 / прямоугольный=2 / тупоугольный=3)', a:1 },{ q:'Упр. 1.144: Найдите третий угол треугольника, если два других равны 65° и 25°', a:90 }],
-      [{ q:'Упр. 1.134б: Назовите вид треугольника по углам, если его углы 30°, 60°, 90°. (остроугольный=1 / прямоугольный=2 / тупоугольный=3)', a:2 },{ q:'Упр. 1.135б: У равнобедренного треугольника ∠A = 90°. Найдите угол при основании', a:45 }],
-      [{ q:'Упр. 1.134в: Назовите вид треугольника по углам, если его углы 40°, 50°, 90°. (остроугольный=1 / прямоугольный=2 / тупоугольный=3)', a:2 },{ q:'Упр. 1.145: Два угла треугольника равны, а третий равен 130°. Найдите каждый из равных углов', a:25 }],
-      [{ q:'Упр. 1.134г: Назовите вид треугольника по сторонам: 4 см, 4 см, 6 см. (равносторонний=1 / равнобедренный=2 / разносторонний=3)', a:2 },{ q:'Упр. 1.146: Два угла треугольника равны, а третий равен 70°. Найдите каждый из равных углов', a:55 }],
-      [{ q:'Упр. 1.134д: Назовите вид треугольника по сторонам: 3 см, 4 см, 5 см. (равносторонний=1 / равнобедренный=2 / разносторонний=3)', a:3 },{ q:'Упр. 1.140: Одна сторона в 2 раза больше другой, третья = 15 см, периметр 42 см. Найдите большую сторону', a:18 }],
-      [{ q:'Упр. 1.134е: Назовите вид треугольника по сторонам: 6 см, 6 см, 6 см. (равносторонний=1 / равнобедренный=2 / разносторонний=3)', a:1 },{ q:'Упр. 1.137а: Периметр равнобедренного треугольника 14 см, основание 4 см. Найдите боковую сторону', a:5 }]
-    ],
     test: [
       { q:'Треугольник, все углы которого острые, называют…', a:'остроугольным', opt:['остроугольным','прямоугольным','тупоугольным','равносторонним'] },
       { q:'Треугольник с углом 90° — какой?', a:'прямоугольный', opt:['остроугольный','прямоугольный','тупоугольный','разносторонний'] },
@@ -1531,23 +1466,21 @@ const lessonData = {
 let curLesson = null;
 let tfIdx=0, tfOk=0;
 let labIdx=0, labOk=0;
-let activeVar=0;
 
 function initLesson(id) {
   curLesson = lessonData[id];
-  tfIdx=0; tfOk=0; labIdx=0; labOk=0; activeVar=0;
+  tfIdx=0; tfOk=0; labIdx=0; labOk=0;
   document.getElementById('lessonTitle').textContent = '📖 ' + curLesson.title;
-  buildTF(); buildLab(); buildVariants(); buildTest();
+  buildTF(); buildLab(); buildTest();
   switchLessonTab(0);
   document.getElementById('tfResult').style.display='none';
   document.getElementById('labResult').style.display='none';
-  document.getElementById('varResult').style.display='none';
 }
 
 function switchLessonTab(i) {
   document.querySelectorAll('.lesson-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
   document.querySelectorAll('.lesson-tab-content').forEach((c,j)=>c.classList.toggle('active',j===i));
-  if (i === 3) startTest();
+  if (i === 2) startTest();
 }
 
 // ===== TEST (10 вопросов, 5 минут, оценка) =====
@@ -1696,46 +1629,6 @@ function labFinish() {
   const r=document.getElementById('labResult'); r.style.display='block';
   r.innerHTML=`<h3>Лабиринт пройден!</h3><div class="big" style="color:var(--${cls})">${labOk}/${curLesson.lab.length}</div><div class="msg">${msg}</div>`;
   updateLab();
-}
-
-// ===== VARIANTS =====
-function buildVariants() {
-  const tabs=document.getElementById('varTabs'); tabs.innerHTML='';
-  const cont=document.getElementById('varContent'); cont.innerHTML='';
-  curLesson.vars.forEach((v,i)=>{
-    const btn=document.createElement('button'); btn.className='variant-tab'+(i===0?' active':'');
-    btn.textContent='Вариант '+(i+1); btn.onclick=()=>switchVariant(i); tabs.appendChild(btn);
-    const div=document.createElement('div'); div.className='variant-content'+(i===0?' active':''); div.id='varC'+i;
-    v.forEach((ex,j)=>{
-      div.innerHTML+=`<div class="var-ex"><span class="ve-n">${j+1}</span><span class="ve-q">${ex.q}</span><input type="number" step="any" class="ve-i" id="ve${i}_${j}" placeholder="?"></div>`;
-    });
-    cont.appendChild(div);
-  });
-}
-function switchVariant(i) {
-  activeVar=i;
-  document.querySelectorAll('.variant-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
-  document.querySelectorAll('.variant-content').forEach((c,j)=>c.classList.toggle('active',j===i));
-  document.getElementById('varResult').style.display='none';
-}
-function checkVariants() {
-  let total=0,correct=0;
-  curLesson.vars.forEach((v,i)=>{
-    v.forEach((ex,j)=>{
-      total++;
-      const inp=document.getElementById('ve'+i+'_'+j); if(!inp) return;
-      const val=parseFloat(inp.value); inp.classList.remove('correct','wrong');
-      if(Math.abs(val-ex.a)<0.5){inp.classList.add('correct');correct++;}
-      else inp.classList.add('wrong');
-    });
-  });
-  const pct=Math.round(correct/total*100);
-  let cls='red',msg='Нужно подтянуть :(';
-  if(pct>=85){cls='green';msg='Отлично! 🎉';}
-  else if(pct>=60){cls='green';msg='Хорошо!';}
-  else if(pct>=40){msg='Есть над чем поработать';}
-  const r=document.getElementById('varResult'); r.style.display='block';
-  r.innerHTML=`<h3>Результат</h3><div class="big" style="color:var(--${cls})">${correct}/${total}</div><div class="msg">${msg}</div>`;
 }
 
 // ===== MATH MAZE GAME =====
