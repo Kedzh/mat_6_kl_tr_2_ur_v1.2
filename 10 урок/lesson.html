@@ -12,7 +12,9 @@
 .fig-item svg { width: 100%; height: auto; }
 .fig-caption { margin-top: 6px; font-weight: 700; color: var(--text); }
 .fig-desc { font-size: 0.9rem; color: var(--text-secondary); }
-.tri-svg g text { font-family: 'Nunito', sans-serif; font-weight: 700; fill: var(--text); }
+.tri-svg g text, .tri-svg > text:not(.angle-label) { font-family: 'Nunito', sans-serif; font-weight: 700; fill: var(--text); }
+.tri-svg text { font-size: 13px; font-weight: 700; }
+.tri-svg .angle-label { font-size: 12px; }
 .angle-arc { fill: none; stroke: var(--accent); stroke-width: 2; }
 .angle-label { fill: var(--accent); }
 .rightmark { fill: none; stroke: var(--green); stroke-width: 2; }
@@ -172,19 +174,6 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
   font-weight: 700; font-size: 1.35rem; min-width: 65px;
 }
 
-.error-example { background: var(--bg); border-radius: var(--radius-sm); padding: 24px; margin-bottom: 18px; border-left: 4px solid var(--accent); }
-.error-example .example-title { font-weight: 700; color: var(--accent); margin-bottom: 8px; font-size: 1.6rem; }
-.error-example pre {
-  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-  padding: 16px; font-family: 'Courier New', monospace; font-size: 1.6rem;
-  overflow-x: auto; margin-bottom: 12px; white-space: pre-wrap; line-height: 1.5;
-}
-.error-example textarea {
-  width: 100%; min-height: 80px; padding: 12px; border: 2px solid var(--border);
-  border-radius: 8px; font-family: inherit; font-size: 1.5rem; resize: vertical;
-  transition: border 0.3s; background: var(--card); color: var(--text);
-}
-.error-example textarea:focus { border-color: var(--primary); outline: none; }
 .btn-check {
   margin-top: 10px; padding: 12px 28px; background: var(--accent); color: white;
   border: none; border-radius: 8px; font-family: inherit; font-weight: 700;
@@ -192,9 +181,6 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
 }
 .btn-check:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(249,115,22,0.4); }
 .btn-check:disabled { opacity: 0.5; cursor: default; }
-.error-feedback { margin-top: 12px; padding: 14px; border-radius: 8px; display: none; animation: fadeIn 0.4s ease; font-size: 1.4rem; }
-.error-feedback.show { display: block; }
-.error-feedback .fb-title { font-weight: 700; margin-bottom: 6px; }
 
 .labyrinth-visual { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
 .labyrinth-step {
@@ -307,10 +293,9 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
 <nav id="mainNav">
   <button class="active" onclick="showSection(0)"><span class="nav-emoji">📖</span>Теория</button>
   <button onclick="showSection(1)"><span class="nav-emoji">🔥</span>Разминка</button>
-  <button onclick="showSection(2)"><span class="nav-emoji">🔎</span>Найди ошибку</button>
-  <button onclick="showSection(3)"><span class="nav-emoji">🧩</span>Лабиринт</button>
-  <button onclick="showSection(4)"><span class="nav-emoji">📝</span>Самостоятельная</button>
-  <button onclick="showSection(5)"><span class="nav-emoji">📚</span>Домашняя</button>
+  <button onclick="showSection(2)"><span class="nav-emoji">🧩</span>Лабиринт</button>
+  <button onclick="showSection(3)"><span class="nav-emoji">📝</span>Самостоятельная</button>
+  <button onclick="showSection(4)"><span class="nav-emoji">📚</span>Домашняя</button>
 </nav>
 
 <!-- ===== SECTION 0: THEORY ===== -->
@@ -324,10 +309,10 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
       <div class="fig-grid">
         <div class="fig-item">
           <svg viewBox="0 0 200 130" class="tri-svg">
-            <polygon points="30,110 170,110 120,20" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
-            <text x="22" y="122">A</text>
-            <text x="168" y="122">B</text>
-            <text x="114" y="15">C</text>
+            <polygon points="36,110 172,110 96,26" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
+            <text x="28" y="127">A</text>
+            <text x="174" y="127">B</text>
+            <text x="96" y="20" text-anchor="middle">C</text>
           </svg>
           <div class="fig-caption">△ ABC</div>
           <div class="fig-desc">Три точки A, B, C и три отрезка AB, BC, AC — стороны: AB, BC, AC</div>
@@ -341,35 +326,50 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
       <div class="fig-grid">
         <div class="fig-item">
           <svg viewBox="0 0 200 130" class="tri-svg">
-            <polygon points="35,110 170,110 120,25" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
-            <path d="M 120 25 L 105 42 M 120 25 L 132 39 M 120 25 L 113 48" class="angle-arc"/>
-            <text x="146" y="110" class="angle-label">70°</text>
-            <text x="35" y="100" class="angle-label">60°</text>
-            <text x="120" y="60" class="angle-label">50°</text>
-          </svg>
+<polygon points="52.9,112 147.1,112 110.7,12.0" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
+<polyline points="60.9,98.1 61.5,98.5 62.1,98.9 62.7,99.3 63.2,99.7 63.7,100.2 64.2,100.7 64.7,101.2 65.2,101.7 65.6,102.3 66.0,102.8 66.4,103.4 66.8,104.0 67.1,104.6 67.4,105.2 67.7,105.9 68.0,106.5 68.2,107.2 68.4,107.9 68.6,108.5 68.7,109.2 68.8,109.9 68.9,110.6 68.9,111.3 68.9,112.0" class="angle-arc"/>
+<text x="45.9" y="129">A</text>
+<text x="78.9" y="100.0" text-anchor="middle" class="angle-label">60°</text>
+<polyline points="131.1,112.0 131.1,111.2 131.1,110.4 131.3,109.6 131.4,108.8 131.6,108.0 131.8,107.2 132.1,106.4 132.4,105.7 132.7,104.9 133.1,104.2 133.5,103.5 134.0,102.8 134.4,102.2 135.0,101.5 135.5,100.9 136.1,100.4 136.7,99.8 137.3,99.3 138.0,98.8 138.7,98.4 139.4,98.0 140.1,97.6 140.8,97.3 141.6,97.0" class="angle-arc"/>
+<text x="148.1" y="129">B</text>
+<text x="122.5" y="97.8" text-anchor="middle" class="angle-label">70°</text>
+<polyline points="116.1,27.0 115.6,27.2 115.0,27.4 114.5,27.5 113.9,27.7 113.3,27.8 112.8,27.9 112.2,27.9 111.6,28.0 111.0,28.0 110.4,28.0 109.9,28.0 109.3,27.9 108.7,27.9 108.1,27.8 107.5,27.7 107.0,27.6 106.4,27.4 105.9,27.3 105.3,27.1 104.8,26.9 104.2,26.6 103.7,26.4 103.2,26.1 102.7,25.9" class="angle-arc"/>
+<text x="110.7" y="6.0" text-anchor="middle">C</text>
+<text x="108.1" y="44.9" text-anchor="middle" class="angle-label">50°</text>
+</svg>
           <div class="fig-caption">Остроугольный</div>
           <div class="fig-desc">все углы острые (&lt; 90°)</div>
         </div>
         <div class="fig-item">
           <svg viewBox="0 0 200 130" class="tri-svg">
-            <polygon points="35,110 170,110 35,25" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
-            <path d="M 35 88 L 57 88 L 57 110" class="rightmark"/>
-            <text x="62" y="108" class="angle-label">90°</text>
-            <text x="150" y="108" class="angle-label">57°</text>
-            <text x="15" y="70" class="angle-label">33°</text>
-          </svg>
+<polygon points="23.0,112 177.0,112 23.0,12.0" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
+<text x="16.0" y="129">A</text>
+<text x="44.2" y="93.8" text-anchor="middle" class="angle-label">90°</text>
+<line x1="23.0" y1="104.0" x2="31.0" y2="104.0" class="rightmark"/>
+<line x1="31.0" y1="112.0" x2="31.0" y2="104.0" class="rightmark"/>
+<polyline points="161.0,112.0 161.0,111.6 161.0,111.2 161.0,110.8 161.1,110.5 161.1,110.1 161.2,109.7 161.2,109.3 161.3,108.9 161.4,108.6 161.5,108.2 161.5,107.8 161.7,107.5 161.8,107.1 161.9,106.7 162.0,106.4 162.2,106.0 162.3,105.7 162.5,105.3 162.6,105.0 162.8,104.6 163.0,104.3 163.2,103.9 163.4,103.6 163.6,103.3" class="angle-arc"/>
+<text x="178.0" y="129">B</text>
+<text x="148.2" y="106.5" text-anchor="middle" class="angle-label">33°</text>
+<polyline points="36.4,20.7 36.1,21.3 35.7,21.8 35.2,22.3 34.8,22.8 34.3,23.3 33.9,23.7 33.4,24.2 32.9,24.6 32.3,25.0 31.8,25.4 31.2,25.7 30.6,26.1 30.1,26.4 29.5,26.6 28.8,26.9 28.2,27.1 27.6,27.3 26.9,27.5 26.3,27.7 25.6,27.8 25.0,27.9 24.3,27.9 23.7,28.0 23.0,28.0" class="angle-arc"/>
+<text x="23.0" y="6.0" text-anchor="middle">C</text>
+<text x="37.3" y="41.4" text-anchor="middle" class="angle-label">57°</text>
+</svg>
           <div class="fig-caption">Прямоугольный</div>
           <div class="fig-desc">один угол прямой (= 90°)</div>
         </div>
         <div class="fig-item">
           <svg viewBox="0 0 200 130" class="tri-svg">
-            <polygon points="42,110 170,110 60,30" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
-            <path d="M 60 30 L 42 52 M 60 30 L 62 52 M 60 30 L 50 40" class="angle-arc"/>
-            <path d="M 57 44 L 60 30 L 45 43" class="angle-arc"/>
-            <text x="75" y="106" class="angle-label">125°</text>
-            <text x="150" y="108" class="angle-label">30°</text>
-            <text x="74" y="60" class="angle-label">25°</text>
-          </svg>
+<polygon points="16.0,112 184.0,112 91.1,68.7" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
+<polyline points="29.9,104.0 30.0,104.3 30.2,104.6 30.3,104.9 30.5,105.2 30.6,105.6 30.8,105.9 30.9,106.2 31.0,106.5 31.2,106.9 31.3,107.2 31.4,107.5 31.5,107.9 31.5,108.2 31.6,108.5 31.7,108.9 31.8,109.2 31.8,109.6 31.9,109.9 31.9,110.3 31.9,110.6 32.0,111.0 32.0,111.3 32.0,111.7 32.0,112.0" class="angle-arc"/>
+<text x="9.0" y="129">A</text>
+<text x="45.0" y="107.2" text-anchor="middle" class="angle-label">30°</text>
+<polyline points="168.0,112.0 168.0,111.7 168.0,111.4 168.0,111.1 168.0,110.8 168.1,110.5 168.1,110.3 168.1,110.0 168.2,109.7 168.2,109.4 168.3,109.1 168.3,108.8 168.4,108.5 168.4,108.3 168.5,108.0 168.6,107.7 168.7,107.4 168.8,107.1 168.8,106.9 168.9,106.6 169.0,106.3 169.2,106.0 169.3,105.8 169.4,105.5 169.5,105.2" class="angle-arc"/>
+<text x="185.0" y="129">B</text>
+<text x="154.7" y="108.5" text-anchor="middle" class="angle-label">25°</text>
+<polyline points="105.6,75.4 104.9,76.7 104.1,77.9 103.2,79.1 102.2,80.1 101.1,81.1 100.0,82.0 98.7,82.7 97.4,83.4 96.0,83.9 94.6,84.3 93.2,84.5 91.8,84.6 90.3,84.6 88.9,84.5 87.4,84.2 86.0,83.9 84.7,83.3 83.4,82.7 82.1,81.9 81.0,81.1 79.9,80.1 78.9,79.0 78.0,77.9 77.2,76.7" class="angle-arc"/>
+<text x="91.1" y="62.7" text-anchor="middle">C</text>
+<text x="92.4" y="101.6" text-anchor="middle" class="angle-label">125°</text>
+</svg>
           <div class="fig-caption">Тупоугольный</div>
           <div class="fig-desc">один угол тупой (&gt; 90°)</div>
         </div>
@@ -381,30 +381,54 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
       <div class="fig-grid">
         <div class="fig-item">
           <svg viewBox="0 0 200 130" class="tri-svg">
-            <polygon points="35,110 170,110 102,22" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
-            <path d="M 35 110 l 22 0 M 35 110 l 16 -0 l 2 0" class="equal-tick"/>
-            <path d="M 102 22 l 15 12 M 102 22 l 11 16 l 2 -2" class="equal-tick"/>
-            <path d="M 170 110 l -16 12 M 170 110 l -11 16 l -2 -2" class="equal-tick"/>
-          </svg>
+<polygon points="42.3,112 157.7,112 100.0,12.0" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
+<line x1="100.0" y1="107.0" x2="100.0" y2="117.0" class="equal-tick"/>
+<line x1="66.8" y1="59.5" x2="75.5" y2="64.5" class="equal-tick"/>
+<line x1="124.5" y1="64.5" x2="133.2" y2="59.5" class="equal-tick"/>
+<polyline points="50.3,98.1 50.9,98.5 51.4,98.9 52.0,99.3 52.5,99.7 53.1,100.2 53.6,100.7 54.1,101.2 54.5,101.7 55.0,102.3 55.4,102.8 55.8,103.4 56.1,104.0 56.5,104.6 56.8,105.2 57.0,105.9 57.3,106.5 57.5,107.2 57.7,107.9 57.9,108.5 58.0,109.2 58.1,109.9 58.2,110.6 58.2,111.3 58.3,112.0" class="angle-arc"/>
+<text x="35.3" y="129">A</text>
+<text x="68.2" y="100.0" text-anchor="middle" class="angle-label">60°</text>
+<polyline points="141.7,112.0 141.8,111.3 141.8,110.6 141.9,109.9 142.0,109.2 142.1,108.5 142.3,107.9 142.5,107.2 142.7,106.5 143.0,105.9 143.2,105.2 143.5,104.6 143.9,104.0 144.2,103.4 144.6,102.8 145.0,102.3 145.5,101.7 145.9,101.2 146.4,100.7 146.9,100.2 147.5,99.7 148.0,99.3 148.6,98.9 149.1,98.5 149.7,98.1" class="angle-arc"/>
+<text x="158.7" y="129">B</text>
+<text x="131.8" y="100.0" text-anchor="middle" class="angle-label">60°</text>
+<polyline points="108.0,25.9 107.4,26.2 106.8,26.5 106.1,26.8 105.5,27.0 104.8,27.3 104.1,27.5 103.5,27.6 102.8,27.8 102.1,27.9 101.4,27.9 100.7,28.0 100.0,28.0 99.3,28.0 98.6,27.9 97.9,27.9 97.2,27.8 96.5,27.6 95.9,27.5 95.2,27.3 94.5,27.0 93.9,26.8 93.2,26.5 92.6,26.2 92.0,25.9" class="angle-arc"/>
+<text x="100.0" y="6.0" text-anchor="middle">C</text>
+<text x="100.0" y="45.0" text-anchor="middle" class="angle-label">60°</text>
+</svg>
           <div class="fig-caption">Равносторонний</div>
           <div class="fig-desc">все стороны равны, все углы по 60°</div>
         </div>
         <div class="fig-item">
           <svg viewBox="0 0 200 130" class="tri-svg">
-            <polygon points="35,110 170,110 115,18" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
-            <path d="M 115 18 l 6 18 M 115 18 l 17 8" class="equal-tick"/>
-            <path d="M 35 110 l 80 0 M 35 110 l 72 -12 l 9 10" class="equal-tick"/>
-            <text x="52" y="105" class="angle-label">∠B = ∠C</text>
-          </svg>
+<polygon points="22.2,112 177.8,112 141.4,12.0" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
+<line x1="100.0" y1="107.0" x2="100.0" y2="117.0" class="equal-tick"/>
+<line x1="78.6" y1="58.2" x2="85.0" y2="65.8" class="equal-tick"/>
+<polyline points="34.5,101.7 34.8,102.1 35.0,102.4 35.3,102.8 35.6,103.2 35.8,103.6 36.1,104.0 36.3,104.4 36.5,104.8 36.7,105.2 36.9,105.7 37.1,106.1 37.2,106.5 37.4,107.0 37.5,107.4 37.7,107.9 37.8,108.3 37.9,108.8 38.0,109.2 38.0,109.7 38.1,110.1 38.2,110.6 38.2,111.1 38.2,111.5 38.2,112.0" class="angle-arc"/>
+<text x="15.2" y="129">A</text>
+<text x="50.4" y="104.7" text-anchor="middle" class="angle-label">40°</text>
+<polyline points="161.8,112.0 161.8,111.2 161.9,110.4 162.0,109.6 162.1,108.8 162.3,108.0 162.5,107.2 162.8,106.4 163.1,105.7 163.4,104.9 163.8,104.2 164.2,103.5 164.7,102.8 165.2,102.2 165.7,101.5 166.2,100.9 166.8,100.4 167.4,99.8 168.0,99.3 168.7,98.8 169.4,98.4 170.1,98.0 170.8,97.6 171.6,97.3 172.3,97.0" class="angle-arc"/>
+<text x="178.8" y="129">B</text>
+<text x="153.2" y="97.8" text-anchor="middle" class="angle-label">70°</text>
+<polyline points="146.9,27.0 146.1,27.3 145.3,27.5 144.5,27.7 143.7,27.8 142.9,27.9 142.1,28.0 141.3,28.0 140.5,28.0 139.6,27.9 138.8,27.8 138.0,27.6 137.2,27.5 136.5,27.2 135.7,27.0 134.9,26.6 134.2,26.3 133.5,25.9 132.8,25.5 132.1,25.0 131.5,24.6 130.8,24.0 130.2,23.5 129.7,22.9 129.1,22.3" class="angle-arc"/>
+<text x="141.4" y="6.0" text-anchor="middle">C</text>
+<text x="133.6" y="44.0" text-anchor="middle" class="angle-label">70°</text>
+</svg>
           <div class="fig-caption">Равнобедренный</div>
           <div class="fig-desc">две стороны равны (AB = AC), углы при основании равны</div>
         </div>
         <div class="fig-item">
           <svg viewBox="0 0 200 130" class="tri-svg">
-            <polygon points="35,110 175,110 95,25" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
-            <text x="65" y="108" class="angle-label">разные</text>
-            <text x="128" y="48" class="angle-label">стороны</text>
-          </svg>
+<polygon points="29.2,112 170.8,112 113.1,12.0" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2.5"/>
+<polyline points="39.5,99.7 39.9,100.1 40.3,100.5 40.7,100.9 41.1,101.4 41.5,101.8 41.9,102.3 42.2,102.7 42.5,103.2 42.9,103.7 43.1,104.2 43.4,104.7 43.7,105.2 43.9,105.8 44.1,106.3 44.3,106.9 44.5,107.4 44.7,108.0 44.8,108.5 44.9,109.1 45.0,109.7 45.1,110.3 45.1,110.8 45.2,111.4 45.2,112.0" class="angle-arc"/>
+<text x="22.2" y="129">A</text>
+<text x="56.4" y="102.3" text-anchor="middle" class="angle-label">50°</text>
+<polyline points="154.8,112.0 154.8,111.3 154.9,110.6 155.0,109.9 155.1,109.2 155.2,108.5 155.4,107.9 155.6,107.2 155.8,106.5 156.0,105.9 156.3,105.2 156.6,104.6 157.0,104.0 157.3,103.4 157.7,102.8 158.1,102.3 158.6,101.7 159.0,101.2 159.5,100.7 160.0,100.2 160.5,99.7 161.1,99.3 161.6,98.9 162.2,98.5 162.8,98.1" class="angle-arc"/>
+<text x="171.8" y="129">B</text>
+<text x="144.8" y="100.0" text-anchor="middle" class="angle-label">60°</text>
+<polyline points="121.1,25.9 120.4,26.2 119.6,26.6 118.9,26.9 118.1,27.2 117.3,27.4 116.6,27.6 115.8,27.8 114.9,27.9 114.1,28.0 113.3,28.0 112.5,28.0 111.7,27.9 110.9,27.8 110.1,27.7 109.3,27.5 108.5,27.3 107.7,27.1 107.0,26.8 106.2,26.5 105.5,26.1 104.8,25.7 104.1,25.2 103.4,24.8 102.8,24.3" class="angle-arc"/>
+<text x="113.1" y="6.0" text-anchor="middle">C</text>
+<text x="110.5" y="44.9" text-anchor="middle" class="angle-label">70°</text>
+</svg>
           <div class="fig-caption">Разносторонний</div>
           <div class="fig-desc">все стороны разной длины</div>
         </div>
@@ -554,75 +578,8 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
   </div>
 </div>
 
-<!-- ===== SECTION 2: FIND ERROR ===== -->
+<!-- ===== SECTION 2: LABYRINTH ===== -->
 <div class="section" id="sec2">
-  <div class="card">
-    <h2><span class="emoji">🔎</span>Найди ошибку в решении</h2>
-    <p class="card-desc">Внимательно изучи каждое решение. Напиши, в чём ошибка.</p>
-
-    <div class="slide active" id="sec2-s0">
-      <div class="two-col">
-        <div class="error-example" id="err0">
-          <div class="example-title">Задача 1:</div>
-          <pre>Треугольник с углами
-30°, 60°, 90°.
-
-Определи вид по углам.
-
-Решение:
-все углы острые, значит
-треугольник остроугольный.
-Ответ: остроугольный</pre>
-          <textarea id="errInput0" placeholder="Напиши, в чём ошибка..."></textarea>
-          <button class="btn-check" onclick="checkError(0)">Проверить</button>
-          <div class="error-feedback" id="errFeedback0"></div>
-        </div>
-        <div class="error-example" id="err1">
-          <div class="example-title">Задача 2:</div>
-          <pre>Треугольник со сторонами
-5 см, 5 см, 3 см.
-
-Решение:
-все стороны равны, значит
-треугольник равносторонний.
-Ответ: равносторонний</pre>
-          <textarea id="errInput1" placeholder="Напиши, в чём ошибка..."></textarea>
-          <button class="btn-check" onclick="checkError(1)">Проверить</button>
-          <div class="error-feedback" id="errFeedback1"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide" id="sec2-s1">
-      <div class="error-example" id="err2">
-        <div class="example-title">Задача 3:</div>
-        <pre>В треугольнике два угла
-равны 55°.
-
-Найди третий угол.
-
-Решение:
-180° − 55° = 125°
-Ответ: 125°</pre>
-        <textarea id="errInput2" placeholder="Напиши, в чём ошибка..."></textarea>
-        <button class="btn-check" onclick="checkError(2)">Проверить</button>
-        <div class="error-feedback" id="errFeedback2"></div>
-      </div>
-    </div>
-
-    <div class="slide-nav">
-      <button id="sec2-prev" onclick="slideNav(2,-1)" disabled>◀ Назад</button>
-      <div class="slide-dots">
-        <div class="slide-dot active" onclick="slideTo(2,0)"></div>
-        <div class="slide-dot" onclick="slideTo(2,1)"></div>
-      </div>
-      <button id="sec2-next" onclick="slideNav(2,1)">Далее ▶</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== SECTION 3: LABYRINTH ===== -->
-<div class="section" id="sec3">
   <div class="card">
     <h2><span class="emoji">🧩</span>Математический лабиринт</h2>
     <p class="card-desc">Реши все примеры, чтобы пройти лабиринт!</p>
@@ -642,8 +599,8 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
   </div>
 </div>
 
-<!-- ===== SECTION 4: INDEPENDENT WORK ===== -->
-<div class="section" id="sec4">
+<!-- ===== SECTION 3: INDEPENDENT WORK ===== -->
+<div class="section" id="sec3">
   <div class="card">
     <h2><span class="emoji">📝</span>Самостоятельная работа</h2>
     <p class="card-desc">Выбери вариант и реши все примеры.</p>
@@ -692,8 +649,8 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
   </div>
 </div>
 
-<!-- ===== SECTION 5: HOMEWORK ===== -->
-<div class="section" id="sec5">
+<!-- ===== SECTION 4: HOMEWORK ===== -->
+<div class="section" id="sec4">
   <div class="card">
     <h2><span class="emoji">📚</span>Домашняя работа</h2>
     <p class="card-desc">Упражнения 1.134, 1.137, 1.140 (учебник, стр. 34–35)</p>
@@ -784,8 +741,8 @@ function showSection(idx) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-const slideCounts = { 1: 2, 2: 2 };
-const currentSlide = { 1: 0, 2: 0 };
+const slideCounts = { 1: 2 };
+const currentSlide = { 1: 0 };
 
 function slideNav(secIdx, dir) {
   const s = currentSlide[secIdx] + dir;
@@ -849,30 +806,6 @@ function updateTFProgress() {
   if (tfAnswered === 8) bar.style.background = tfCorrect === 8 ? 'linear-gradient(90deg,#22c55e,#34d399)' : 'linear-gradient(90deg,#eab308,#facc15)';
 }
 
-const errData = [
-  { correct: 'Ошибка: угол 90° — прямой, значит треугольник ПРЯМОУГОЛЬНЫЙ, а не остроугольный.', keywords: ['прямоуголь', '90', 'прямой'] },
-  { correct: 'Ошибка: равны только ДВЕ стороны (5 см и 5 см), значит треугольник РАВНОБЕДРЕННЫЙ. Для равностороннего нужны все три равные стороны.', keywords: ['равнобедр', 'две', '2'] },
-  { correct: 'Ошибка: надо отнять ОБА угла: 180° − 55° − 55° = 70° (а не 125°).', keywords: ['70', 'два', '55', 'оба'] }
-];
-
-function checkError(idx) {
-  const input = document.getElementById('errInput' + idx);
-  const fb = document.getElementById('errFeedback' + idx);
-  const btn = input.parentElement.querySelector('.btn-check');
-  if (input.value.trim().length < 3) { input.style.borderColor = 'var(--red)'; return; }
-  btn.disabled = true; input.disabled = true;
-  const userText = input.value.trim().toLowerCase();
-  const matchCount = errData[idx].keywords.filter(kw => userText.includes(kw.toLowerCase())).length;
-  fb.className = 'error-feedback show';
-  if (matchCount >= 1) {
-    fb.style.background = '#dcfce7'; fb.style.color = '#166534';
-    fb.innerHTML = '<div class="fb-title">✅ Хорошо! Ты нашёл ошибку!</div><div>' + errData[idx].correct + '</div>';
-  } else {
-    fb.style.background = '#fee2e2'; fb.style.color = '#991b1b';
-    fb.innerHTML = '<div class="fb-title">💡 Вот правильный ответ:</div><div>' + errData[idx].correct + '</div>';
-  }
-}
-
 const labSteps = [
   { q: 'Сумма углов треугольника = ?°', a: 180 },
   { q: 'Треугольник с углом 90° — какой? (остроугольный=1 / прямоугольный=2 / тупоугольный=3)', a: 2 },
@@ -927,7 +860,7 @@ function checkLabStep() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('sec3').classList.contains('active') && labCurrent < labSteps.length) checkLabStep();
+  if (e.key === 'Enter' && document.getElementById('sec2').classList.contains('active') && labCurrent < labSteps.length) checkLabStep();
 });
 
 const variants = [
