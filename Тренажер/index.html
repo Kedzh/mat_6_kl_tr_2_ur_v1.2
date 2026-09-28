@@ -1577,12 +1577,12 @@ function updateTFBar() {
 }
 function showTFResult() {
   const pct=Math.round(tfOk/curLesson.tf.length*100);
-  let cls='red',msg='Нужно подтянуть :(';
-  if(pct>=85){cls='green';msg='Отлично! 🎉';}
-  else if(pct>=60){cls='green';msg='Хорошо!';}
-  else if(pct>=40){msg='Есть над чем поработать';}
+  let grade='2', cls='red', msg='Нужно подтянуть :(';
+  if(pct>=90){grade='5'; cls='green'; msg='Отлично! 🎉';}
+  else if(pct>=75){grade='4'; cls='green'; msg='Хорошо!';}
+  else if(pct>=50){grade='3'; cls='green'; msg='Есть над чем поработать';}
   const r=document.getElementById('tfResult'); r.style.display='block';
-  r.innerHTML=`<h3>Разминка завершена</h3><div class="big" style="color:var(--${cls})">${tfOk}/${curLesson.tf.length}</div><div class="msg">${msg}</div>`;
+  r.innerHTML=`<h3>Разминка завершена</h3><div class="big" style="color:var(--${cls})">${tfOk}/${curLesson.tf.length}</div><div class="msg">${pct}% · Оценка: <b style="color:var(--${cls})">${grade}</b> — ${msg}</div>`;
 }
 
 // ===== LABYRINTH =====
@@ -1602,6 +1602,7 @@ function updateLab() {
     const dot=document.getElementById('labDot'+i);
     dot.className='lab-dot'+(i<labIdx?' done':i===labIdx?' current':'');
   });
+  if (labIdx >= curLesson.lab.length) return;
   document.getElementById('labLabel').textContent='Шаг '+(labIdx+1)+' из '+curLesson.lab.length;
   document.getElementById('labQ').textContent=curLesson.lab[labIdx].q;
   document.getElementById('labIn').value=''; document.getElementById('labIn').focus();
@@ -1622,12 +1623,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementB
 function labFinish() {
   document.getElementById('labCard').style.display='none';
   const pct=Math.round(labOk/curLesson.lab.length*100);
-  let cls='red',msg='Нужно подтянуть :(';
-  if(pct>=85){cls='green';msg='Отлично! 🎉';}
-  else if(pct>=60){cls='green';msg='Хорошо!';}
-  else if(pct>=40){msg='Есть над чем поработать';}
+  let grade='2', cls='red', msg='Нужно подтянуть :(';
+  if(pct>=90){grade='5'; cls='green'; msg='Отлично! 🎉';}
+  else if(pct>=75){grade='4'; cls='green'; msg='Хорошо!';}
+  else if(pct>=50){grade='3'; cls='green'; msg='Есть над чем поработать';}
   const r=document.getElementById('labResult'); r.style.display='block';
-  r.innerHTML=`<h3>Лабиринт пройден!</h3><div class="big" style="color:var(--${cls})">${labOk}/${curLesson.lab.length}</div><div class="msg">${msg}</div>`;
+  r.innerHTML=`<h3>Лабиринт пройден!</h3><div class="big" style="color:var(--${cls})">${labOk}/${curLesson.lab.length}</div><div class="msg">${pct}% · Оценка: <b style="color:var(--${cls})">${grade}</b> — ${msg}</div>`;
   updateLab();
 }
 
