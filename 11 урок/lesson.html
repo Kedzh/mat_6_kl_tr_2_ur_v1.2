@@ -252,13 +252,6 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
 .btn-check-all:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(249,115,22,0.4); }
 .score-display { text-align: center; margin-top: 16px; font-size: 2.3rem; font-weight: 700; display: none; animation: fadeIn 0.4s ease; }
 
-.hw-answer {
-  margin-top: 12px; padding: 16px; border-radius: 8px;
-  background: #dcfce7; color: #166534; font-size: 1.8rem; font-weight: 600;
-  animation: fadeIn 0.4s ease;
-}
-[data-theme="dark"] .hw-answer { background: #14532d; color: #bbf7d0; }
-
 .confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
 .confetti-piece { position: absolute; width: 10px; height: 10px; top: -20px; animation: confettiFall linear forwards; }
 @keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
@@ -662,10 +655,6 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
         <div class="example-title">Подсказка:</div>
         <p>Первая цифра (сотни) не может быть нулём. Десятки и единицы — каждая из цифр 0 или 1.</p>
       </div>
-      <div class="hw-answer" id="hw1Answer" style="display:none">
-        <p><strong>Ответ:</strong> {100; 101; 110; 111}. Всего 4 числа.</p>
-      </div>
-      <button class="btn-check" onclick="document.getElementById('hw1Answer').style.display='block'; this.disabled=true;">Показать ответ</button>
     </div>
 
     <div class="theory-box">
@@ -680,13 +669,6 @@ nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
         <div class="example-title">Подсказка:</div>
         <p>Сначала вычисли выражение в скобках, затем деление и умножение, потом сложение и вычитание.</p>
       </div>
-      <div class="hw-answer" id="hw2Answer" style="display:none">
-        <p><strong>Решение:</strong><br>
-        а) 97 548 + 69 432 = 166 980; 16 400 − 15 388 = 1 012; 166 980 : 1 012 = 165.<br>
-        б) 1 067 154 : 4 807 = 222; 707 · 390 = 275 730; 222 − 189 + 275 730 = 275 763.<br>
-        <strong>Ответ:</strong> а) 165; б) 275 763.</p>
-      </div>
-      <button class="btn-check" onclick="document.getElementById('hw2Answer').style.display='block'; this.disabled=true;">Показать ответ</button>
     </div>
 
   </div>
