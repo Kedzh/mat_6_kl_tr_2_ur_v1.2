@@ -35,6 +35,44 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   font-size: 1.3rem; width: 40px; height: 40px; border-radius: 50%;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
+.sheet-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 12px 6px 0; background: rgba(255,255,255,.2);
+  border: 3px solid rgba(255,255,255,.65); color: #fff;
+  font-size: 0.9rem; font-weight: 800; padding: 10px 20px; border-radius: 30px;
+  cursor: pointer; font-family: inherit; transition: all .2s;
+}
+.sheet-btn:active { transform: scale(.97); }
+.sheet-state { display: block; margin: 8px auto 0; width: fit-content; padding: 4px 12px; border-radius: 20px; font-size: .75rem; font-weight: 700; background: rgba(255,255,255,.2); }
+.sheet-state.on { background: #22c55e; color: #fff; }
+.sheet-state.off { background: rgba(0,0,0,.25); }
+.modal-back { position: fixed; inset: 0; background: rgba(15,23,42,.65); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
+.modal-back.show { display: flex; }
+.modal { background: var(--card); border: 2px solid var(--border); border-radius: 16px; max-width: 520px; width: 100%; max-height: 92vh; overflow: auto; padding: 22px; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+.modal h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+.modal .modal-sub { font-size: .82rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: .78rem; font-weight: 700; margin-bottom: 5px; color: var(--text-secondary); }
+.field input, .field select { width: 100%; padding: 11px 12px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: .95rem; background: var(--bg); color: var(--text); }
+.field input:focus, .field select:focus { border-color: var(--primary); outline: none; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.adv { margin-top: 14px; border: 2px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--bg); }
+.adv summary { cursor: pointer; font-size: .85rem; font-weight: 600; color: var(--text); opacity: .8; list-style: revert; }
+.adv summary:hover { opacity: 1; }
+.adv .field { margin-top: 12px; }
+.adv .btn-row { margin-top: 10px; }
+.hint { margin: 8px 0 0; font-size: .78rem; line-height: 1.5; opacity: .7; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.btn-row button { flex: 1; min-width: 130px; padding: 12px; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; background: var(--primary); color: #fff; }
+.btn-row button.ghost { background: var(--bg); color: var(--text); border: 2px solid var(--border); }
+.btn-row button.green { background: var(--green); }
+.sheet-status { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: .85rem; font-weight: 600; display: none; line-height: 1.5; }
+.sheet-status.show { display: block; }
+.sheet-status.ok { background: rgba(34,197,94,.16); color: var(--green); }
+.sheet-status.err { background: rgba(239,68,68,.16); color: var(--red); }
+.sheet-status.wait { background: var(--primary-light); color: var(--primary); }
+.report-note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: .85rem; font-weight: 700; background: var(--primary-light); color: var(--primary); display: none; line-height: 1.5; }
+.report-note.show { display: block; }
 
 .container { padding: 12px; max-width: 480px; margin: 0 auto; }
 
@@ -548,6 +586,8 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   <button class="theme-btn" onclick="toggleTheme()">🌓</button>
   <h1>🧮 Тренажёр</h1>
   <div class="subtitle">Арифметика с многозначными числами · 6 класс</div>
+  <button class="sheet-btn" id="sheetBtn" onclick="openSheetPanel()">📊 Таблица</button>
+  <span class="sheet-state off" id="sheetState"></span>
 </div>
 
 <div class="container">
@@ -610,6 +650,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div class="lesson-progress"><div class="lesson-progress-bar" id="tfBar" style="width:0%"></div><span class="lesson-progress-text" id="tfText">0 / 8</span></div>
     <div id="tfContainer"></div>
     <div class="lesson-result" id="tfResult" style="display:none"></div>
+    <div class="report-note" id="tfReport"></div>
   </div>
   <div class="lesson-tab-content" id="lessonTab1">
     <div class="lab-chain" id="labChain"></div>
@@ -623,6 +664,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
       <div class="lab-feedback" id="labFb"></div>
     </div>
     <div class="lesson-result" id="labResult" style="display:none"></div>
+    <div class="report-note" id="labReport"></div>
   </div>
   <div class="lesson-tab-content" id="lessonTab2">
     <div class="lesson-progress"><div class="test-timer" id="testTimer">⏱️ 5:00</div><span class="lesson-progress-text">10 вопросов · оценка 5/4/3/2</span></div>
@@ -630,6 +672,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div id="testContainer"></div>
     <button class="lesson-btn" onclick="finishTest()">Завершить тест</button>
     <div class="lesson-result" id="testResult" style="display:none"></div>
+    <div class="report-note" id="testReport"></div>
   </div>
 </div>
 
@@ -643,6 +686,44 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div id="hwDetail" style="display:none">
       <button class="nav-btn" id="hwBack" onclick="hwShowList()">← К списку заданий</button>
       <div id="hwDetailBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="sheetModal" onclick="if(event.target===this)closeSheetPanel()">
+  <div class="modal">
+    <h3>📊 Сбор результатов</h3>
+    <p class="modal-sub">Результат каждого прохождения уходит в таблицу учителя автоматически (вкладка «Математика»). Введите фамилию и имя — и всё.</p>
+
+    <div class="field"><label>Фамилия *</label><input type="text" id="stFam" autocomplete="off" placeholder="Иванов"></div>
+    <div class="field-row">
+      <div class="field"><label>Имя *</label><input type="text" id="stIm" autocomplete="off" placeholder="Пётр"></div>
+      <div class="field"><label>Класс</label><input type="number" id="stKlass" min="1" max="11" placeholder="6"></div>
+    </div>
+    <div class="field">
+      <label>Буква класса</label>
+      <select id="stLetter"></select>
+    </div>
+    <details class="adv">
+      <summary>Таблица уже подключена — менять не нужно</summary>
+      <div class="field">
+        <label>Адрес скрипта</label>
+        <input type="text" id="stUrl" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <p class="hint">Ученику это поле трогать не нужно. Оно открыто на случай, если учитель захочет подключить другую таблицу.</p>
+      <div class="btn-row">
+        <button class="green" onclick="testSheet()">🔌 Проверить связь</button>
+      </div>
+    </details>
+
+    <div class="sheet-status" id="stStatus"></div>
+
+    <div class="btn-row">
+      <button onclick="saveSheetSettings()">💾 Сохранить</button>
+      <button class="ghost" onclick="closeSheetPanel()">Закрыть</button>
+    </div>
+    <div class="btn-row">
+      <button class="ghost" onclick="clearSheetSettings()">Сбросить данные</button>
     </div>
   </div>
 </div>
@@ -855,6 +936,208 @@ function toggleTheme() {
   localStorage.setItem('theme', d ? 'light' : 'dark');
 }
 (function(){ if(localStorage.getItem('theme')==='dark') document.documentElement.setAttribute('data-theme','dark'); })();
+
+// ===== СБОР РЕЗУЛЬТАТОВ В GOOGLE ТАБЛИЦУ (по примеру тренажёра физики) =====
+const MAT_SHEET_KEY='matSheetUrl', MAT_STUDENT_KEY='matStudent', MAT_QUEUE_KEY='matReportQueue';
+const DEFAULT_SHEET_URL='https://script.google.com/macros/s/AKfycbwK07zhPUc6cxL5DmHhc9bteAR7QfdUV8KS2w9-JdjJPx0kPlKvGm4wWWJH7h0soktGaA/exec';
+const CLASS_LETTERS=['А','Б','В','Г','Д','Е','Ё','Ж','З','И','К','Л','М','Н','П','Р','Т','У','Ф','Х','Ц','Ч','Ш','Щ','Э','Ю','Я'];
+
+function sheetUrl(){
+  const v=(localStorage.getItem(MAT_SHEET_KEY)||'').trim();
+  return v||DEFAULT_SHEET_URL;
+}
+function splitCls(cls){
+  const m=String(cls||'').trim().match(/^(\d*)\s*([а-яёa-z]?)$/i);
+  if(!m)return {klass:String(cls||'').trim(),letter:''};
+  let letter=m[2]||'';
+  if(letter)letter=CLASS_LETTERS.find(l=>l===letter.toUpperCase())||letter.toUpperCase();
+  return {klass:m[1],letter:letter};
+}
+function getStudent(){
+  try{const v=JSON.parse(localStorage.getItem(MAT_STUDENT_KEY)||'null');return v&&typeof v==='object'?v:null}catch(e){return null}
+}
+function getStudentRecord(){
+  const s=getStudent();
+  if(s&&String(s.fam||'').trim()&&String(s.im||'').trim())return s;
+  const u=getUser();
+  if(u&&String(u.last||'').trim()&&String(u.first||'').trim()){
+    const c=splitCls(u.cls);
+    return {fam:u.last,im:u.first,klass:c.klass,letter:c.letter};
+  }
+  return null;
+}
+function studentReady(){return !!getStudentRecord()}
+function getQueue(){
+  try{const q=JSON.parse(localStorage.getItem(MAT_QUEUE_KEY)||'[]');return Array.isArray(q)?q:[]}catch(e){return []}
+}
+function setQueue(q){localStorage.setItem(MAT_QUEUE_KEY,JSON.stringify(q))}
+function updateSheetBadge(){
+  const el=document.getElementById('sheetState');
+  if(!el)return;
+  const on=!!sheetUrl();
+  el.className='sheet-state '+(on?'on':'off');
+  el.textContent=on?(studentReady()?'📊 результаты отправляются':'📊 нужно ввести фамилию'):'таблица не подключена';
+}
+function fillLetterSelect(){
+  const sel=document.getElementById('stLetter');
+  const sr=getStudentRecord();
+  const cur=(sr&&sr.letter)||'А';
+  sel.innerHTML='';
+  CLASS_LETTERS.forEach(l=>{
+    const o=document.createElement('option');
+    o.value=l;o.textContent=l;
+    sel.appendChild(o);
+  });
+  sel.value=cur;
+}
+function openSheetPanel(){
+  const s=getStudent()||getStudentRecord()||{};
+  document.getElementById('stFam').value=s.fam||'';
+  document.getElementById('stIm').value=s.im||'';
+  document.getElementById('stKlass').value=s.klass||'';
+  document.getElementById('stUrl').value=sheetUrl();
+  fillLetterSelect();
+  setSheetStatus('','');
+  const q=getQueue().length;
+  if(q)setSheetStatus('wait','В очереди '+q+' '+plural(q,'результат','результата','результатов')+'. Введите фамилию и имя, затем нажмите «Сохранить» — они уйдут в таблицу.');
+  document.getElementById('sheetModal').classList.add('show');
+}
+function closeSheetPanel(){document.getElementById('sheetModal').classList.remove('show')}
+function setSheetStatus(kind,text){
+  const el=document.getElementById('stStatus');
+  el.className='sheet-status'+(kind?' show '+kind:'');
+  el.textContent=text||'';
+}
+function plural(n,a,b,c){
+  const m=n%100,k=m%10;
+  if(m>=11&&m<=14)return c;
+  if(k===1)return a;
+  if(k>=2&&k<=4)return b;
+  return c;
+}
+function saveSheetSettings(){
+  const fam=document.getElementById('stFam').value.trim();
+  const im=document.getElementById('stIm').value.trim();
+  const klass=document.getElementById('stKlass').value.trim();
+  const letter=document.getElementById('stLetter').value;
+  const url=document.getElementById('stUrl').value.trim();
+  localStorage.setItem(MAT_STUDENT_KEY,JSON.stringify({fam,im,klass,letter}));
+  if(url&&url!==DEFAULT_SHEET_URL)localStorage.setItem(MAT_SHEET_KEY,url);else localStorage.removeItem(MAT_SHEET_KEY);
+  if(fam&&im)localStorage.setItem('trainUser',JSON.stringify({last:fam,first:im,cls:klass+letter}));else localStorage.removeItem('trainUser');
+  showUser();
+  updateSheetBadge();
+  if(!url){
+    setSheetStatus('err','Адрес скрипта не указан — используется встроенный адрес, отправка работает.');
+  }else if(!fam||!im){
+    setSheetStatus('wait','Введите фамилию и имя — без них результат нельзя записать в таблицу.');
+  }else{
+    setSheetStatus('ok','Сохранено.');
+  }
+  flushReports();
+}
+function clearSheetSettings(){
+  localStorage.removeItem(MAT_SHEET_KEY);
+  localStorage.removeItem(MAT_STUDENT_KEY);
+  setQueue([]);
+  openSheetPanel();
+  updateSheetBadge();
+  setSheetStatus('wait','Данные очищены. Введите их заново. Адрес скрипта уже встроен — ученику ничего вводить не нужно.');
+}
+function testSheet(){
+  const url=sheetUrl();
+  if(!url){setSheetStatus('err','Сначала вставьте адрес скрипта и нажмите «Сохранить».');return}
+  setSheetStatus('wait','Проверяю связь...');
+  const ctrl=new AbortController();
+  const to=setTimeout(()=>ctrl.abort(),10000);
+  fetch(url+'?ping=1',{signal:ctrl.signal,redirect:'follow'})
+    .then(r=>r.json())
+    .then(d=>{
+      clearTimeout(to);
+      if(d&&d.ok)setSheetStatus('ok','✅ Связь есть. Таблица: '+(d.name||'без названия')+', столбцов: '+d.columns);
+      else setSheetStatus('err','❌ Скрипт ответил ошибкой: '+((d&&d.error)||'неизвестно'));
+    })
+    .catch(e=>{
+      clearTimeout(to);
+      setSheetStatus('err','❌ Не удалось связаться: '+(e.name==='AbortError'?'превышено время ожидания':e.message));
+    });
+}
+function sheetNote(elId,text){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  if(!text){el.className='report-note';el.textContent='';return}
+  el.className='report-note show';
+  el.textContent=text;
+}
+function postReport(p){
+  return fetch(sheetUrl(),{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(p)
+  }).then(()=>true).catch(()=>false);
+}
+function sendReport(p,noteId){
+  return postReport(p).then(ok=>{
+    if(ok){sheetNote(noteId,'📊 Отправлено в таблицу: '+p.topic+' · '+p.type+' · '+p.ok+' из '+p.total+' ('+p.pct+'%)')}
+    else{
+      setQueue(getQueue().concat([p]));
+      sheetNote(noteId,'📊 Не удалось отправить. Результат сохранён и уйдёт при следующем «Сохранить».');
+      setSheetStatus('err','❌ Связь не удалась. Результаты в очереди: '+getQueue().length+'.');
+      updateSheetBadge();
+    }
+    return ok;
+  });
+}
+function flushReports(){
+  const q=getQueue();
+  if(!q.length){updateSheetBadge();return}
+  if(!sheetUrl()||!studentReady()){updateSheetBadge();return}
+  const s=getStudentRecord();
+  const rows=q.map(p=>({...p,fam:s.fam,im:s.im,klass:s.klass,letter:s.letter}));
+  setQueue([]);
+  rows.reduce((chain,p)=>chain.then(acc=>postReport(p).then(ok=>{acc.push({ok:ok,p:p});return acc})),Promise.resolve([]))
+    .then(res=>{
+      const failed=res.filter(r=>!r.ok).map(r=>r.p);
+      if(failed.length)setQueue(getQueue().concat(failed));
+      if(failed.length)setSheetStatus('err','❌ Отправлено '+(rows.length-failed.length)+' из '+rows.length+'. Не удалось: '+failed.length+'.');
+      else setSheetStatus('ok','✅ Отправлено накопленных результатов: '+rows.length+'.');
+      updateSheetBadge();
+    });
+}
+function reportResult(typeName,ok,total,sec,noteId){
+  const pct=total?Math.round(ok/total*100):0;
+  const now=new Date();
+  const t=TOPICS.find(x=>x.id===currentTopic);
+  const topic=curLesson&&curLesson.title?curLesson.title:(t?t.label:currentTopic);
+  const p={
+    tab:'Математика',
+    date:String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear(),
+    time:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'),
+    fam:'',im:'',klass:'',letter:'',
+    topic:topic,
+    type:typeName,
+    ok:ok,total:total,pct:pct,sec:sec
+  };
+  sheetNote(noteId,'');
+  if(!sheetUrl()){
+    sheetNote(noteId,'📊 Таблица не подключена. Нажми «📊 Таблица» в шапке, чтобы собирать результаты.');
+    updateSheetBadge();
+    return;
+  }
+  const st=getStudentRecord();
+  if(!st){
+    setQueue(getQueue().concat([p]));
+    sheetNote(noteId,'📊 Введите фамилию и имя в «📊 Таблица» — результат ждёт отправки.');
+    openSheetPanel();
+    updateSheetBadge();
+    return;
+  }
+  p.fam=st.fam;p.im=st.im;p.klass=st.klass;p.letter=st.letter;
+  sendReport(p,noteId);
+  flushReports();
+  updateSheetBadge();
+}
+updateSheetBadge();
 
 // ===== PROFILE =====
 function getUser() { try { return JSON.parse(localStorage.getItem('trainUser')); } catch(e) { return null; } }
@@ -1466,6 +1749,7 @@ const lessonData = {
 let curLesson = null;
 let tfIdx=0, tfOk=0;
 let labIdx=0, labOk=0;
+let curSecStart = Date.now();
 
 function initLesson(id) {
   curLesson = lessonData[id];
@@ -1480,6 +1764,7 @@ function initLesson(id) {
 function switchLessonTab(i) {
   document.querySelectorAll('.lesson-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
   document.querySelectorAll('.lesson-tab-content').forEach((c,j)=>c.classList.toggle('active',j===i));
+  curSecStart = Date.now();
   if (i === 2) startTest();
 }
 
@@ -1542,6 +1827,7 @@ function finishTest() {
   r.innerHTML = `<h3>Тест завершён</h3><div class="big" style="color:var(--${cls})">${correct}/${total}</div><div class="msg">${pct}% · Оценка: <b style="color:var(--${cls})">${grade}</b> — ${msg}</div>`;
   const a = document.getElementById('testAlert'); a.style.display = 'block';
   a.textContent = testTime <= 0 ? '⏱️ Время вышло — тест завершён автоматически' : '✅ Тест завершён по кнопке';
+  reportResult('Тест', correct, total, Math.round((Date.now()-curSecStart)/1000), 'testReport');
 }
 
 // ===== TRUE / FALSE =====
@@ -1583,6 +1869,7 @@ function showTFResult() {
   else if(pct>=50){grade='3'; cls='green'; msg='Есть над чем поработать';}
   const r=document.getElementById('tfResult'); r.style.display='block';
   r.innerHTML=`<h3>Разминка завершена</h3><div class="big" style="color:var(--${cls})">${tfOk}/${curLesson.tf.length}</div><div class="msg">${pct}% · Оценка: <b style="color:var(--${cls})">${grade}</b> — ${msg}</div>`;
+  reportResult('Разминка', tfOk, curLesson.tf.length, Math.round((Date.now()-curSecStart)/1000), 'tfReport');
 }
 
 // ===== LABYRINTH =====
@@ -1630,6 +1917,7 @@ function labFinish() {
   const r=document.getElementById('labResult'); r.style.display='block';
   r.innerHTML=`<h3>Лабиринт пройден!</h3><div class="big" style="color:var(--${cls})">${labOk}/${curLesson.lab.length}</div><div class="msg">${pct}% · Оценка: <b style="color:var(--${cls})">${grade}</b> — ${msg}</div>`;
   updateLab();
+  reportResult('Лабиринт', labOk, curLesson.lab.length, Math.round((Date.now()-curSecStart)/1000), 'labReport');
 }
 
 // ===== MATH MAZE GAME =====
