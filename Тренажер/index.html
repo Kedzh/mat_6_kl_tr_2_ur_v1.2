@@ -667,7 +667,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div class="report-note" id="labReport"></div>
   </div>
   <div class="lesson-tab-content" id="lessonTab2">
-    <div class="lesson-progress"><div class="test-timer" id="testTimer">⏱️ 5:00</div><span class="lesson-progress-text">10 вопросов · оценка 5/4/3/2</span></div>
+    <div class="lesson-progress"><div class="test-timer" id="testTimer">⏱️ 15:00</div><span class="lesson-progress-text">10 вопросов · оценка 5/4/3/2</span></div>
     <div class="test-count" id="testAlert" style="display:none"></div>
     <div id="testContainer"></div>
     <button class="lesson-btn" onclick="finishTest()">Завершить тест</button>
@@ -1815,7 +1815,7 @@ function switchLessonTab(i) {
 }
 
 // ===== TEST (10 вопросов, 5 минут, оценка) =====
-let testTime = 300, testTimer = null, testActive = false, testFinished = false;
+let testTime = 900, testTimer = null, testActive = false, testFinished = false;
 function buildTest() {
   const c = document.getElementById('testContainer'); c.innerHTML = '';
   if (!curLesson.test) return;
@@ -1843,7 +1843,7 @@ function startTest() {
   if (!curLesson.test || testActive || testFinished) return;
   const els = document.getElementById('testContainer').querySelectorAll('.ve-i');
   if (!els.length) { buildTest(); }
-  testActive = true; testTime = 300; renderTestTimer();
+  testActive = true; testTime = 900; renderTestTimer();
   stopTestTimer();
   testTimer = setInterval(() => {
     testTime--;
