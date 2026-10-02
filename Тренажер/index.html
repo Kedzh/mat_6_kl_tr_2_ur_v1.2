@@ -501,6 +501,12 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .lesson-tab-content { display: none; animation: fadeIn 0.3s ease; }
 .lesson-tab-content.active { display: block; }
 
+.theory-block { background: var(--card); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); margin-bottom: 10px; border-left: 4px solid var(--primary); }
+.theory-block h4 { margin: 0 0 8px; font-size: 1rem; color: var(--primary); }
+.theory-block ul { margin: 0; padding-left: 20px; }
+.theory-block li { margin-bottom: 6px; font-size: 0.92rem; line-height: 1.45; }
+.theory-hint { background: var(--primary-light); border: 2px dashed var(--primary); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 10px; font-size: 0.8rem; font-weight: 700; text-align: center; }
+
 .lesson-progress { position: relative; background: var(--border); border-radius: 20px; height: 28px; overflow: hidden; margin-bottom: 12px; }
 .lesson-progress-bar { height: 100%; background: linear-gradient(90deg, var(--green), #34d399); border-radius: 20px; transition: width 0.4s ease; }
 .lesson-progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: 700; color: var(--text); }
@@ -642,17 +648,21 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <span class="nav-title" id="lessonTitle">📖 Урок</span>
   </div>
   <div class="lesson-tabs">
-    <button class="lesson-tab active" onclick="switchLessonTab(0)">🔥 Разминка</button>
-    <button class="lesson-tab" onclick="switchLessonTab(1)">🚶 Лабиринт</button>
-    <button class="lesson-tab" onclick="switchLessonTab(2)">⏱️ Тест</button>
+    <button class="lesson-tab active" onclick="switchLessonTab(0)">📖 Теория</button>
+    <button class="lesson-tab" onclick="switchLessonTab(1)">🔥 Разминка</button>
+    <button class="lesson-tab" onclick="switchLessonTab(2)">🚶 Лабиринт</button>
+    <button class="lesson-tab" onclick="switchLessonTab(3)">⏱️ Тест</button>
   </div>
   <div class="lesson-tab-content active" id="lessonTab0">
+    <div class="theory-list" id="theoryContainer"></div>
+  </div>
+  <div class="lesson-tab-content" id="lessonTab1">
     <div class="lesson-progress"><div class="lesson-progress-bar" id="tfBar" style="width:0%"></div><span class="lesson-progress-text" id="tfText">0 / 8</span></div>
     <div id="tfContainer"></div>
     <div class="lesson-result" id="tfResult" style="display:none"></div>
     <div class="report-note" id="tfReport"></div>
   </div>
-  <div class="lesson-tab-content" id="lessonTab1">
+  <div class="lesson-tab-content" id="lessonTab2">
     <div class="lab-chain" id="labChain"></div>
     <div class="lab-card" id="labCard">
       <div class="lab-step-label" id="labLabel">Шаг 1 из 8</div>
@@ -666,7 +676,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div class="lesson-result" id="labResult" style="display:none"></div>
     <div class="report-note" id="labReport"></div>
   </div>
-  <div class="lesson-tab-content" id="lessonTab2">
+  <div class="lesson-tab-content" id="lessonTab3">
     <div class="lesson-progress"><div class="test-timer" id="testTimer">⏱️ 15:00</div><span class="lesson-progress-text">10 вопросов · оценка 5/4/3/2</span></div>
     <div class="test-count" id="testAlert" style="display:none"></div>
     <div id="testContainer"></div>
@@ -1154,14 +1164,14 @@ function checkUser() { showUser(); goTopics(); return true; }
 let currentTopic = '';
 const TOPICS = [
   { id:'homework', label:'📌 Домашняя работа', icon:'📚', desc:'Задания на дом по урокам 4–11' },
-  { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'🧮', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
-  { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'🧮', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
-  { id:'lesson6', label:'Урок 6: Проценты', icon:'💯', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
-  { id:'lesson7', label:'Урок 7: Проценты', icon:'📖', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
-  { id:'lesson8', label:'Урок 8: Круговые диаграммы', icon:'🥧', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
-  { id:'lesson9', label:'Урок 9: Виды углов', icon:'📐', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
-  { id:'lesson10', label:'Урок 10: Виды треугольников', icon:'🔺', desc:'Разминка, лабиринт, самостоятельная работа, тест' },
-  { id:'lesson11', label:'Урок 11: Понятие множества', icon:'🧩', desc:'Разминка, лабиринт, самостоятельная работа, тест' }
+  { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'🧮', desc:'Теория, разминка, лабиринт, тест' },
+  { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'🧮', desc:'Теория, разминка, лабиринт, тест' },
+  { id:'lesson6', label:'Урок 6: Проценты', icon:'💯', desc:'Теория, разминка, лабиринт, тест' },
+  { id:'lesson7', label:'Урок 7: Проценты', icon:'📖', desc:'Теория, разминка, лабиринт, тест' },
+  { id:'lesson8', label:'Урок 8: Круговые диаграммы', icon:'🥧', desc:'Теория, разминка, лабиринт, тест' },
+  { id:'lesson9', label:'Урок 9: Виды углов', icon:'📐', desc:'Теория, разминка, лабиринт, тест' },
+  { id:'lesson10', label:'Урок 10: Виды треугольников', icon:'🔺', desc:'Теория, разминка, лабиринт, тест' },
+  { id:'lesson11', label:'Урок 11: Понятие множества', icon:'🧩', desc:'Теория, разминка, лабиринт, тест' }
 ];
 function goTopics() { showScreen('screenTopics'); renderTopics(); }
 function renderTopics() {
@@ -1512,6 +1522,20 @@ function launchConfetti() {
 const lessonData = {
   lesson7: {
     title: 'Урок 7: Проценты',
+    theory: [
+      { h: 'Полоска-100%', items: [
+        'Число рисуют полоской из 100 клеток: вся полоска — 100%, закрашенные части — проценты.',
+        '1% = полоска : 100; 50% — половина полоски, 25% — четвертинка.'
+      ]},
+      { h: 'Решение через 1%', items: [
+        'Найти N% от числа: сначала 1%, затем × N. Пример: 45% от 1500 → 1500:100=15, 15×45 = 675.',
+        'Найти число по проценту: 1% = часть : N, затем × 100. Пример: 80 уч. = 20% → 1% = 4, всего 400.',
+        'Сколько % составляет часть: часть : целое × 100. Пример: 528 : 1600 = 0,33 → 33%.'
+      ]},
+      { h: '«Ступенчатые» проценты', items: [
+        'Проценты могут браться от части: берёзы 30% от 2400 = 720; из них 10% = 72.'
+      ]}
+    ],
     tf: [
       { q:'1% от 800 — это 8.', a:true, ex:'Верно! 800 × 1 : 100 = 8.' },
       { q:'50% от числа — это его половина.', a:true, ex:'Верно! 50% = 1/2, это половина числа.' },
@@ -1547,6 +1571,20 @@ const lessonData = {
   },
   lesson4: {
     title: 'Урок 4: Среднее арифметическое',
+    theory: [
+      { h: 'Определение', items: [
+        'Среднее арифметическое — частное от деления суммы чисел на их количество.',
+        'Формула: Ср. = (a₁ + a₂ + … + aₙ) : n, где n — число слагаемых.',
+        'Пример: 8; 9 и 4 кг → (8 + 9 + 4) : 3 = 7 (кг).'
+      ]},
+      { h: 'Средняя скорость', items: [
+        'Средняя скорость — путь, пройденный за единицу времени: ср. скорость = Путь : Время.',
+        'Пример: 4 ч по 16,1 км/ч и 3 ч по 15,4 км/ч → 110,6 : 7 = 15,8 км/ч.'
+      ]},
+      { h: 'Где применяется', items: [
+        'Средняя температура воздуха, средний балл за четверть, средняя урожайность, средняя скорость.'
+      ]}
+    ],
     tf: [
       { q:'Среднее арифметическое чисел 4 и 6 равно 5.', a:true, ex:'Верно! (4 + 6) : 2 = 10 : 2 = 5.' },
       { q:'Чтобы найти среднее арифметическое, нужно умножить все числа друг на друга.', a:false, ex:'Неверно! Нужно сложить все числа и разделить на их количество.' },
@@ -1582,6 +1620,19 @@ const lessonData = {
   },
   lesson5: {
     title: 'Урок 5: Среднее арифметическое — уровень 2',
+    theory: [
+      { h: 'Повторение', items: [
+        'Среднее арифметическое = сумма чисел : их количество.',
+        'Средний балл: 10×5 + 12×4 + 3×3 = 107, 107 : 25 = 4,28 ≈ 4,3.'
+      ]},
+      { h: 'Важно помнить', items: [
+        'Среднее не обязано быть целым и всегда лежит между самым маленьким и самым большим числом.',
+        'Средняя скорость ≠ среднему арифметическому скоростей, если время на участках разное!'
+      ]},
+      { h: 'Пример', items: [
+        '15 км/ч — 2 ч и 10 км/ч — 3 ч: путь = 15×2 + 10×3 = 60 км, время 5 ч, скорость = 12 км/ч.'
+      ]}
+    ],
     tf: [
       { q:'Среднее арифметическое чисел 3, 7 и 10 равно 6.', a:true, ex:'Верно! (3 + 7 + 10) : 3 = 20 : 3 = 6,67 ≈ 6.' },
       { q:'Если все числа одинаковые, среднее арифметическое равно любому из них.', a:true, ex:'Верно! Если все числа равны a, то (a+a+...+a) : n = a.' },
@@ -1617,6 +1668,17 @@ const lessonData = {
   },
   lesson6: {
     title: 'Урок 6: Проценты',
+    theory: [
+      { h: 'Что такое процент', items: [
+        'Процент — сотая доля числа: 1% = 1/100 = 0,01, обозначается знаком %.',
+        '100% — само число; 50% — половина; 25% — четверть; 1% — сотая часть.'
+      ]},
+      { h: 'Три главные задачи', items: [
+        'Найти N% от числа: число × N : 100. Пример: 45% от 1500 = 675.',
+        'Найти число по его N%: (часть × 100) : N. Пример: 80 уч. — это 20%, всего 400.',
+        'Сколько % составляет часть: (часть : целое) × 100. Пример: 528 : 1600 × 100 = 33%.'
+      ]}
+    ],
     tf: [
       { q:'1% от 500 равно 5.', a:true, ex:'Верно! 500 × 1 : 100 = 5.' },
       { q:'Чтобы найти 25% числа, нужно разделить его на 4.', a:true, ex:'Верно! 25% = 25/100 = 1/4, значит делим на 4.' },
@@ -1652,6 +1714,20 @@ const lessonData = {
   },
   lesson8: {
     title: 'Урок 8: Круговые диаграммы',
+    theory: [
+      { h: 'Круг и проценты', items: [
+        'Круг — это целое: 100% = 360°. Значит 1% круга = 360° : 100 = 3,6°.',
+        'Угол сектора в градусах = проценты × 3,6°. Пример: 25% → 90°; 30% → 108°.',
+        'Сумма углов всех секторов диаграммы всегда равна 360°.'
+      ]},
+      { h: 'Если даны части в единицах', items: [
+        '360° раздели на сумму всех частей и умножь на каждую часть.',
+        'Пример: сумма материков 150 → 1 млн км² = 360° : 150 = 2,4°.'
+      ]},
+      { h: 'Как построить', items: [
+        'Найди сумму (или 100%), переведи части в градусы, проведи радиусы-секторы, закрась и подпиши.'
+      ]}
+    ],
     tf: [
       { q:'В круге 360°, то есть 100%.', a:true, ex:'Верно! 180° + 180° = 360° = 100%.' },
       { q:'25% круга — это сектор 90°.', a:true, ex:'Верно! 25 × 3,6 = 90°.' },
@@ -1687,6 +1763,17 @@ const lessonData = {
   },
   lesson9: {
     title: 'Урок 9: Виды углов',
+    theory: [
+      { h: 'Угол и его виды', items: [
+        'Угол — фигура из вершины и двух лучей-сторон: ∠ABC — вершина B, стороны BA и BC.',
+        'Острый < 90°; прямой = 90°; тупой — больше прямого, но меньше развёрнутого (90° < α < 180°); развёрнутый = 180°.',
+        'Прямой угол — это половина развёрнутого угла.'
+      ]},
+      { h: 'Измерение транспортиром', items: [
+        'Центр транспортира — на вершину, одна сторона — вдоль основания, вторая сторона показывает градусную меру.',
+        'Пример: вторая сторона на делении 60° → угол 60° — острый.'
+      ]}
+    ],
     tf: [
       { q:'Угол — это фигура, состоящая из вершины и двух лучей, исходящих из этой точки.', a:true, ex:'Верно! Угол = вершина + два луча (стороны угла).' },
       { q:'Угол, меньший прямого, называют тупым.', a:false, ex:'Неверно! Угол, меньший прямого, называют ОСТРЫМ. Тупой угол БОЛЬШЕ прямого.' },
@@ -1722,6 +1809,22 @@ const lessonData = {
   },
   lesson10: {
     title: 'Урок 10: Виды треугольников',
+    theory: [
+      { h: 'Треугольник', items: [
+        '3 вершины, 3 стороны, 3 угла. Сумма углов любого треугольника = 180°.',
+        'Третий угол = 180° − сумма двух известных. Пример: 180° − 40° − 65° = 75°.'
+      ]},
+      { h: 'Виды по углам', items: [
+        'Остроугольный — все углы < 90°.',
+        'Прямоугольный — один угол = 90°.',
+        'Тупоугольный — один угол > 90°.'
+      ]},
+      { h: 'Виды по сторонам', items: [
+        'Равносторонний — все стороны равны, все углы по 60°.',
+        'Равнобедренный — две стороны равны, углы при основании равны.',
+        'Разносторонний — все стороны разные.'
+      ]}
+    ],
     tf: [
       { q:'Треугольник, все углы которого острые, называют остроугольным.', a:true, ex:'Верно! Если все углы треугольника острые (<90°), он остроугольный.' },
       { q:'Треугольник, у которого одна сторона равна 5 см, называют равносторонним.', a:false, ex:'Неверно! Равносторонний — это треугольник, у которого ВСЕ ТРИ стороны равны.' },
@@ -1757,6 +1860,22 @@ const lessonData = {
   },
   lesson11: {
     title: 'Урок 11: Понятие множества',
+    theory: [
+      { h: 'Множества', items: [
+        'Множество обозначают прописной латинской буквой и записывают в фигурных скобках: A = {0; 1; 2; …; 9}.',
+        'Порядок элементов не важен: {1; 2} = {2; 1}.',
+        '∈ — «принадлежит» (9 ∈ A), ∉ — «не принадлежит»; ∅ — пустое множество (без элементов).'
+      ]},
+      { h: 'Подмножество', items: [
+        'B ⊂ A — множество B — часть множества A. Пример: {0; 2; 4; 6; 8} ⊂ {0; 1; …; 9}.',
+        'Пустое множество ∅ — подмножество любого множества.'
+      ]},
+      { h: 'Пересечение и объединение', items: [
+        'K ∩ L — общие элементы: {10; …; 20} ∩ {5; …; 25} = {10; 20}; может быть пустым: B ∩ D = ∅.',
+        'B ∪ D — все элементы обоих множеств: чётные ∪ нечётные однозначные = A.',
+        'Пример: делители 20 и 30: A ∩ B = {1; 2; 5; 10}, A ∪ B = {1; 2; 3; 4; 5; 6; 10; 15; 20; 30}.'
+      ]}
+    ],
     tf: [
       { q:'Множества принято обозначать прописными буквами латинского алфавита.', a:true, ex:'Верно! Множества обозначают прописными буквами: A, B, C, …' },
       { q:'Элементы множества записывают в круглых скобках: ( ).', a:false, ex:'Неверно! Элементы множества записывают в ФИГУРНЫХ скобках: { }.' },
@@ -1801,20 +1920,32 @@ function initLesson(id) {
   curLesson = lessonData[id];
   tfIdx=0; tfOk=0; labIdx=0; labOk=0;
   document.getElementById('lessonTitle').textContent = '📖 ' + curLesson.title;
-  buildTF(); buildLab(); buildTest();
+  buildTheory(); buildTF(); buildLab(); buildTest();
   switchLessonTab(0);
   document.getElementById('tfResult').style.display='none';
   document.getElementById('labResult').style.display='none';
+}
+
+function buildTheory() {
+  const c = document.getElementById('theoryContainer'); c.innerHTML = '';
+  if (!curLesson.theory || !curLesson.theory.length) { c.innerHTML = '<div class="theory-hint">Теория по этой теме появится позже.</div>'; return; }
+  curLesson.theory.forEach(g => {
+    const b = document.createElement('div'); b.className = 'theory-block';
+    let html = `<h4>${g.h}</h4><ul>`;
+    g.items.forEach(it => { html += `<li>${it}</li>`; });
+    html += '</ul>';
+    b.innerHTML = html; c.appendChild(b);
+  });
 }
 
 function switchLessonTab(i) {
   document.querySelectorAll('.lesson-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
   document.querySelectorAll('.lesson-tab-content').forEach((c,j)=>c.classList.toggle('active',j===i));
   curSecStart = Date.now();
-  if (i === 2) startTest();
+  if (i === 3) startTest();
 }
 
-// ===== TEST (10 вопросов, 5 минут, оценка) =====
+// ===== TEST (10 вопросов, 15 минут, оценка) =====
 let testTime = 900, testTimer = null, testActive = false, testFinished = false;
 function buildTest() {
   const c = document.getElementById('testContainer'); c.innerHTML = '';
@@ -1952,7 +2083,7 @@ function labCheck() {
     setTimeout(()=>{fb.className='lab-feedback';},1200);
   }
 }
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screenLesson').classList.contains('active')&&document.getElementById('lessonTab1').classList.contains('active')&&labIdx<curLesson.lab.length)labCheck();});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screenLesson').classList.contains('active')&&document.getElementById('lessonTab2').classList.contains('active')&&labIdx<curLesson.lab.length)labCheck();});
 function labFinish() {
   document.getElementById('labCard').style.display='none';
   const pct=Math.round(labOk/curLesson.lab.length*100);
