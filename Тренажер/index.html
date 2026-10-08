@@ -120,6 +120,12 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .topic-card .tc-icon{font-size:2.2rem;margin-bottom:6px}
 .topic-card .tc-title{font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:4px}
 .topic-card .tc-desc{font-size:.8rem;color:var(--text-secondary);line-height:1.4}
+.topic-card.special{border-color:var(--primary);background:linear-gradient(135deg,var(--primary-light),var(--card))}
+.topic-card.special.pdd{border-color:#f97316;background:linear-gradient(135deg,#ffedd5,var(--card))}
+[data-theme="dark"] .topic-card.special.pdd{background:linear-gradient(135deg,#3b2412,var(--card))}
+.topic-card.special .tc-icon{font-size:2.6rem}
+.topics-sep{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:6px 0 2px;font-size:.75rem;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--text-secondary)}
+.topics-sep::after{content:'';flex:1;height:2px;background:var(--border);border-radius:2px}
 
 .stats-row { display: flex; gap: 8px; margin-bottom: 12px; }
 .stat-box {
@@ -567,6 +573,41 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 [data-theme="dark"] .var-ex .ve-i.correct { background: #14532d; }
 [data-theme="dark"] .var-ex .ve-i.wrong { background: #7f1d1d; }
 
+/* ===== ПДД: РАЗДЕЛ БЕЗОПАСНЫЙ ПЕШЕХОД ===== */
+.light-box { display: flex; gap: 22px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+.tl { width: 104px; padding: 11px 10px; background: var(--card); border: 4px solid var(--border); border-radius: 18px; display: flex; flex-direction: column; gap: 9px; box-shadow: var(--shadow); }
+.tl .lamp { height: 56px; border-radius: 13px; background: var(--bg); border: 2px solid var(--border); position: relative; }
+.tl .lamp.on { box-shadow: 0 0 20px currentColor; }
+.tl .lamp.red.on { background: #ef4444; border-color: #ef4444; color: #ef4444; }
+.tl .lamp.yel.on { background: #eab308; border-color: #eab308; color: #eab308; }
+.tl .lamp.grn.on { background: #22c55e; border-color: #22c55e; color: #22c55e; }
+.tl .lamp.blink::after { content: ''; position: absolute; inset: -6px; border-radius: 20px; border: 3px solid currentColor; animation: pddBlink .85s infinite; }
+@keyframes pddBlink { 0%,50% { opacity: 1 } 51%,100% { opacity: 0 } }
+.pd { width: 104px; min-height: 200px; padding: 13px 10px; background: var(--card); border: 4px solid var(--border); border-radius: 18px; display: flex; flex-direction: column; gap: 11px; align-items: center; justify-content: center; box-shadow: var(--shadow); }
+.pd .lamp { width: 74px; height: 74px; border-radius: 50%; background: var(--bg); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative; }
+.pd .lamp svg { width: 44px; height: 44px; }
+.pd .lamp svg g { stroke: currentColor; }
+.pd .lamp.off svg { color: var(--border); }
+.pd .lamp.on.g { background: #dcfce7; border-color: var(--green); }
+.pd .lamp.on.g svg { color: #16a34a; }
+.pd .lamp.on.r { background: #fee2e2; border-color: var(--red); }
+.pd .lamp.on.r svg { color: #dc2626; }
+[data-theme="dark"] .pd .lamp.on.g { background: #14532d; }
+[data-theme="dark"] .pd .lamp.on.g svg { color: #4ade80; }
+[data-theme="dark"] .pd .lamp.on.r { background: #7f1d1d; }
+[data-theme="dark"] .pd .lamp.on.r svg { color: #fca5a5; }
+.pd .pd-none { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-align: center; }
+.sign-box { width: 74px; height: 74px; background: #fff; border-radius: 8px; padding: 4px; box-shadow: var(--shadow); flex-shrink: 0; display: flex; }
+.sign-box svg { width: 100%; height: 100%; display: block; }
+.pdd-memo { background: var(--primary-light); border: 2px dashed var(--primary); border-radius: var(--radius); padding: 14px 16px; margin-top: 10px; }
+.pdd-memo h4 { margin: 0 0 8px; font-size: 1rem; color: var(--primary); }
+.pdd-memo ol, .pdd-memo ul { margin: 0; padding-left: 20px; font-size: 0.88rem; line-height: 1.5; }
+.pdd-memo li { margin-bottom: 5px; }
+.pdd-memo .no-list { color: var(--red); font-weight: 700; margin-top: 10px; }
+#screenPdd .var-ex { flex-wrap: wrap; }
+#screenPdd .var-ex .ve-q { min-width: 180px; }
+#screenPdd .var-ex .ve-sel { width: 100%; flex: 1 1 100%; font-size: 0.85rem; text-align: left; }
+
 /* ===== HOMEWORK SCREEN ===== */
 #hwGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 #hwDetail .nav-btn { margin-bottom: 12px; }
@@ -685,6 +726,74 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div class="report-note" id="testReport"></div>
   </div>
 </div>
+
+  <!-- ===== ПДД: БЕЗОПАСНЫЙ ПЕШЕХОД ===== -->
+  <div class="screen" id="screenPdd">
+    <div class="nav-bar">
+      <button class="nav-btn" onclick="goBackToTopics()">← К темам</button>
+      <span class="nav-title" id="pddTitle">🚦 ПДД: Безопасный пешеход</span>
+    </div>
+    <div class="lesson-tabs">
+      <button class="lesson-tab active" onclick="switchPddTab(0)">📖 Теория</button>
+      <button class="lesson-tab" onclick="switchPddTab(1)">🔥 Разминка</button>
+      <button class="lesson-tab" onclick="switchPddTab(2)">🚦 Светофор</button>
+      <button class="lesson-tab" onclick="switchPddTab(3)">🔗 Знаки</button>
+      <button class="lesson-tab" onclick="switchPddTab(4)">🚶 Маршрут</button>
+      <button class="lesson-tab" onclick="switchPddTab(5)">⏱️ Тест</button>
+    </div>
+
+    <div class="lesson-tab-content active" id="pddTab0">
+      <div id="pddTheory"></div>
+    </div>
+
+    <div class="lesson-tab-content" id="pddTab1">
+      <div class="lesson-progress"><div class="lesson-progress-bar" id="pddTfBar" style="width:0%"></div><span class="lesson-progress-text" id="pddTfText">0 / 8</span></div>
+      <div id="pddTfList"></div>
+      <div class="lesson-result" id="pddTfResult" style="display:none"></div>
+      <div class="report-note" id="pddTfReport"></div>
+    </div>
+
+    <div class="lesson-tab-content" id="pddTab2">
+      <div class="lab-chain" id="pddLightChain"></div>
+      <div class="lab-card">
+        <div class="lab-step-label" id="pddLightLabel">Ситуация 1 из 8</div>
+        <div class="light-box" id="pddLightBox"></div>
+        <div class="lab-question" id="pddLightQ"></div>
+        <div class="tf-btns" id="pddLightOpts" style="flex-direction:column;gap:8px"></div>
+        <div class="lab-feedback" id="pddLightFb"></div>
+        <button class="lesson-btn" id="pddLightNext" onclick="pddLightNext()" style="display:none">Следующая ситуация →</button>
+      </div>
+      <div class="lesson-result" id="pddLightResult" style="display:none"></div>
+      <div class="report-note" id="pddLightReport"></div>
+    </div>
+
+    <div class="lesson-tab-content" id="pddTab3">
+      <div class="theory-hint">Выбери, что означает каждый знак. Знаки нарисованы по ГОСТ Р 52290.</div>
+      <div id="pddSignList"></div>
+      <button class="lesson-btn" onclick="pddCheckSigns()">Проверить</button>
+      <button class="lesson-btn" style="background:var(--bg);color:var(--text);border:2px solid var(--border)" onclick="pddSignsReset()">Заново</button>
+      <div class="lesson-result" id="pddSignResult" style="display:none"></div>
+      <div class="report-note" id="pddSignReport"></div>
+    </div>
+
+    <div class="lesson-tab-content" id="pddTab4">
+      <div class="theory-hint">Расставь шаги перехода через дорогу без светофора по порядку.</div>
+      <div id="pddRouteList"></div>
+      <button class="lesson-btn" onclick="pddCheckRoute()">Проверить порядок</button>
+      <button class="lesson-btn" style="background:var(--bg);color:var(--text);border:2px solid var(--border)" onclick="pddRouteHint()">Подсказка</button>
+      <div class="lesson-result" id="pddRouteResult" style="display:none"></div>
+      <div class="report-note" id="pddRouteReport"></div>
+    </div>
+
+    <div class="lesson-tab-content" id="pddTab5">
+      <div class="lesson-progress"><div class="test-timer" id="pddTestTimer">⏱️ 15:00</div><span class="lesson-progress-text">10 вопросов · оценка 5/4/3/2</span></div>
+      <div class="test-count" id="pddTestAlert" style="display:none"></div>
+      <div id="pddTestList"></div>
+      <button class="lesson-btn" onclick="pddFinishTest()">Завершить тест</button>
+      <div class="lesson-result" id="pddTestResult" style="display:none"></div>
+      <div class="report-note" id="pddTestReport"></div>
+    </div>
+  </div>
 
   <!-- ===== HOMEWORK SCREEN ===== -->
   <div class="screen" id="screenHomework">
@@ -1119,8 +1228,9 @@ function reportResult(typeName,ok,total,sec,noteId){
   const now=new Date();
   const t=TOPICS.find(x=>x.id===currentTopic);
   const topic=curLesson&&curLesson.title?curLesson.title:(t?t.label:currentTopic);
+  const subject=curLesson&&curLesson.subject?curLesson.subject:'Математика';
   const p={
-    tab:'Математика',
+    tab:subject,
     date:String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear(),
     time:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'),
     fam:'',im:'',klass:'',letter:'',
@@ -1163,6 +1273,7 @@ function checkUser() { showUser(); goTopics(); return true; }
 // ===== TOPICS =====
 let currentTopic = '';
 const TOPICS = [
+  { id:'pdd', label:'ПДД: Безопасный пешеход', icon:'🚦', desc:'Теория, разминка, светофор, знаки, маршрут, тест' },
   { id:'homework', label:'📌 Домашняя работа', icon:'📚', desc:'Задания на дом по урокам 4–11' },
   { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'🧮', desc:'Теория, разминка, лабиринт, тест' },
   { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'🧮', desc:'Теория, разминка, лабиринт, тест' },
@@ -1186,12 +1297,20 @@ function renderTopics() {
     <div class="stat-box green"><div class="stat-val">${totalOk}</div><div class="stat-label">Всего верно</div></div>
     <div class="stat-box"><div class="stat-val">${totalAll}</div><div class="stat-label">Всего решено</div></div>`;
   TOPICS.forEach(t => {
-    const card = document.createElement('div'); card.className = 'topic-card';
+    const card = document.createElement('div');
+    card.className = 'topic-card' + (t.id === 'pdd' || t.id === 'homework' ? ' special' : '') + (t.id === 'pdd' ? ' pdd' : '');
     card.innerHTML = `<div class="tc-icon">${t.icon}</div><div class="tc-title">${t.label}</div><div class="tc-desc">${t.desc}</div>`;
-    card.onclick = () => selectTopic(t.id); g.appendChild(card);
+    card.onclick = () => selectTopic(t.id);
+    if (t.id === 'lesson4') {
+      const sep = document.createElement('div'); sep.className = 'topics-sep';
+      sep.textContent = 'Уроки по математике';
+      g.appendChild(sep);
+    }
+    g.appendChild(card);
   });
 }
 function selectTopic(id) {
+  if (id === 'pdd') { showScreen('screenPdd'); initPdd(); return; }
   if (lessonData[id]) { showScreen('screenLesson'); initLesson(id); return; }
   if (id === 'homework') { showScreen('screenHomework'); renderHomework(); return; }
   currentTopic = id; goMenu();
@@ -2671,6 +2790,460 @@ function gShowDiffFromExam() {
   document.getElementById('gExamScreen').style.display='none';
   gShowDiffScreen();
 }
+
+/* ============================================================
+   РАЗДЕЛ ПДД: БЕЗОПАСНЫЙ ПЕШЕХОД (6 класс)
+   По принципу тренажёра: теория → разминка → практика → тест,
+   каждый режим отдаёт результат в таблицу через reportResult.
+   ============================================================ */
+
+const PDD_WALK = '<g stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="0" cy="0" r="7" fill="currentColor" stroke="none"/><path d="M0 8 L0 24"/><path d="M0 13 L-9 20"/><path d="M0 13 L9 9"/><path d="M0 24 L-8 38"/><path d="M0 24 L9 38"/></g>';
+const PDD_STAND = '<g stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="0" cy="0" r="7" fill="currentColor" stroke="none"/><path d="M0 8 L0 26"/><path d="M0 12 L-8 26"/><path d="M0 12 L8 26"/><path d="M0 26 L-7 38"/><path d="M0 26 L7 38"/></g>';
+const PDD_WALK_D = PDD_WALK.replace(/currentColor/g, '#111');
+const PDD_CAR = '<path d="M14 60 L22 40 H78 L86 60 V70 H14 Z" fill="#111"/><circle cx="30" cy="70" r="8" fill="#111"/><circle cx="70" cy="70" r="8" fill="#111"/><rect x="26" y="44" width="18" height="10" fill="#fff"/><rect x="56" y="44" width="18" height="10" fill="#fff"/>';
+
+const pddLesson = {
+  subject: 'ПДД',
+  title: 'ПДД: Безопасный пешеход',
+  theory: [
+    { h: 'Где должен ходить пешеход', items: [
+      'Пешеход идёт по тротуару, а при его отсутствии — по пешеходной дорожке или обочине.',
+      'Нет и обочины — идём по краю проезжей части навстречу движению машин, чтобы водитель нас видел.',
+      'Дорога — не место для игр, прогулок и разговоров по телефону.'
+    ]},
+    { h: 'Сигналы светофора', items: [
+      'Красный — ждём на тротуаре, переходить нельзя.',
+      'Зелёный — переходим шагом, но сначала убеждаемся, что машины остановились и видят нас.',
+      'Мигающий зелёный — переходим, только если дорога свободна и нет опасности за переходом.',
+      'Жёлтый — машины тормозят, движение запрещено, ждём своего сигнала.',
+      'Главный запрет: нельзя выбегать на дорогу, когда для машин горит зелёный и они ещё не остановились.'
+    ]},
+    { h: 'Как переходить дорогу', items: [
+      'Проезжую часть пересекают только по пешеходному переходу — регулируемому или нерегулируемому.',
+      'На нерегулируемом переходе: остановились у края тротуара → налево → направо → снова налево.',
+      'Переходим шагом, по прямой, не отворачивая и не останавливаясь посреди дороги.',
+      'Опасность за переходом (фургон, автобус, затор) — переход откладываем.',
+      'Водитель не тормозит — не бежим навстречу, отходим в сторону и даём коридор.'
+    ]},
+    { h: 'Двор и прилегающая территория', items: [
+      'В жилой зоне и во дворе скорость ограничена 20 км/ч, и пешеход здесь главный.',
+      'Но при выезде со двора на улицу преимущества нет: останавливаемся у ворот, смотрим в обе стороны, уступаем машинам.',
+      'Нельзя выезжать из двора на тротуар и на проезжую часть.'
+    ]},
+    { h: 'Самокат и велосипед', items: [
+      'До 14 лет выезжать на проезжую часть на велосипеде, самокате или скутере запрещено.',
+      'Пешеходный переход переходим пешком, ведя транспорт рядом, как пешеход.',
+      'На тротуару кататься можно осторожно, уступая пешеходам.'
+    ]},
+    { h: 'Чтобы тебя видели', items: [
+      'В тёмной одежде пешехода видно за несколько метров — надевайте светоотражатели или светлую одежду.',
+      'Наушники и телефон у дороги опаснее самого перехода: не слышно сигнала, не видно яму и выезд машин со двора.',
+      'Уберите телефон и наушники до перехода, в темноте возьмите фонарик.'
+    ]}
+  ],
+  tf: [
+    { q: 'Пешеход должен идти по тротуару, а если тротуара нет — по обочине или краю проезжей части.', a: true, ex: 'Верно! По краю проезжей части пешеход идёт навстречу потоку машин, чтобы водитель его видел.' },
+    { q: 'Дорогу можно переходить в любом месте, если рядом не видно машин.', a: false, ex: 'Неверно! Проезжую часть пересекают только по пешеходному переходу.' },
+    { q: 'Мигающий зелёный сигнал разрешает переход, если машин на переходе нет.', a: true, ex: 'Верно! Но если за переходом стоит транспорт или закрыт обзор — переход откладывают.' },
+    { q: 'В жилой зоне и во дворе скорость ограничена 20 км/ч, и пешеход здесь главный.', a: true, ex: 'Верно! Но при выезде со двора на улицу пешеход уступает машинам.' },
+    { q: 'До 14 лет можно выезжать на проезжую часть на самокате, если рядом нет машин.', a: false, ex: 'Неверно! До 14 лет выезд на проезжую часть на велосипеде, самокате и скутере запрещён.' },
+    { q: 'На пешеходном переходе пешеход имеет преимущество перед автомобилем.', a: true, ex: 'Верно! Водитель обязан уступить, поэтому в наезде на переходе виноват он.' },
+    { q: 'Перед переходом дороги без светофора нужно осмотреться: налево — направо — налево.', a: true, ex: 'Верно! Сначала налево, потом направо, потом снова налево — и только потом переходим шагом.' },
+    { q: 'Если машина не тормозит, нужно бежать быстрее, чтобы проскочить на другую сторону.', a: false, ex: 'Неверно! Бежать навстречу машине опасно — нужно отойти в сторону и дать водителю коридор.' }
+  ],
+  light: [
+    { lamp: 'grn', pd: 'stop', q: 'Для тебя красный, для машин зелёный. Ребята рядом разбежались. Ты:',
+      o: ['Перебегу, пока машины ещё едут', 'Останусь на тротуаре и дождусь своего сигнала'], a: 1,
+      ex: 'Зелёный для машин — это движение, а не остановка. Выбегать навстречу зелёному сигналу нельзя.' },
+    { lamp: 'red', pd: 'go', q: 'Для тебя зелёный, машины остановились, дорога свободна. Ты:',
+      o: ['Спокойно перейду шагом, оглядываясь', 'Ускорюсь и перебегу'], a: 0,
+      ex: 'Зелёный разрешает переход. Переходи шагом по прямой и посмотри направо: со двора могут выезжать машины.' },
+    { lamp: 'red', pd: 'blink', q: 'Мигает зелёный сигнал для пешехода, машин нет. Ты:',
+      o: ['Жду: мигающий сигнал ничего не разрешает', 'Перехожу — дорога свободна'], a: 1,
+      ex: 'Мигающий зелёный разрешает переход, если нет транспорта и нет опасности за переходом.' },
+    { lamp: 'red', pd: 'go', q: 'Для тебя зелёный, но за переходом стоит фургон и закрывает обзор. Ты:',
+      o: ['Перейду: машина же стоит', 'Останусь на тротуаре, пока фургон не уедет'], a: 1,
+      ex: 'Опасность за переходом — главная причина откладывать переход. За фургоном тебя никто не увидит.' },
+    { lamp: 'grn', pd: 'stop', q: 'Машины едут на зелёный, одноклассники бегут через дорогу. Ты:',
+      o: ['Побегу вместе с ними', 'Останусь и предупрежу их громко'], a: 1,
+      ex: 'Бежать при движущемся транспорте нельзя. Лучшее действие — предупредить товарищей.' },
+    { lamp: 'yel', pd: 'stop', q: 'Для машин жёлтый (движение запрещено), для тебя красный. Ты:',
+      o: ['Пробегу на жёлтый: машины остановятся', 'Жду своего сигнала'], a: 1,
+      ex: 'Жёлтый запрещает движение и останавливает машины. Ждать надо своего сигнала.' },
+    { lamp: 'none', pd: 'none', q: 'Светофора нет, переход без знака, машин пока не видно. Ты:',
+      o: ['Сразу побегу — машины далеко', 'Дойду до края, осмотрюсь и перейду', 'Буду ждать, пока поставят светофор'], a: 1,
+      ex: 'На переходе без знака и светофора решает только то, что видно: шагом и с осмотром.' },
+    { lamp: 'red', pd: 'go', q: 'Для тебя зелёный, но на переходе стоит автомобиль и водитель не уезжает. Ты:',
+      o: ['Перейду перед его машиной', 'Подожду, пока водитель освободит переход', 'Обойду сзади по проезжей части'], a: 1,
+      ex: 'Водитель не вправе стоять на пешеходном переходе, но обходить по проезжей части тоже нельзя — ждём.' }
+  ],
+  signs: [
+    { id: 'p5191', name: '5.19.1 «Пешеходный переход»', correct: 'Здесь можно переходить дорогу' },
+    { id: 'p123', name: '1.23 «Дети»', correct: 'Впереди дети — снизить скорость' },
+    { id: 'p21', name: '2.1 «Главная дорога»', correct: 'Движение по второстепенной уступает' },
+    { id: 'p22', name: '2.2 «Уступить дорогу»', correct: 'Остановись и дай проехать главной' },
+    { id: 'p324', name: '3.24 «Ограничение скорости 60»', correct: 'Максимальная скорость 60 км/ч' },
+    { id: 'p8201', name: '8.20.1 «Въезд на прилегающую территорию»', correct: 'Въезд во двор — уступай и смотри' }
+  ],
+  route: [
+    'Подойти к краю тротуара и остановиться',
+    'Посмотреть налево',
+    'Посмотреть направо',
+    'Снова посмотреть налево',
+    'Убедиться, что машины остановились и видят меня',
+    'Выйти на дорогу и переходить прямо, не отворачивая и не бегом',
+    'Дойти до противоположного тротуара и там осмотреться'
+  ],
+  routeTraps: [
+    'Перебежать быстро, пока машины далеко',
+    'Выйти сразу, не глядя: машины не ездят',
+    'Кричать «аа», чтобы водитель испугался'
+  ],
+  test: [
+    { q: 'Где должен идти пешеход?', a: 'По тротуару', opt: ['По тротуару', 'По краю проезжей части', 'Посреди дороги'] },
+    { q: 'Горит зелёный для тебя. Что делаешь?', a: 'Перехожу, убедившись, что машины стоят', opt: ['Перехожу, убедившись, что машины стоят', 'Сразу бегу через дорогу', 'Жду дополнительного сигнала'] },
+    { q: 'Мигающий зелёный сигнал:', a: 'Переходить можно, если дорога свободна', opt: ['Переходить можно, если дорога свободна', 'Переходить запрещено', 'Переходить можно только бегом'] },
+    { q: 'Как перейти переход без светофора?', a: 'Налево — направо — налево', opt: ['Налево — направо — налево', 'Только направо', 'Налево — налево — направо'] },
+    { q: 'Водитель не тормозит. Твоё действие?', a: 'Отойти в сторону, освобождая коридор', opt: ['Отойти в сторону, освобождая коридор', 'Ускориться и проскочить', 'Кричать и махать руками'] },
+    { q: 'Выезжаешь из двора на улицу:', a: 'Остановись, осмотрись, уступи машинам', opt: ['Остановись, осмотрись, уступи машинам', 'Выходи сразу, двор — не дорога', 'Перебегай, чтобы затормозили'] },
+    { q: 'Самокат и проезжую часть до 14 лет:', a: 'Выезд запрещён', opt: ['Выезд запрещён', 'Разрешён, если машин нет', 'Разрешён только вечером'] },
+    { q: 'Переход дороги на самокате:', a: 'Пешком, ведя самокат рядом', opt: ['Пешком, ведя самокат рядом', 'Проехать по переходу', 'Стоять на переходе и ждать'] },
+    { q: 'Что делает пешехода заметным в темноте?', a: 'Светоотражатели и светлая одежда', opt: ['Светоотражатели и светлая одежда', 'Тёмная одежда', 'Громкий разговор'] },
+    { q: 'Кто виноват в наезде на пешехода на переходе?', a: 'Водитель — он обязан уступить', opt: ['Водитель — он обязан уступить', 'Пешеход до 16 лет', 'Оба поровну'] }
+  ]
+};
+
+const PDD_SIGNS = {
+  p5191: '<rect width="100" height="100" fill="#0b5cab"/><path d="M50 10 L88 84 L12 84 Z" fill="#fff"/><g transform="translate(50,66) scale(0.62)">' + PDD_WALK_D + '</g>',
+  p123: '<path d="M50 6 L96 94 L4 94 Z" fill="#fff" stroke="#e11d1d" stroke-width="9"/><g transform="translate(40,66) scale(0.6)">' + PDD_WALK_D + '</g><g transform="translate(64,66) scale(0.5)">' + PDD_WALK_D + '</g>',
+  p21: '<rect x="18" y="18" width="64" height="64" rx="3" fill="#ffd400" stroke="#fff" stroke-width="8" transform="rotate(45 50 50)"/>',
+  p22: '<path d="M50 92 L6 12 L94 12 Z" fill="#fff" stroke="#e11d1d" stroke-width="9"/>',
+  p324: '<circle cx="50" cy="50" r="40" fill="#fff" stroke="#e11d1d" stroke-width="10"/><text x="50" y="63" font-size="30" font-weight="800" text-anchor="middle" fill="#111" font-family="Arial,sans-serif">60</text>',
+  p8201: '<rect x="6" y="26" width="88" height="48" fill="#fff" stroke="#111" stroke-width="3"/>' + PDD_CAR
+};
+function pddSignSvg(id) { return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' + PDD_SIGNS[id] + '</svg>'; }
+
+let pddTab = 0, pddTfIdx = 0, pddTfOk = 0;
+let pddLightIdx = 0, pddLightOk = 0, pddLightAns = [];
+let pddSignOk = -1, pddRouteOk = -1;
+let pddTestTime = 900, pddTestTimer = null, pddTestActive = false, pddTestFinished = false;
+
+function initPdd() {
+  curLesson = pddLesson;
+  currentTopic = 'pdd';
+  pddTfIdx = 0; pddTfOk = 0;
+  pddLightIdx = 0; pddLightOk = 0; pddLightAns = [];
+  pddSignOk = -1; pddRouteOk = -1;
+  pddTestActive = false; pddTestFinished = false; pddTestTime = 900;
+  stopPddTestTimer();
+  document.getElementById('pddTitle').textContent = '🚦 ' + pddLesson.title;
+  document.getElementById('pddTfResult').style.display = 'none';
+  document.getElementById('pddLightResult').style.display = 'none';
+  document.getElementById('pddSignResult').style.display = 'none';
+  document.getElementById('pddRouteResult').style.display = 'none';
+  document.getElementById('pddTestResult').style.display = 'none';
+  ['pddTfReport', 'pddLightReport', 'pddSignReport', 'pddRouteReport', 'pddTestReport'].forEach(id => sheetNote(id, ''));
+  pddBuildTheory(); pddBuildTF(); pddBuildLight(); pddBuildSigns(); pddBuildRoute(); pddBuildTest();
+  switchPddTab(0);
+}
+function switchPddTab(i) {
+  pddTab = i;
+  document.querySelectorAll('#screenPdd .lesson-tab').forEach((t, j) => t.classList.toggle('active', j === i));
+  document.querySelectorAll('#screenPdd .lesson-tab-content').forEach((c, j) => c.classList.toggle('active', j === i));
+  curSecStart = Date.now();
+  if (i === 5) pddStartTest();
+}
+function pddGrade(pct) {
+  if (pct >= 90) return ['5', 'green', 'Отлично! 🎉'];
+  if (pct >= 75) return ['4', 'green', 'Хорошо!'];
+  if (pct >= 50) return ['3', 'green', 'Есть над чем поработать'];
+  return ['2', 'red', 'Нужно подтянуть :('];
+}
+function pddShowResult(id, title, ok, total, typeName, reportId) {
+  const pct = Math.round((total ? ok / total : 0) * 100);
+  const [grade, cls, msg] = pddGrade(pct);
+  const r = document.getElementById(id);
+  r.style.display = 'block';
+  r.innerHTML = '<h3>' + title + '</h3><div class="big" style="color:var(--' + cls + ')">' + ok + '/' + total +
+    '</div><div class="msg">' + pct + '% · Оценка: <b style="color:var(--' + cls + ')">' + grade + '</b> — ' + msg + '</div>';
+  reportResult(typeName, ok, total, Math.round((Date.now() - curSecStart) / 1000), reportId);
+}
+
+/* ---- ТЕОРИЯ ---- */
+function pddBuildTheory() {
+  const c = document.getElementById('pddTheory');
+  let html = '<div class="theory-hint">Правила дорожного движения для пешехода. Читай блоки и запоминай главное.</div>';
+  pddLesson.theory.forEach(b => {
+    html += '<div class="theory-block"><h4>' + b.h + '</h4><ul>';
+    b.items.forEach(t => { html += '<li>' + t + '</li>'; });
+    html += '</ul></div>';
+  });
+  html += '<div class="pdd-memo"><h4>📋 Памятка: пешеход — 7 правил безопасности</h4><ol>' +
+    '<li>Иди по тротуару, нет тротуара — по обочине или краю проезжей части навстречу машинам.</li>' +
+    '<li>Пересекай дорогу только по пешеходному переходу.</li>' +
+    '<li>На переходе без светофора: налево → направо → налево, затем шагом по прямой.</li>' +
+    '<li>Зелёный сигнал — не гарантия безопасности: убедись, что водители остановились.</li>' +
+    '<li>Во дворе скорость 20 км/ч и пешеход главный, но при выезде на улицу уступай машинам.</li>' +
+    '<li>В темноте — светоотражатели и светлая одежда.</li>' +
+    '<li>Не выбегай из-за припаркованной машины, кустов, из подъезда.</li></ol>' +
+    '<div class="no-list">⛔ Нельзя: бежать через дорогу · пересекать вне перехода · выбегать навстречу машине · ' +
+    'идти вдоль дороги в наушниках или в телефоне · выезжать на проезжую часть на самокате до 14 лет · выезжать из двора на тротуар.</div>' +
+    '<div class="no-list" style="color:var(--green)">📞 Помни: на переходе преимущество у пешехода. Сбил человека водитель — виноват водитель. Нарушил сам ребёнок до 16 лет — отвечают родители. Экстренные номера: 112 и 102.</div>' +
+    '</div>';
+  c.innerHTML = html;
+}
+
+/* ---- РАЗМИНКА: ВЕРЮ / НЕ ВЕРЮ ---- */
+function pddBuildTF() {
+  const c = document.getElementById('pddTfList');
+  c.innerHTML = '';
+  pddLesson.tf.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'tf-card'; card.id = 'pddTf' + i;
+    card.innerHTML = '<div class="tf-statement">' + (i + 1) + '. ' + item.q + '</div>' +
+      '<div class="tf-btns"><button class="tf-btn" onclick="pddTfAnswer(' + i + ',true)">✅ Верно</button>' +
+      '<button class="tf-btn" onclick="pddTfAnswer(' + i + ',false)">❌ Неверно</button></div>' +
+      '<div class="tf-explain" id="pddTfEx' + i + '"></div>';
+    c.appendChild(card);
+  });
+  pddUpdateTfBar();
+}
+function pddTfAnswer(i, ans) {
+  const card = document.getElementById('pddTf' + i);
+  const btns = card.querySelectorAll('.tf-btn');
+  if (btns[0].disabled) return;
+  btns.forEach(b => b.disabled = true);
+  const ok = ans === pddLesson.tf[i].a;
+  pddTfIdx++; if (ok) pddTfOk++;
+  btns[ans ? 0 : 1].classList.add(ok ? 'hit' : 'miss');
+  if (!ok) btns[ans ? 1 : 0].classList.add('hit');
+  card.classList.add(ok ? 'answered-ok' : 'answered-fail');
+  const ex = document.getElementById('pddTfEx' + i);
+  ex.className = 'tf-explain show ' + (ok ? 'correct' : 'wrong');
+  ex.textContent = (ok ? '✅ Правильно! ' : '❌ Неверно. ') + pddLesson.tf[i].ex;
+  pddUpdateTfBar();
+  if (pddTfIdx === pddLesson.tf.length) pddShowResult('pddTfResult', 'Разминка завершена', pddTfOk, pddLesson.tf.length, 'ПДД · Разминка', 'pddTfReport');
+}
+function pddUpdateTfBar() {
+  document.getElementById('pddTfBar').style.width = Math.round(pddTfIdx / pddLesson.tf.length * 100) + '%';
+  document.getElementById('pddTfText').textContent = pddTfIdx + ' / ' + pddLesson.tf.length;
+}
+
+/* ---- СВЕТОФОР ---- */
+function pddRenderLight() {
+  const item = pddLesson.light[pddLightIdx];
+  let h = '<div class="tl"><div class="lamp red' + (item.lamp === 'red' ? ' on' : '') + '"></div>' +
+    '<div class="lamp yel' + (item.lamp === 'yel' ? ' on' : '') + '"></div>' +
+    '<div class="lamp grn' + (item.lamp === 'grn' ? ' on' : '') + '"></div></div><div class="pd">';
+  if (item.pd === 'go') h += '<div class="lamp on g"><svg viewBox="-26 -8 52 54">' + PDD_WALK + '</svg></div><div class="lamp off r"><svg viewBox="-26 -8 52 54">' + PDD_STAND + '</svg></div>';
+  else if (item.pd === 'blink') h += '<div class="lamp on g blink"><svg viewBox="-26 -8 52 54">' + PDD_WALK + '</svg></div><div class="lamp off r"><svg viewBox="-26 -8 52 54">' + PDD_STAND + '</svg></div>';
+  else if (item.pd === 'stop') h += '<div class="lamp off g"><svg viewBox="-26 -8 52 54">' + PDD_WALK + '</svg></div><div class="lamp on r"><svg viewBox="-26 -8 52 54">' + PDD_STAND + '</svg></div>';
+  else h += '<div class="pd-none">СВЕТОФОРА<br>НЕТ</div>';
+  h += '</div>';
+  document.getElementById('pddLightBox').innerHTML = h;
+
+  document.getElementById('pddLightLabel').textContent = 'Ситуация ' + (pddLightIdx + 1) + ' из ' + pddLesson.light.length;
+  document.getElementById('pddLightQ').textContent = item.q;
+  const opts = document.getElementById('pddLightOpts');
+  opts.innerHTML = '';
+  item.o.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.className = 'tf-btn'; b.textContent = String.fromCharCode(65 + i) + '. ' + t;
+    b.onclick = () => pddLightAnswer(i);
+    opts.appendChild(b);
+  });
+  const answered = pddLightAns[pddLightIdx] !== undefined;
+  if (answered) pddPaintLight(pddLightAns[pddLightIdx]);
+  const fb = document.getElementById('pddLightFb');
+  if (answered) {
+    const ok = pddLightAns[pddLightIdx] === item.a;
+    fb.className = 'lab-feedback show ' + (ok ? 'correct' : 'wrong');
+    fb.textContent = (ok ? '✅ Верно! ' : '❌ Ошибка. ') + item.ex;
+  } else fb.className = 'lab-feedback';
+  document.getElementById('pddLightNext').style.display = answered ? 'block' : 'none';
+  document.getElementById('pddLightNext').textContent = pddLightIdx === pddLesson.light.length - 1 ? 'К знакам →' : 'Следующая ситуация →';
+  pddRenderLightChain();
+}
+function pddRenderLightChain() {
+  const chain = document.getElementById('pddLightChain');
+  chain.innerHTML = '';
+  pddLesson.light.forEach((item, i) => {
+    if (i > 0) { const a = document.createElement('span'); a.className = 'lab-arrow'; a.textContent = '→'; chain.appendChild(a); }
+    const d = document.createElement('div');
+    d.className = 'lab-dot';
+    if (pddLightAns[i] !== undefined) d.className += ' ' + (pddLightAns[i] === item.a ? 'done' : '');
+    else if (i === pddLightIdx) d.className += ' current';
+    if (pddLightAns[i] !== undefined && pddLightAns[i] !== item.a) d.style.background = 'var(--red)';
+    d.textContent = i + 1;
+    chain.appendChild(d);
+  });
+}
+function pddPaintLight(chosen) {
+  const item = pddLesson.light[pddLightIdx];
+  const btns = document.querySelectorAll('#pddLightOpts .tf-btn');
+  btns.forEach(b => b.disabled = true);
+  if (btns[item.a]) btns[item.a].classList.add('hit');
+  if (chosen !== item.a && btns[chosen]) btns[chosen].classList.add('miss');
+}
+function pddLightAnswer(choice) {
+  const item = pddLesson.light[pddLightIdx];
+  if (pddLightAns[pddLightIdx] !== undefined) return;
+  const ok = choice === item.a;
+  pddLightAns[pddLightIdx] = choice;
+  if (ok) pddLightOk++;
+  pddPaintLight(choice);
+  const fb = document.getElementById('pddLightFb');
+  fb.className = 'lab-feedback show ' + (ok ? 'correct' : 'wrong');
+  fb.textContent = (ok ? '✅ Верно! ' : '❌ Ошибка. ') + item.ex;
+  document.getElementById('pddLightNext').style.display = 'block';
+  pddRenderLightChain();
+  if (pddLightIdx === pddLesson.light.length - 1) {
+    const all = pddLightAns.filter(v => v !== undefined).length;
+    if (all === pddLesson.light.length) pddShowResult('pddLightResult', 'Тренажёр «Светофор» пройден', pddLightOk, pddLesson.light.length, 'ПДД · Светофор', 'pddLightReport');
+  }
+}
+function pddLightNext() {
+  if (pddLightAns[pddLightIdx] === undefined) return;
+  if (pddLightIdx === pddLesson.light.length - 1) { switchPddTab(3); return; }
+  pddLightIdx++;
+  pddRenderLight();
+}
+function pddBuildLight() { pddLightIdx = 0; pddLightAns = []; pddLightOk = 0; pddRenderLight(); }
+
+/* ---- ЗНАКИ ---- */
+function pddBuildSigns() {
+  const c = document.getElementById('pddSignList');
+  c.innerHTML = '';
+  pddLesson.signs.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'var-ex';
+    const opts = pddLesson.signs.map(s => s.correct).sort(() => Math.random() - 0.5);
+    let html = '<span class="sign-box">' + pddSignSvg(item.id) + '</span>' +
+      '<span class="ve-q">' + (i + 1) + '. ' + item.name + '</span>' +
+      '<select class="ve-i ve-sel" id="pddSign' + i + '"><option value="">—</option>';
+    opts.forEach(v => { html += '<option value="' + v + '">' + v + '</option>'; });
+    html += '</select>';
+    div.innerHTML = html;
+    c.appendChild(div);
+  });
+  pddSignOk = -1;
+  document.getElementById('pddSignResult').style.display = 'none';
+}
+function pddCheckSigns() {
+  let ok = 0;
+  pddLesson.signs.forEach((item, i) => {
+    const sel = document.getElementById('pddSign' + i);
+    if (!sel) return;
+    sel.classList.remove('correct', 'wrong');
+    if (sel.value === item.correct) { sel.classList.add('correct'); ok++; }
+    else if (sel.value) sel.classList.add('wrong');
+  });
+  pddSignOk = ok;
+  pddShowResult('pddSignResult', 'Знаки проверены', ok, pddLesson.signs.length, 'ПДД · Знаки', 'pddSignReport');
+}
+function pddSignsReset() {
+  pddBuildSigns();
+  sheetNote('pddSignReport', '');
+}
+
+/* ---- МАРШРУТ ---- */
+function pddBuildRoute() {
+  const c = document.getElementById('pddRouteList');
+  c.innerHTML = '';
+  const all = pddLesson.route.concat(pddLesson.routeTraps);
+  pddLesson.route.forEach((_, i) => {
+    const div = document.createElement('div');
+    div.className = 'var-ex';
+    const opts = all.slice().sort(() => Math.random() - 0.5);
+    let html = '<span class="ve-n">' + (i + 1) + '</span><span class="ve-q">Шаг ' + (i + 1) + ':</span>' +
+      '<select class="ve-i ve-sel" id="pddRoute' + i + '"><option value="">— выбери действие —</option>';
+    opts.forEach(v => { html += '<option value="' + v + '">' + v + '</option>'; });
+    html += '</select>';
+    div.innerHTML = html;
+    c.appendChild(div);
+  });
+  pddRouteOk = -1;
+  document.getElementById('pddRouteResult').style.display = 'none';
+}
+function pddCheckRoute() {
+  let ok = 0;
+  pddLesson.route.forEach((step, i) => {
+    const sel = document.getElementById('pddRoute' + i);
+    if (!sel) return;
+    sel.classList.remove('correct', 'wrong');
+    if (sel.value === step) { sel.classList.add('correct'); ok++; }
+    else if (sel.value) sel.classList.add('wrong');
+  });
+  pddRouteOk = ok;
+  pddShowResult('pddRouteResult', 'Маршрут проверен', ok, pddLesson.route.length, 'ПДД · Маршрут', 'pddRouteReport');
+}
+function pddRouteHint() {
+  const r = document.getElementById('pddRouteResult');
+  r.style.display = 'block';
+  r.innerHTML = '<h3>Подсказка</h3><div class="msg">Остановиться у края тротуара → налево → направо → снова налево → ' +
+    'убедиться, что машины остановились → переходить прямо шагом → дойти до другого тротуара. Шаги-ловушки в маршрут не входят.</div>';
+}
+
+/* ---- ТЕСТ ---- */
+function pddBuildTest() {
+  const c = document.getElementById('pddTestList');
+  c.innerHTML = '';
+  pddTestFinished = false;
+  pddLesson.test.forEach((ex, i) => {
+    const div = document.createElement('div');
+    div.className = 'var-ex';
+    const shuf = ex.opt.slice().sort(() => Math.random() - 0.5);
+    let html = '<span class="ve-n">' + (i + 1) + '</span><span class="ve-q">' + ex.q + '</span>' +
+      '<select class="ve-i ve-sel" id="pddTe' + i + '"><option value="">—</option>';
+    shuf.forEach(v => { html += '<option value="' + v + '">' + v + '</option>'; });
+    html += '</select>';
+    div.innerHTML = html;
+    c.appendChild(div);
+  });
+  pddRenderTestTimer();
+  document.getElementById('pddTestResult').style.display = 'none';
+  document.getElementById('pddTestAlert').style.display = 'none';
+}
+function pddRenderTestTimer() {
+  const m = Math.floor(pddTestTime / 60), s = pddTestTime % 60;
+  const el = document.getElementById('pddTestTimer');
+  el.textContent = '⏱️ ' + m + ':' + (s < 10 ? '0' : '') + s;
+  el.style.color = pddTestTime <= 60 ? 'var(--red)' : 'var(--text)';
+}
+function pddStartTest() {
+  if (!pddLesson.test || pddTestActive || pddTestFinished) return;
+  if (!document.querySelectorAll('#pddTestList .ve-i').length) pddBuildTest();
+  pddTestActive = true; pddTestTime = 900; pddRenderTestTimer();
+  stopPddTestTimer();
+  pddTestTimer = setInterval(() => {
+    pddTestTime--;
+    pddRenderTestTimer();
+    if (pddTestTime <= 0) { stopPddTestTimer(); pddFinishTest(); }
+  }, 1000);
+}
+function stopPddTestTimer() { if (pddTestTimer) { clearInterval(pddTestTimer); pddTestTimer = null; } }
+function pddFinishTest() {
+  if (!pddTestActive) return;
+  stopPddTestTimer(); pddTestActive = false; pddTestFinished = true;
+  let total = 0, ok = 0;
+  pddLesson.test.forEach((ex, i) => {
+    total++;
+    const sel = document.getElementById('pddTe' + i); if (!sel) return;
+    sel.classList.remove('correct', 'wrong');
+    if (sel.value === ex.a) { sel.classList.add('correct'); ok++; }
+    else sel.classList.add('wrong');
+  });
+  pddShowResult('pddTestResult', 'Тест завершён', ok, total, 'ПДД · Тест', 'pddTestReport');
+  const a = document.getElementById('pddTestAlert');
+  a.style.display = 'block';
+  a.textContent = pddTestTime <= 0 ? '⏱️ Время вышло — тест завершён автоматически' : '✅ Тест завершён по кнопке';
+}
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const s = document.getElementById('screenPdd');
+  if (!s || !s.classList.contains('active')) return;
+  if (document.getElementById('pddTab5').classList.contains('active') && pddTestActive && !pddTestFinished) pddFinishTest();
+});
 
 checkUser();
 </script>
