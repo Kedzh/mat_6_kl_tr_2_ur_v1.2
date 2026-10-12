@@ -43,6 +43,17 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   cursor: pointer; font-family: inherit; transition: all .2s;
 }
 .sheet-btn:active { transform: scale(.97); }
+.archive-btn { border-color: rgba(255,255,255,.9); background: linear-gradient(135deg, rgba(249,115,22,.55), rgba(59,130,246,.45)); }
+.archive-hero { text-align: center; padding: 18px 0 6px; }
+.archive-open {
+  width: 100%; max-width: 520px; padding: 20px 22px; border-radius: 14px;
+  border: 2px solid var(--primary); background: linear-gradient(135deg, var(--primary-light), var(--card));
+  color: var(--text); font-family: inherit; font-size: 1.1rem; font-weight: 800; cursor: pointer;
+  box-shadow: var(--shadow); transition: all .2s;
+}
+.archive-open:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,130,246,.25); }
+.archive-open:active { transform: scale(.97); }
+.archive-sub { color: var(--text-secondary); font-size: .82rem; margin-top: 10px; line-height: 1.5; padding: 0 12px; }
 .sheet-state { display: block; margin: 8px auto 0; width: fit-content; padding: 4px 12px; border-radius: 20px; font-size: .75rem; font-weight: 700; background: rgba(255,255,255,.2); }
 .sheet-state.on { background: #22c55e; color: #fff; }
 .sheet-state.off { background: rgba(0,0,0,.25); }
@@ -634,6 +645,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   <h1>🧮 Тренажёр</h1>
   <div class="subtitle">Арифметика с многозначными числами · 6 класс</div>
   <button class="sheet-btn" id="sheetBtn" onclick="openSheetPanel()">📊 Таблица</button>
+  <button class="sheet-btn archive-btn" id="archiveBtn" onclick="goArchive()">🗂️ Архив</button>
   <span class="sheet-state off" id="sheetState"></span>
 </div>
 
@@ -806,6 +818,20 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
       <button class="nav-btn" id="hwBack" onclick="hwShowList()">← К списку заданий</button>
       <div id="hwDetailBody"></div>
     </div>
+  </div>
+
+  <!-- ===== ARCHIVE SCREEN ===== -->
+  <div class="screen" id="screenArchive">
+    <div class="nav-bar">
+      <button class="nav-btn" onclick="goTopics()">← К темам</button>
+      <span class="nav-title">🗂️ Архив</span>
+    </div>
+    <div class="archive-hero">
+      <button class="archive-open" id="archiveOpenBtn" onclick="toggleArchiveGrid()">📚 Задания до 09.10.2026</button>
+      <div class="archive-sub">Учебные задания по математике за прошлые уроки (уроки 4–12) и домашняя работа.</div>
+    </div>
+    <div class="stats-row" id="archiveStats"></div>
+    <div class="menu" id="archiveGrid" style="display:none"></div>
   </div>
 </div>
 
@@ -1273,7 +1299,10 @@ function checkUser() { showUser(); goTopics(); return true; }
 // ===== TOPICS =====
 let currentTopic = '';
 const TOPICS = [
-  { id:'pdd', label:'ПДД: Безопасный пешеход', icon:'🚦', desc:'Теория, разминка, светофор, знаки, маршрут, тест' },
+  { id:'pdd', label:'ПДД: Безопасный пешеход', icon:'🚦', desc:'Теория, разминка, светофор, знаки, маршрут, тест' }
+];
+const ARCHIVE_TOPICS = [
+  { id:'tug', label:'Канат: дуэль команд', icon:'⚔️', desc:'Перетягивание каната: дроби, проценты, отрицательные числа' },
   { id:'homework', label:'📌 Домашняя работа', icon:'📚', desc:'Задания на дом по урокам 4–11' },
   { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'🧮', desc:'Теория, разминка, лабиринт, тест' },
   { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'🧮', desc:'Теория, разминка, лабиринт, тест' },
@@ -1289,7 +1318,7 @@ function goTopics() { showScreen('screenTopics'); renderTopics(); }
 function renderTopics() {
   const g = document.getElementById('topicGrid'); g.innerHTML = '';
   let totalOk = 0, totalAll = 0;
-  TOPICS.forEach(t => {
+  [...TOPICS, ...ARCHIVE_TOPICS].forEach(t => {
     const s = JSON.parse(localStorage.getItem('trainStats_'+t.id) || '{}');
     Object.values(s).forEach(v => { totalOk += v.ok; totalAll += v.ok + v.fail; });
   });
@@ -1298,7 +1327,43 @@ function renderTopics() {
     <div class="stat-box"><div class="stat-val">${totalAll}</div><div class="stat-label">Всего решено</div></div>`;
   TOPICS.forEach(t => {
     const card = document.createElement('div');
-    card.className = 'topic-card' + (t.id === 'pdd' || t.id === 'homework' ? ' special' : '') + (t.id === 'pdd' ? ' pdd' : '');
+    card.className = 'topic-card' + (t.id === 'pdd' ? ' special pdd' : '');
+    card.innerHTML = `<div class="tc-icon">${t.icon}</div><div class="tc-title">${t.label}</div><div class="tc-desc">${t.desc}</div>`;
+    card.onclick = () => selectTopic(t.id);
+    g.appendChild(card);
+  });
+}
+function selectTopic(id) {
+  if (id === 'pdd') { showScreen('screenPdd'); initPdd(); return; }
+  /* Канат — отдельная страница: там своя физика и настройки. */
+  if (id === 'tug') { window.location.href = 'math-kanat.html'; return; }
+  if (lessonData[id]) { showScreen('screenLesson'); initLesson(id); return; }
+  if (id === 'homework') { showScreen('screenHomework'); renderHomework(); return; }
+  currentTopic = id; goMenu();
+}
+function goBackToTopics() { currentTopic = ''; goTopics(); }
+
+// ===== ARCHIVE =====
+let archiveGridOpen = false;
+function goArchive() { showScreen('screenArchive'); renderArchive(); }
+function toggleArchiveGrid() {
+  archiveGridOpen = !archiveGridOpen;
+  const grid = document.getElementById('archiveGrid');
+  grid.style.display = archiveGridOpen ? 'grid' : 'none';
+}
+function renderArchive() {
+  const g = document.getElementById('archiveGrid'); g.innerHTML = '';
+  let totalOk = 0, totalAll = 0;
+  ARCHIVE_TOPICS.forEach(t => {
+    const s = JSON.parse(localStorage.getItem('trainStats_'+t.id) || '{}');
+    Object.values(s).forEach(v => { totalOk += v.ok; totalAll += v.ok + v.fail; });
+  });
+  document.getElementById('archiveStats').innerHTML = `
+    <div class="stat-box green"><div class="stat-val">${totalOk}</div><div class="stat-label">Всего верно</div></div>
+    <div class="stat-box"><div class="stat-val">${totalAll}</div><div class="stat-label">Всего решено</div></div>`;
+  ARCHIVE_TOPICS.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'topic-card' + (t.id === 'homework' || t.id === 'tug' ? ' special' : '');
     card.innerHTML = `<div class="tc-icon">${t.icon}</div><div class="tc-title">${t.label}</div><div class="tc-desc">${t.desc}</div>`;
     card.onclick = () => selectTopic(t.id);
     if (t.id === 'lesson4') {
@@ -1309,13 +1374,6 @@ function renderTopics() {
     g.appendChild(card);
   });
 }
-function selectTopic(id) {
-  if (id === 'pdd') { showScreen('screenPdd'); initPdd(); return; }
-  if (lessonData[id]) { showScreen('screenLesson'); initLesson(id); return; }
-  if (id === 'homework') { showScreen('screenHomework'); renderHomework(); return; }
-  currentTopic = id; goMenu();
-}
-function goBackToTopics() { currentTopic = ''; goTopics(); }
 
 // ===== HOMEWORK =====
 const HW_LESSONS = [
