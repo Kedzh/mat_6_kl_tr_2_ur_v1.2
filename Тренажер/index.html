@@ -1303,7 +1303,8 @@ const TOPICS = [
   { id:'lesson13', label:'Урок 13: Наибольший общий делитель. Взаимно простые числа', icon:'🔗', desc:'Теория, разминка, лабиринт, тест' },
   { id:'lesson14', label:'Урок 14: Наименьшее общее кратное натуральных чисел', icon:'🔁', desc:'Теория, разминка, лабиринт, тест' },
   { id:'lesson15', label:'Урок 15: Приведение дробей к наименьшему общему знаменателю', icon:'➗', desc:'Теория, разминка, лабиринт, тест' },
-  { id:'lesson16', label:'Урок 16: Сложение и вычитание смешанных чисел', icon:'➕', desc:'Теория, разминка, лабиринт, тест' }
+  { id:'lesson16', label:'Урок 16: Сложение и вычитание смешанных чисел', icon:'➕', desc:'Теория, разминка, лабиринт, тест' },
+  { id:'viz11', label:'Визуализация: параграф 11 — смешанные числа', icon:'🧩', desc:'Наглядная схема по шагам (сложение и вычитание)' }
 ];
 const ARCHIVE_TOPICS = [
   { id:'tug', label:'Канат: дуэль команд', icon:'⚔️', desc:'Перетягивание каната: дроби, проценты, отрицательные числа' },
@@ -1342,6 +1343,7 @@ function selectTopic(id) {
   if (id === 'pdd') { showScreen('screenPdd'); initPdd(); return; }
   /* Канат — отдельная страница: там своя физика и настройки. */
   if (id === 'tug') { window.location.href = 'math-kanat.html'; return; }
+  if (id === 'viz11') { window.location.href = '../11 параграф/smeshannye-chisla.html'; return; }
   if (lessonData[id]) { showScreen('screenLesson'); initLesson(id); return; }
   if (id === 'homework') { showScreen('screenHomework'); renderHomework(); return; }
   currentTopic = id; goMenu();
