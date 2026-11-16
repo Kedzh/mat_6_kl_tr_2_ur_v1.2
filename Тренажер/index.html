@@ -686,7 +686,7 @@ body.vizMode .container { max-width: 1100px; }
       <span class="nav-title">🧩 Визуализация: параграф 11 — смешанные числа</span>
     </div>
     <iframe id="vizFrame" class="viz-frame" title="Визуализация параграфа 11"
-            src="../11 параграф/smeshannye-chisla.html"></iframe>
+            src="../11 параграф/smeshannye-chisla.html?v=2"></iframe>
   </div>
 
   <div class="screen" id="screenMenu">
@@ -1378,7 +1378,7 @@ function selectTopic(id) {
   /* Канат — отдельная страница: там своя физика и настройки. */
   if (id === 'tug') { window.location.href = 'math-kanat.html'; return; }
   if (id === 'viz11') {
-    document.getElementById('vizFrame').src = '../11 параграф/smeshannye-chisla.html';
+    document.getElementById('vizFrame').src = '../11 параграф/smeshannye-chisla.html?v=' + Date.now();
     showScreen('screenViz');
     return;
   }
