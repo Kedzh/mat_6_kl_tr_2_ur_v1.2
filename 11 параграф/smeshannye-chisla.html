@@ -107,7 +107,28 @@ header .source { font-size: 1.25rem; opacity: 0.7; margin-top: 4px; position: re
 .btn:hover { transform: translateY(-2px); }
 
 .stage-wrap { background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 10px; overflow-x: auto; }
-svg { display: block; }
+
+/* дробь с горизонтальной чертой */
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center;
+        line-height: 1.05; font-weight: 700; margin: 0 4px; }
+.frac > span { padding: 0 3px; }
+.frac > span:last-child { border-top: 2px solid currentColor; }
+
+.scene { padding: 22px 6px 4px; min-width: 900px; }
+.row { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; flex-wrap: wrap; }
+.row:last-child { margin-bottom: 10px; }
+.rlabel { width: 200px; flex-shrink: 0; font-size: 20px; font-weight: 800; color: var(--text); }
+.tiles { display: flex; gap: 8px 6px; flex-wrap: wrap; align-items: center; }
+.tile { width: 62px; height: 44px; border-radius: 9px; position: relative; flex-shrink: 0; margin-top: 22px; }
+.tile.whole { background: #dbeafe; border: 2px solid #3b82f6; color: #3b82f6;
+  display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; }
+.tile.frac { background: #fff7ed; border: 2px solid #f59e0b; padding: 3px; }
+.tile.frac .segs { display: flex; height: 100%; }
+.tile.frac .seg { flex: 1; }
+.tile.frac .seg.fill { background: #fbbf24; }
+.tile .tlab { position: absolute; top: -21px; left: -6px; right: -6px; text-align: center;
+  font-size: 15px; font-weight: 800; color: #b45309; }
+.tile.dim { opacity: 0.35; }
 .caption {
   margin-top: 14px; background: var(--primary-light); border-left: 4px solid var(--primary);
   border-radius: var(--radius-sm); padding: 14px 18px; font-size: 1.8rem; font-weight: 600;
@@ -183,7 +204,7 @@ svg { display: block; }
 
 <div class="card">
   <h2><span class="emoji">🖼️</span>Схема по шагам</h2>
-  <div class="stage-wrap"><svg id="svg" viewBox="0 0 1000 300" role="img" aria-label="Наглядная схема действия"></svg></div>
+  <div class="stage-wrap"><div id="stage" class="scene" role="img" aria-label="Наглядная схема действия"></div></div>
   <div class="caption" id="caption"></div>
   <div class="nav">
     <button id="prevBtn" onclick="step(-1)">◀ Назад</button>
@@ -223,17 +244,17 @@ function toggleTheme() {
   if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 })();
 
-const NS = 'http://www.w3.org/2000/svg';
-function el(name, attrs, parent) {
-  const e = document.createElementNS(NS, name);
-  for (const k in attrs) e.setAttribute(k, attrs[k]);
-  if (parent) parent.appendChild(e);
-  return e;
-}
 function gcd(x, y) { y = Math.abs(y); while (y) { const t = x % y; x = y; y = t; } return x || 1; }
 function lcm(x, y) { return x * y / gcd(x, y); }
-function fracStr(k, n) { return k + '/' + n; }
+/* дробь с горизонтальной чертой, как в учебнике */
+function fracStr(k, n) { return '<span class="frac"><span>' + k + '</span><span>' + n + '</span></span>'; }
 function mixStr(a, b, c) { return b === 0 ? String(a) : (a === 0 ? fracStr(b, c) : a + ' ' + fracStr(b, c)); }
+/* превращает «2 1/4» и «3/4» в дроби с горизонтальной чертой */
+function frText(s) {
+  return String(s)
+    .replace(/(\d+)\s+(\d+)\s*\/\s*(\d+)/g, (m, a, b, c) => a + ' ' + fracStr(b, c))
+    .replace(/(\d+)\s*\/\s*(\d+)/g, (m, a, b) => fracStr(a, b));
+}
 
 /* ---------- примеры ---------- */
 const PRESETS = [
@@ -269,7 +290,7 @@ function renderPresets() {
   PRESETS.forEach(p => {
     const b = document.createElement('button');
     b.className = 'preset';
-    b.textContent = p.name;
+    b.innerHTML = frText(p.name);
     b.onclick = () => {
       document.getElementById('aInt').value = p.a[0];
       document.getElementById('aNum').value = p.a[1];
@@ -432,50 +453,25 @@ function buildStages() {
 }
 
 /* ---------- отрисовка ---------- */
-function drawTile(g, t, x, y) {
-  const dim = t.dim ? 0.35 : 1;
-  if (t.t === 'w') {
-    el('rect', { x, y, width: TW, height: TH, rx: 9, fill: '#dbeafe', stroke: '#3b82f6', 'stroke-width': 2, opacity: dim }, g);
-    const tx = el('text', { x: x + TW / 2, y: y + TH / 2 + 7, 'font-size': 21, 'font-weight': 800, fill: '#3b82f6', 'text-anchor': 'middle', opacity: dim }, g);
-    tx.textContent = '1';
-    return;
-  }
+function tileHtml(t) {
+  if (t.t === 'w') return '<div class="tile whole' + (t.dim ? ' dim' : '') + '">1</div>';
   const n = Math.max(1, t.n), k = Math.max(0, Math.min(n, t.k));
-  el('rect', { x, y, width: TW, height: TH, rx: 9, fill: '#fff7ed', stroke: '#f59e0b', 'stroke-width': 2, opacity: dim }, g);
-  if (k > 0) {
-    const w = TW / n;
-    el('rect', { x: x + 1, y: y + 1, width: Math.max(0, w * k - 2), height: TH - 2, fill: '#fbbf24', opacity: dim }, g);
-  }
-  const w = TW / n;
-  for (let i = 1; i < n; i++) {
-    el('line', { x1: x + i * w, y1: y + 2, x2: x + i * w, y2: y + TH - 2, stroke: '#f59e0b', 'stroke-width': 1, opacity: dim }, g);
-  }
-  el('rect', { x, y, width: TW, height: TH, rx: 9, fill: 'none', stroke: '#f59e0b', 'stroke-width': 2, opacity: dim }, g);
-  const tx = el('text', { x: x + TW / 2, y: y - 8, 'font-size': 17, 'font-weight': 800, fill: '#b45309', 'text-anchor': 'middle', opacity: dim }, g);
-  tx.textContent = fracStr(k, n);
+  let segs = '';
+  for (let i = 0; i < n; i++) segs += '<div class="seg' + (i < k ? ' fill' : '') + '"></div>';
+  return '<div class="tile frac' + (t.dim ? ' dim' : '') + '">' + fracStr(k, n) +
+         '<div class="segs">' + segs + '</div></div>';
 }
 
 function drawStage() {
   const st = stages[stageIdx];
-  const svg = document.getElementById('svg');
-  svg.innerHTML = '';
-  let maxW = 1000;
+  const stage = document.getElementById('stage');
+  let html = '';
   st.rows.forEach(r => {
-    const w = LABEL_W + r.tiles.length * (TW + GAP) + 20;
-    if (w > maxW) maxW = w;
+    html += '<div class="row"><div class="rlabel">' + r.label + '</div><div class="tiles">';
+    r.tiles.forEach(t => { html += tileHtml(t); });
+    html += '</div></div>';
   });
-  const h = TOP + st.rows.length * ROW_H + 30;
-  svg.setAttribute('viewBox', '0 0 ' + maxW + ' ' + h);
-  svg.setAttribute('width', maxW);
-  svg.setAttribute('height', h);
-
-  st.rows.forEach((r, ri) => {
-    const y = TOP + ri * ROW_H;
-    const lbl = el('text', { x: 12, y: y + TH / 2 + 7, 'font-size': 21, 'font-weight': 800, fill: '#1e293b' }, svg);
-    lbl.textContent = r.label;
-    let x = LABEL_W;
-    r.tiles.forEach(t => { drawTile(svg, t, x, y); x += TW + GAP; });
-  });
+  stage.innerHTML = html;
 
   document.getElementById('caption').innerHTML =
     '<span class="step">Шаг ' + (stageIdx + 1) + ' из ' + stages.length + '</span>' + st.caption;

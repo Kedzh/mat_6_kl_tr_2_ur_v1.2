@@ -712,6 +712,13 @@ function updateSlides(secIdx) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+/* Дроби с горизонтальной чертой вместо слеша */
+function frText(s) {
+  return String(s)
+    .replace(/(\d+)\s+(\d+)\s*\/\s*(\d+)/g, (m, a, b, c) => a + ' <span class="frac"><span>' + b + '</span><span>' + c + '</span></span>')
+    .replace(/(\d+)\s*\/\s*(\d+)/g, (m, a, b) => '<span class="frac"><span>' + a + '</span><span>' + b + '</span></span>');
+}
+
 const tfData = [
   { correctAnswer: true, explanation: 'Верно! НОЗ нескольких дробей — это НОК их знаменателей.' },
   { correctAnswer: true, explanation: 'Верно! НОК(6, 9) = 18 — значит НОЗ равен 18.' },
@@ -738,7 +745,7 @@ function checkTF(idx, userAnswer) {
   buttons[userAnswer ? 0 : 1].classList.add(isCorrect ? 'selected-true' : 'selected-false');
   const comment = document.getElementById('tf-comment-' + idx);
   comment.className = 'tf-comment ' + (isCorrect ? 'correct' : 'wrong');
-  comment.innerHTML = (isCorrect ? '✅ Правильно! ' : '❌ Неправильно. ') + tfData[idx].explanation;
+  comment.innerHTML = (isCorrect ? '✅ Правильно! ' : '❌ Неправильно. ') + frText(tfData[idx].explanation);
   updateTFProgress();
 }
 
@@ -769,7 +776,7 @@ function initLabyrinth() {
     const s = document.createElement('div'); s.className = 'labyrinth-step future'; s.textContent = i + 1; s.id = 'labStep' + i; visual.appendChild(s);
   });
   updateLabVisual();
-  document.getElementById('labQuestion').textContent = labSteps[0].q;
+  document.getElementById('labQuestion').innerHTML = frText(labSteps[0].q);
   document.getElementById('labInput').value = '';
 }
 
@@ -791,7 +798,7 @@ function checkLabStep() {
         document.getElementById('labComplete').classList.add('show');
         updateLabVisual(); launchConfetti();
       } else {
-        document.getElementById('labQuestion').textContent = labSteps[labCurrent].q;
+        document.getElementById('labQuestion').innerHTML = frText(labSteps[labCurrent].q);
         input.value = ''; input.style.borderColor = 'var(--border)'; hint.className = 'lab-hint'; updateLabVisual();
       }
     }, 800);
@@ -851,6 +858,11 @@ function launchConfetti() {
 }
 
 initLabyrinth();
+
+/* заменяем дроби через слеш на дроби с горизонтальной чертой */
+document.querySelectorAll('.formula, .tf-statement, .ex-text, .card-desc, .theory-box p').forEach(e => {
+  e.innerHTML = frText(e.innerHTML);
+});
 </script>
 </body>
 </html>

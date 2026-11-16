@@ -717,6 +717,13 @@ function updateSlides(secIdx) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+/* Дроби с горизонтальной чертой вместо слеша */
+function frText(s) {
+  return String(s)
+    .replace(/(\d+)\s+(\d+)\s*\/\s*(\d+)/g, (m, a, b, c) => a + ' <span class="frac"><span>' + b + '</span><span>' + c + '</span></span>')
+    .replace(/(\d+)\s*\/\s*(\d+)/g, (m, a, b) => '<span class="frac"><span>' + a + '</span><span>' + b + '</span></span>');
+}
+
 const tfData = [
   { correctAnswer: true, explanation: 'Верно! Например: 14 5/12 = 14 + 5/12.' },
   { correctAnswer: true, explanation: 'Верно! Именно эти свойства позволяют складывать целые и дробные части отдельно.' },
@@ -743,7 +750,7 @@ function checkTF(idx, userAnswer) {
   buttons[userAnswer ? 0 : 1].classList.add(isCorrect ? 'selected-true' : 'selected-false');
   const comment = document.getElementById('tf-comment-' + idx);
   comment.className = 'tf-comment ' + (isCorrect ? 'correct' : 'wrong');
-  comment.innerHTML = (isCorrect ? '✅ Правильно! ' : '❌ Неправильно. ') + tfData[idx].explanation;
+  comment.innerHTML = (isCorrect ? '✅ Правильно! ' : '❌ Неправильно. ') + frText(tfData[idx].explanation);
   updateTFProgress();
 }
 
@@ -753,7 +760,6 @@ function updateTFProgress() {
   bar.textContent = tfCorrect + ' / 12';
   if (tfAnswered === 12) bar.style.background = tfCorrect === 12 ? 'linear-gradient(90deg,#22c55e,#34d399)' : 'linear-gradient(90deg,#eab308,#facc15)';
 }
-
 const labSteps = [
   { q: '14 5/12 + 17 1/6 = ?', a: '31 7/12' },
   { q: '6 4/9 + 2 5/6 = ?', a: '9 5/18' },
@@ -774,7 +780,7 @@ function initLabyrinth() {
     const s = document.createElement('div'); s.className = 'labyrinth-step future'; s.textContent = i + 1; s.id = 'labStep' + i; visual.appendChild(s);
   });
   updateLabVisual();
-  document.getElementById('labQuestion').textContent = labSteps[0].q;
+  document.getElementById('labQuestion').innerHTML = frText(labSteps[0].q);
   document.getElementById('labInput').value = '';
 }
 
@@ -797,7 +803,7 @@ function checkLabStep() {
         document.getElementById('labComplete').classList.add('show');
         updateLabVisual(); launchConfetti();
       } else {
-        document.getElementById('labQuestion').textContent = labSteps[labCurrent].q;
+        document.getElementById('labQuestion').innerHTML = frText(labSteps[labCurrent].q);
         input.value = ''; input.style.borderColor = 'var(--border)'; hint.className = 'lab-hint'; updateLabVisual();
       }
     }, 800);
@@ -859,6 +865,11 @@ function launchConfetti() {
 }
 
 initLabyrinth();
+
+/* заменяем дроби через слеш на дроби с горизонтальной чертой */
+document.querySelectorAll('.formula, .tf-statement, .ex-text, .card-desc, .theory-box p').forEach(e => {
+  e.innerHTML = frText(e.innerHTML);
+});
 </script>
 </body>
 </html>

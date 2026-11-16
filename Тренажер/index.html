@@ -584,6 +584,21 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 [data-theme="dark"] .var-ex .ve-i.correct { background: #14532d; }
 [data-theme="dark"] .var-ex .ve-i.wrong { background: #7f1d1d; }
 
+/* дробь с горизонтальной чертой */
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; line-height: 1.05; font-weight: 700; margin: 0 2px; }
+.frac > span { padding: 0 2px; }
+.frac > span:last-child { border-top: 2px solid currentColor; }
+
+/* варианты ответов теста кнопками */
+.var-ex .ve-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.var-ex .ve-opt { padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: var(--bg); color: var(--text); transition: all 0.2s; }
+.var-ex .ve-opt:hover { border-color: var(--primary); color: var(--primary); }
+.var-ex .ve-opt.sel { background: var(--primary); border-color: var(--primary); color: white; }
+.var-ex .ve-opts.correct { border: 2px solid var(--green); background: #dcfce7; border-radius: 8px; padding: 4px; }
+.var-ex .ve-opts.wrong { border: 2px solid var(--red); background: #fee2e2; border-radius: 8px; padding: 4px; }
+[data-theme="dark"] .var-ex .ve-opts.correct { background: #14532d; }
+[data-theme="dark"] .var-ex .ve-opts.wrong { background: #7f1d1d; }
+
 /* ===== ПДД: РАЗДЕЛ БЕЗОПАСНЫЙ ПЕШЕХОД ===== */
 .light-box { display: flex; gap: 22px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
 .tl { width: 104px; padding: 11px 10px; background: var(--card); border: 4px solid var(--border); border-radius: 18px; display: flex; flex-direction: column; gap: 9px; box-shadow: var(--shadow); }
@@ -2435,6 +2450,13 @@ const lessonData = {
 };
 
 let curLesson = null;
+
+/* Дроби с горизонтальной чертой вместо слеша */
+function frText(s) {
+  return String(s)
+    .replace(/(\d+)\s+(\d+)\s*\/\s*(\d+)/g, (m, a, b, c) => a + ' <span class="frac"><span>' + b + '</span><span>' + c + '</span></span>')
+    .replace(/(\d+)\s*\/\s*(\d+)/g, (m, a, b) => '<span class="frac"><span>' + a + '</span><span>' + b + '</span></span>');
+}
 let tfIdx=0, tfOk=0;
 let labIdx=0, labOk=0;
 let curSecStart = Date.now();
@@ -2455,7 +2477,7 @@ function buildTheory() {
   curLesson.theory.forEach(g => {
     const b = document.createElement('div'); b.className = 'theory-block';
     let html = `<h4>${g.h}</h4><ul>`;
-    g.items.forEach(it => { html += `<li>${it}</li>`; });
+    g.items.forEach(it => { html += `<li>${frText(it)}</li>`; });
     html += '</ul>';
     b.innerHTML = html; c.appendChild(b);
   });
@@ -2478,12 +2500,18 @@ function buildTest() {
     const div = document.createElement('div'); div.className = 'var-ex';
     const opts = ex.opt || [ex.a];
     const shuf = opts.slice(); for (let k = shuf.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [shuf[k], shuf[j]] = [shuf[j], shuf[k]]; }
-    let html = `<span class="ve-n">${i+1}</span><span class="ve-q">${ex.q}</span><select class="ve-i ve-sel" id="te${i}"><option value="">—</option>`;
-    shuf.forEach(v => { html += `<option value="${v}">${v}</option>`; });
-    html += '</select>';
+    let html = `<span class="ve-n">${i+1}</span><span class="ve-q">${frText(ex.q)}</span><div class="ve-opts" id="te${i}">`;
+    shuf.forEach(v => { html += `<button type="button" class="ve-opt" data-v="${String(v).replace(/"/g, '&quot;')}">${frText(v)}</button>`; });
+    html += '</div>';
     div.innerHTML = html;
     c.appendChild(div);
   });
+  c.querySelectorAll('.ve-opt').forEach(b => b.addEventListener('click', () => {
+    const box = b.parentElement;
+    box.querySelectorAll('.ve-opt').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    box.setAttribute('data-sel', b.getAttribute('data-v'));
+  }));
   renderTestTimer();
   document.getElementById('testResult').style.display = 'none';
   document.getElementById('testAlert').style.display = 'none';
@@ -2495,7 +2523,7 @@ function renderTestTimer() {
 }
 function startTest() {
   if (!curLesson.test || testActive || testFinished) return;
-  const els = document.getElementById('testContainer').querySelectorAll('.ve-i');
+  const els = document.getElementById('testContainer').querySelectorAll('.ve-opts');
   if (!els.length) { buildTest(); }
   testActive = true; testTime = 900; renderTestTimer();
   stopTestTimer();
@@ -2513,7 +2541,8 @@ function finishTest() {
   if (curLesson.test) curLesson.test.forEach((ex, i) => {
     total++;
     const inp = document.getElementById('te' + i); if (!inp) return;
-    const sel = inp.value; inp.classList.remove('correct','wrong');
+    const sel = inp.getAttribute('data-sel') || '';
+    inp.classList.remove('correct','wrong');
     const ok = typeof ex.a === 'string' ? sel === ex.a : (!isNaN(parseFloat(sel)) && Math.abs(parseFloat(sel) - ex.a) < 0.001);
     if (ok) { inp.classList.add('correct'); correct++; }
     else inp.classList.add('wrong');
@@ -2535,7 +2564,7 @@ function buildTF() {
   const c=document.getElementById('tfContainer'); c.innerHTML='';
   curLesson.tf.forEach((item,i)=>{
     const card=document.createElement('div'); card.className='tf-card'; card.id='tf'+i;
-    card.innerHTML=`<div class="tf-statement">${i+1}. ${item.q}</div>
+    card.innerHTML=`<div class="tf-statement">${i+1}. ${frText(item.q)}</div>
       <div class="tf-btns"><button class="tf-btn" onclick="tfAnswer(${i},true)">✅ Верно</button><button class="tf-btn" onclick="tfAnswer(${i},false)">❌ Неверно</button></div>
       <div class="tf-explain" id="tfEx${i}"></div>`;
     c.appendChild(card);
@@ -2591,7 +2620,7 @@ function updateLab() {
   });
   if (labIdx >= curLesson.lab.length) return;
   document.getElementById('labLabel').textContent='Шаг '+(labIdx+1)+' из '+curLesson.lab.length;
-  document.getElementById('labQ').textContent=curLesson.lab[labIdx].q;
+  document.getElementById('labQ').innerHTML=frText(curLesson.lab[labIdx].q);
   document.getElementById('labIn').value=''; document.getElementById('labIn').focus();
   document.getElementById('labFb').className='lab-feedback';
 }
