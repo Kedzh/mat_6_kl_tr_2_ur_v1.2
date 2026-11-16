@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сложение и вычитание смешанных чисел — визуализация (параграф 11)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --primary: #3b82f6;
+  --primary-light: #dbeafe;
+  --accent: #f97316;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+[data-theme="dark"] {
+  --bg: #0f172a; --card: #1e293b; --primary: #60a5fa; --primary-light: #1e3a5f;
+  --accent: #fb923c; --green: #4ade80; --red: #f87171; --yellow: #facc15;
+  --text: #f1f5f9; --text-secondary: #94a3b8; --border: #334155;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
+  transition: background 0.3s, color 0.3s; overflow-x: hidden;
+}
+.container { max-width: 1240px; margin: 0 auto; padding: 24px 32px; }
+
+header {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: white; padding: 32px 40px; border-radius: var(--radius);
+  margin-bottom: 24px; text-align: center; position: relative;
+  box-shadow: var(--shadow); overflow: hidden;
+}
+header::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: headerPulse 8s ease-in-out infinite;
+}
+@keyframes headerPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+header h1 { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800; position: relative; }
+header .subtitle { font-size: 1.6rem; opacity: 0.9; margin-top: 6px; position: relative; }
+header .source { font-size: 1.25rem; opacity: 0.7; margin-top: 4px; position: relative; }
+.theme-toggle {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(255,255,255,0.2); border: none; color: white;
+  font-size: 2rem; width: 52px; height: 52px; border-radius: 50%;
+  cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.35); transform: scale(1.1); }
+
+.card {
+  background: var(--card); border-radius: var(--radius); padding: 28px;
+  margin-bottom: 22px; box-shadow: var(--shadow); border: 1px solid var(--border);
+  transition: background 0.3s, border 0.3s;
+}
+.card h2 { font-size: 2.4rem; margin-bottom: 4px; color: var(--primary); }
+.card h2 .emoji { margin-right: 10px; }
+.card .desc { color: var(--text-secondary); font-size: 1.65rem; margin-bottom: 16px; }
+.card .desc b { color: var(--text); }
+
+.presets { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.preset {
+  padding: 10px 16px; border: 2px solid var(--border); background: var(--bg);
+  border-radius: 8px; font-family: inherit; font-weight: 700; font-size: 1.5rem;
+  cursor: pointer; color: var(--text); transition: all 0.25s;
+}
+.preset:hover { border-color: var(--primary); color: var(--primary); }
+.preset.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+.form { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 1.5rem; font-weight: 700; }
+.field .name { color: var(--text-secondary); }
+.mixed { display: flex; align-items: center; gap: 8px; }
+.mixed input {
+  width: 76px; padding: 10px; border: 2px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 1.8rem; font-weight: 700; text-align: center;
+  background: var(--card); color: var(--text);
+}
+.mixed input:focus { border-color: var(--primary); outline: none; }
+.mixed .frac { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.mixed .frac input { width: 70px; }
+.mixed .frac .bar { width: 70px; height: 2px; background: var(--text); }
+.op-btns { display: flex; gap: 8px; }
+.op-btns button {
+  width: 60px; height: 60px; border-radius: 10px; border: 2px solid var(--border);
+  background: var(--bg); font-family: inherit; font-size: 2.6rem; font-weight: 800;
+  cursor: pointer; color: var(--text); transition: all 0.25s;
+}
+.op-btns button.active { background: var(--accent); border-color: var(--accent); color: white; }
+.btn {
+  padding: 14px 30px; border: none; border-radius: 8px; font-family: inherit;
+  font-weight: 700; font-size: 1.7rem; cursor: pointer; transition: all 0.25s;
+  background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(59,130,246,0.3);
+}
+.btn:hover { transform: translateY(-2px); }
+
+.stage-wrap { background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 10px; overflow-x: auto; }
+svg { display: block; }
+.caption {
+  margin-top: 14px; background: var(--primary-light); border-left: 4px solid var(--primary);
+  border-radius: var(--radius-sm); padding: 14px 18px; font-size: 1.8rem; font-weight: 600;
+}
+.caption .step { color: var(--text-secondary); font-weight: 700; margin-right: 8px; }
+.nav { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.nav button {
+  padding: 12px 24px; border: 2px solid var(--primary); background: var(--card);
+  color: var(--primary); border-radius: 8px; font-family: inherit; font-weight: 700;
+  font-size: 1.6rem; cursor: pointer; transition: all 0.25s;
+}
+.nav button:hover:not(:disabled) { background: var(--primary); color: white; }
+.nav button:disabled { opacity: 0.35; cursor: default; }
+.nav .dots { display: flex; gap: 8px; }
+.nav .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--border); border: none; cursor: pointer; }
+.nav .dot.active { background: var(--primary); transform: scale(1.25); }
+
+.answer { margin-top: 16px; font-size: 2.1rem; font-weight: 800; color: var(--green); text-align: center; }
+.answer .f { color: var(--primary); }
+
+.rule { background: var(--primary-light); border-left: 4px solid var(--primary); border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 14px; }
+.rule h3 { font-size: 1.9rem; color: var(--primary); margin-bottom: 6px; }
+.rule p { font-size: 1.6rem; margin-bottom: 4px; }
+
+.warn { margin-top: 14px; padding: 12px 16px; border-radius: 8px; background: #fee2e2; color: #991b1b; font-weight: 700; font-size: 1.6rem; display: none; }
+[data-theme="dark"] .warn { background: #7f1d1d; color: #fecaca; }
+
+@media (max-width: 700px) {
+  .container { padding: 12px; }
+  .card { padding: 16px; }
+  header { padding: 20px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">🌓</button>
+  <h1>🧩 Сложение и вычитание смешанных чисел</h1>
+  <div class="subtitle">6 класс · Параграф 11 · Наглядная схема</div>
+  <div class="source">По учебнику Виленкин Н.Я., Жохов В.И., Чесноков А.С. и др. (Просвещение), стр. 71–73</div>
+</header>
+
+<div class="card">
+  <h2><span class="emoji">🎛️</span>Выбери пример</h2>
+  <p class="desc">Плитка <b>«1»</b> — целая часть, плитка с долями — дробная часть. Нажми <b>«Показать»</b> и двигай шаги кнопками.</p>
+  <div class="presets" id="presets"></div>
+  <div class="form">
+    <div class="field"><span class="name">Первое число</span>
+      <div class="mixed">
+        <input type="number" id="aInt" min="0" max="30" value="2">
+        <div class="frac"><input type="number" id="aNum" min="0" max="20" value="1"><div class="bar"></div><input type="number" id="aDen" min="1" max="20" value="4"></div>
+      </div>
+    </div>
+    <div class="field"><span class="name">Действие</span>
+      <div class="op-btns">
+        <button id="opPlus" class="active" onclick="setOp('+')">+</button>
+        <button id="opMinus" onclick="setOp('−')">−</button>
+      </div>
+    </div>
+    <div class="field"><span class="name">Второе число</span>
+      <div class="mixed">
+        <input type="number" id="bInt" min="0" max="30" value="1">
+        <div class="frac"><input type="number" id="bNum" min="0" max="20" value="1"><div class="bar"></div><input type="number" id="bDen" min="1" max="20" value="2"></div>
+      </div>
+    </div>
+    <button class="btn" onclick="rebuild()">Показать ▶</button>
+  </div>
+  <div class="warn" id="warn"></div>
+</div>
+
+<div class="card">
+  <h2><span class="emoji">🖼️</span>Схема по шагам</h2>
+  <div class="stage-wrap"><svg id="svg" viewBox="0 0 1000 300" role="img" aria-label="Наглядная схема действия"></svg></div>
+  <div class="caption" id="caption"></div>
+  <div class="nav">
+    <button id="prevBtn" onclick="step(-1)">◀ Назад</button>
+    <div class="dots" id="dots"></div>
+    <button id="nextBtn" onclick="step(1)">Дальше ▶</button>
+  </div>
+  <div class="answer" id="answer"></div>
+</div>
+
+<div class="card">
+  <h2><span class="emoji">📖</span>Правило из учебника</h2>
+  <div class="rule">
+    <h3>Чтобы найти сумму смешанных чисел</h3>
+    <p>1) дробные части привести к наименьшему общему знаменателю;</p>
+    <p>2) отдельно выполнить сложение целых и отдельно дробных частей;</p>
+    <p>3) при необходимости сократить дробь, выделить целую часть и прибавить её к целой части.</p>
+  </div>
+  <div class="rule">
+    <h3>Чтобы найти разность смешанных чисел</h3>
+    <p>1) дробные части привести к наименьшему общему знаменателю;</p>
+    <p>2) если дробная часть уменьшаемого больше дробной части вычитаемого — вычесть целые и дробные части отдельно;</p>
+    <p>3) если дробная часть уменьшаемого меньше — занять единицу из целой части и выполнить вычитание по пункту 2.</p>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function () {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+
+const NS = 'http://www.w3.org/2000/svg';
+function el(name, attrs, parent) {
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function gcd(x, y) { y = Math.abs(y); while (y) { const t = x % y; x = y; y = t; } return x || 1; }
+function lcm(x, y) { return x * y / gcd(x, y); }
+function fracStr(k, n) { return k + '/' + n; }
+function mixStr(a, b, c) { return b === 0 ? String(a) : (a === 0 ? fracStr(b, c) : a + ' ' + fracStr(b, c)); }
+
+/* ---------- примеры ---------- */
+const PRESETS = [
+  { name: '2 1/4 + 1 1/2', a: [2,1,4], b: [1,1,2], op: '+' },
+  { name: '3 1/5 − 1 3/4', a: [3,1,5], b: [1,3,4], op: '−' },
+  { name: 'Пример 1: 14 5/12 + 17 1/6', a: [14,5,12], b: [17,1,6], op: '+' },
+  { name: 'Пример 2: 6 4/9 + 2 5/6', a: [6,4,9], b: [2,5,6], op: '+' },
+  { name: 'Пример 3: 4 5/6 − 2 1/4', a: [4,5,6], b: [2,1,4], op: '−' },
+  { name: 'Пример 4: 5 7/12 − 1 5/8', a: [5,7,12], b: [1,5,8], op: '−' }
+];
+
+let op = '+';
+let stageIdx = 0;
+let stages = [];
+
+function setOp(o) {
+  op = o;
+  document.getElementById('opPlus').classList.toggle('active', o === '+');
+  document.getElementById('opMinus').classList.toggle('active', o === '−');
+}
+
+function readInputs() {
+  const g = id => parseInt(document.getElementById(id).value, 10);
+  return {
+    a: [g('aInt'), g('aNum'), g('aDen')],
+    b: [g('bInt'), g('bNum'), g('bDen')]
+  };
+}
+
+function renderPresets() {
+  const box = document.getElementById('presets');
+  box.innerHTML = '';
+  PRESETS.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'preset';
+    b.textContent = p.name;
+    b.onclick = () => {
+      document.getElementById('aInt').value = p.a[0];
+      document.getElementById('aNum').value = p.a[1];
+      document.getElementById('aDen').value = p.a[2];
+      document.getElementById('bInt').value = p.b[0];
+      document.getElementById('bNum').value = p.b[1];
+      document.getElementById('bDen').value = p.b[2];
+      setOp(p.op);
+      rebuild();
+    };
+    box.appendChild(b);
+  });
+}
+
+/* ---------- плитки ---------- */
+const TW = 62, TH = 44, GAP = 6, LABEL_W = 190, ROW_H = 82, TOP = 46;
+
+function tilesWhole(n) {
+  const arr = [];
+  for (let i = 0; i < n; i++) arr.push({ t: 'w' });
+  return arr;
+}
+function tilesFrac(n, k) {
+  const arr = [];
+  let left = k;
+  while (left > 0) { const take = Math.min(n, left); arr.push({ t: 'f', n, k: take }); left -= take; }
+  if (!arr.length) arr.push({ t: 'f', n, k: 0 });
+  return arr;
+}
+function tilesMixed(a, b, c) {
+  return tilesWhole(a).concat(b > 0 ? [{ t: 'f', n: c, k: b }] : []);
+}
+
+/* ---------- построение шагов ---------- */
+function buildStages() {
+  const { a: A, b: B } = readInputs();
+  const st = [];
+  if (op === '+') {
+    const [a, b, c] = A, [d, e, f] = B;
+    const N = lcm(c, f);
+    const bp = b * (N / c), ep = e * (N / f);
+    const s = bp + ep, carry = Math.floor(s / N), rem = s % N;
+    const wholeSum = a + d;
+
+    st.push({
+      caption: 'Даны смешанные числа. Каждое — это целая часть плюс дробная: ' +
+               mixStr(a, b, c) + ' = ' + a + ' + ' + fracStr(b, c) + ',  ' +
+               mixStr(d, e, f) + ' = ' + d + ' + ' + fracStr(e, f) + '.',
+      rows: [
+        { label: 'A = ' + mixStr(a, b, c), tiles: tilesMixed(a, b, c) },
+        { label: 'B = ' + mixStr(d, e, f), tiles: tilesMixed(d, e, f) }
+      ]
+    });
+    st.push({
+      caption: 'Складываем целые части отдельно (сочетательное и переместительное свойства): ' +
+               a + ' + ' + d + ' = ' + wholeSum + '.',
+      rows: [
+        { label: 'Целые A', tiles: tilesWhole(a) },
+        { label: 'Целые B', tiles: tilesWhole(d) },
+        { label: 'Всего целых', tiles: tilesWhole(wholeSum) }
+      ]
+    });
+    st.push({
+      caption: 'Дробные части приводим к общему знаменателю ' + N + ': ' +
+               fracStr(b, c) + ' = ' + fracStr(bp, N) + ',  ' + fracStr(e, f) + ' = ' + fracStr(ep, N) + '.',
+      rows: [
+        { label: 'Дробная A', tiles: [{ t: 'f', n: N, k: bp }] },
+        { label: 'Дробная B', tiles: [{ t: 'f', n: N, k: ep }] }
+      ]
+    });
+    st.push({
+      caption: 'Складываем дробные части: ' + fracStr(bp, N) + ' + ' + fracStr(ep, N) + ' = ' +
+               fracStr(s, N) + ' — это ' + s + ' частей из ' + N + '.',
+      rows: [
+        { label: 'Сумма дробных', tiles: tilesFrac(N, s)}
+      ]
+    });
+    if (carry > 0) {
+      st.push({
+        caption: 'Получилась неправильная дробь: ' + fracStr(s, N) + ' = ' + carry + ' + ' +
+                 (rem > 0 ? fracStr(rem, N) : '0') + '. Выделяем целую часть и прибавляем её к целым.',
+        rows: [
+          { label: 'Целые из дроби', tiles: tilesWhole(carry) },
+          { label: 'Остаток', tiles: [{ t: 'f', n: N, k: rem }] }
+        ]
+      });
+    }
+    const resInt = wholeSum + carry;
+    st.push({
+      caption: 'Ответ: ' + mixStr(a, b, c) + ' + ' + mixStr(d, e, f) + ' = ' +
+               (rem > 0 ? resInt + ' ' + fracStr(rem, N) : String(resInt)) + '.',
+      rows: [
+        { label: 'Итог', tiles: tilesMixed(resInt, rem, N) }
+      ]
+    });
+  } else {
+    const [a, b, c] = A, [d, e, f] = B;
+    const N = lcm(c, f);
+    const bp = b * (N / c), ep = e * (N / f);
+    const needBorrow = bp < ep;
+    const a2 = needBorrow ? a - 1 : a;
+    const b2 = needBorrow ? bp + N : bp;
+    const diffFrac = b2 - ep;
+    const diffInt = a2 - d;
+
+    st.push({
+      caption: 'Даны смешанные числа. Уменьшаемое A = ' + mixStr(a, b, c) + ', вычитаемое B = ' + mixStr(d, e, f) + '.',
+      rows: [
+        { label: 'A = ' + mixStr(a, b, c), tiles: tilesMixed(a, b, c) },
+        { label: 'B = ' + mixStr(d, e, f), tiles: tilesMixed(d, e, f) }
+      ]
+    });
+    st.push({
+      caption: 'Сравним дробные части, приведя их к общему знаменателю ' + N + ': ' +
+               fracStr(b, c) + ' = ' + fracStr(bp, N) + ',  ' + fracStr(e, f) + ' = ' + fracStr(ep, N) + '. ' +
+               (needBorrow ? 'Дробная часть уменьшаемого меньше — будем занимать единицу.'
+                           : 'Дробная часть уменьшаемого больше — вычитаем части отдельно.'),
+      rows: [
+        { label: 'Дробная A', tiles: [{ t: 'f', n: N, k: bp }] },
+        { label: 'Дробная B', tiles: [{ t: 'f', n: N, k: ep }] }
+      ]
+    });
+    if (needBorrow) {
+      st.push({
+        caption: 'Занимаем единицу из целой части: ' + a + ' = ' + a2 + ' + 1,  а 1 = ' +
+                 fracStr(N, N) + '. Тогда дробная часть уменьшаемого: ' + fracStr(bp, N) + ' + ' +
+                 fracStr(N, N) + ' = ' + fracStr(b2, N) + '.',
+        rows: [
+          { label: 'Целых осталось', tiles: tilesWhole(a2) },
+          { label: 'Одна целая → доли', tiles: [{ t: 'f', n: N, k: N }] },
+          { label: 'Новая дробная A', tiles: tilesFrac(N, b2) }
+        ]
+      });
+    }
+    st.push({
+      caption: 'Вычитаем дробные части: ' + fracStr(b2, N) + ' − ' + fracStr(ep, N) + ' = ' + fracStr(diffFrac, N) + '.',
+      rows: [
+        { label: 'Дробная A', tiles: tilesFrac(N, b2) },
+        { label: 'Вычли B', tiles: [{ t: 'f', n: N, k: ep, dim: true }] },
+        { label: 'Осталось', tiles: [{ t: 'f', n: N, k: diffFrac }] }
+      ]
+    });
+    st.push({
+      caption: 'Вычитаем целые части: ' + a2 + ' − ' + d + ' = ' + diffInt + '.',
+      rows: [
+        { label: 'Целые A', tiles: tilesWhole(a2) },
+        { label: 'Вычли B', tiles: tilesWhole(d), dim: true },
+        { label: 'Осталось', tiles: tilesWhole(diffInt) }
+      ]
+    });
+    st.push({
+      caption: 'Ответ: ' + mixStr(a, b, c) + ' − ' + mixStr(d, e, f) + ' = ' +
+               (diffFrac > 0 ? diffInt + ' ' + fracStr(diffFrac, N) : String(diffInt)) + '.',
+      rows: [
+        { label: 'Итог', tiles: tilesMixed(diffInt, diffFrac, N) }
+      ]
+    });
+  }
+  return st;
+}
+
+/* ---------- отрисовка ---------- */
+function drawTile(g, t, x, y) {
+  const dim = t.dim ? 0.35 : 1;
+  if (t.t === 'w') {
+    el('rect', { x, y, width: TW, height: TH, rx: 9, fill: '#dbeafe', stroke: '#3b82f6', 'stroke-width': 2, opacity: dim }, g);
+    const tx = el('text', { x: x + TW / 2, y: y + TH / 2 + 7, 'font-size': 21, 'font-weight': 800, fill: '#3b82f6', 'text-anchor': 'middle', opacity: dim }, g);
+    tx.textContent = '1';
+    return;
+  }
+  const n = Math.max(1, t.n), k = Math.max(0, Math.min(n, t.k));
+  el('rect', { x, y, width: TW, height: TH, rx: 9, fill: '#fff7ed', stroke: '#f59e0b', 'stroke-width': 2, opacity: dim }, g);
+  if (k > 0) {
+    const w = TW / n;
+    el('rect', { x: x + 1, y: y + 1, width: Math.max(0, w * k - 2), height: TH - 2, fill: '#fbbf24', opacity: dim }, g);
+  }
+  const w = TW / n;
+  for (let i = 1; i < n; i++) {
+    el('line', { x1: x + i * w, y1: y + 2, x2: x + i * w, y2: y + TH - 2, stroke: '#f59e0b', 'stroke-width': 1, opacity: dim }, g);
+  }
+  el('rect', { x, y, width: TW, height: TH, rx: 9, fill: 'none', stroke: '#f59e0b', 'stroke-width': 2, opacity: dim }, g);
+  const tx = el('text', { x: x + TW / 2, y: y - 8, 'font-size': 17, 'font-weight': 800, fill: '#b45309', 'text-anchor': 'middle', opacity: dim }, g);
+  tx.textContent = fracStr(k, n);
+}
+
+function drawStage() {
+  const st = stages[stageIdx];
+  const svg = document.getElementById('svg');
+  svg.innerHTML = '';
+  let maxW = 1000;
+  st.rows.forEach(r => {
+    const w = LABEL_W + r.tiles.length * (TW + GAP) + 20;
+    if (w > maxW) maxW = w;
+  });
+  const h = TOP + st.rows.length * ROW_H + 30;
+  svg.setAttribute('viewBox', '0 0 ' + maxW + ' ' + h);
+  svg.setAttribute('width', maxW);
+  svg.setAttribute('height', h);
+
+  st.rows.forEach((r, ri) => {
+    const y = TOP + ri * ROW_H;
+    const lbl = el('text', { x: 12, y: y + TH / 2 + 7, 'font-size': 21, 'font-weight': 800, fill: '#1e293b' }, svg);
+    lbl.textContent = r.label;
+    let x = LABEL_W;
+    r.tiles.forEach(t => { drawTile(svg, t, x, y); x += TW + GAP; });
+  });
+
+  document.getElementById('caption').innerHTML =
+    '<span class="step">Шаг ' + (stageIdx + 1) + ' из ' + stages.length + '</span>' + st.caption;
+
+  const dots = document.getElementById('dots');
+  dots.innerHTML = '';
+  stages.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === stageIdx ? ' active' : '');
+    d.onclick = () => { stageIdx = i; drawStage(); };
+    dots.appendChild(d);
+  });
+  document.getElementById('prevBtn').disabled = stageIdx === 0;
+  document.getElementById('nextBtn').disabled = stageIdx === stages.length - 1;
+
+  const last = stages[stages.length - 1];
+  document.getElementById('answer').innerHTML = (stageIdx === stages.length - 1)
+    ? 'Ответ: <span class="f">' + last.caption.replace(/^Ответ: /, '') + '</span>'
+    : '';
+}
+
+function step(dir) {
+  const n = stageIdx + dir;
+  if (n < 0 || n >= stages.length) return;
+  stageIdx = n;
+  drawStage();
+}
+
+function validate() {
+  const { a: A, b: B } = readInputs();
+  const w = document.getElementById('warn');
+  const bad = v => isNaN(v) || v === null;
+  if ([...A, ...B].some(bad) || A[2] < 1 || B[2] < 1) {
+    w.style.display = 'block'; w.textContent = 'Проверь числа: знаменатели должны быть больше нуля.'; return false;
+  }
+  if (A[1] >= A[2] || B[1] >= B[2]) {
+    w.style.display = 'block'; w.textContent = 'Числитель должен быть меньше знаменателя (дробная часть — правильная дробь).'; return false;
+  }
+  if (op === '−') {
+    const va = A[0] + A[1] / A[2], vb = B[0] + B[1] / B[2];
+    if (va < vb) { w.style.display = 'block'; w.textContent = 'Уменьшаемое должно быть не меньше вычитаемого (иначе ответ отрицательный).'; return false; }
+  }
+  w.style.display = 'none';
+  return true;
+}
+
+function rebuild() {
+  if (!validate()) return;
+  stages = buildStages();
+  stageIdx = 0;
+  drawStage();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') step(1);
+  if (e.key === 'ArrowLeft') step(-1);
+});
+
+renderPresets();
+rebuild();
+</script>
+</body>
+</html>
