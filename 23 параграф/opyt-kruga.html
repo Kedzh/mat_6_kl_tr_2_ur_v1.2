@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Опыты: длина окружности и площадь круга (параграф 23)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --primary: #3b82f6;
+  --primary-light: #dbeafe;
+  --accent: #f97316;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+[data-theme="dark"] {
+  --bg: #0f172a; --card: #1e293b; --primary: #60a5fa; --primary-light: #1e3a5f;
+  --accent: #fb923c; --green: #4ade80; --red: #f87171; --yellow: #facc15;
+  --text: #f1f5f9; --text-secondary: #94a3b8; --border: #334155;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
+  transition: background 0.3s, color 0.3s; overflow-x: hidden;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 24px 32px; }
+
+header {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: white; padding: 32px 40px; border-radius: var(--radius);
+  margin-bottom: 24px; text-align: center; position: relative;
+  box-shadow: var(--shadow); overflow: hidden;
+}
+header::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: headerPulse 8s ease-in-out infinite;
+}
+@keyframes headerPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+header h1 { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800; position: relative; }
+header .subtitle { font-size: 1.6rem; opacity: 0.9; margin-top: 6px; position: relative; }
+header .source { font-size: 1.25rem; opacity: 0.7; margin-top: 4px; position: relative; }
+.theme-toggle {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(255,255,255,0.2); border: none; color: white;
+  font-size: 2rem; width: 52px; height: 52px; border-radius: 50%;
+  cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.35); transform: scale(1.1); }
+
+.card {
+  background: var(--card); border-radius: var(--radius); padding: 28px;
+  margin-bottom: 22px; box-shadow: var(--shadow); border: 1px solid var(--border);
+  transition: background 0.3s, border 0.3s;
+}
+.card h2 { font-size: 2.4rem; margin-bottom: 4px; color: var(--primary); }
+.card h2 .emoji { margin-right: 10px; }
+.card .desc { color: var(--text-secondary); font-size: 1.65rem; margin-bottom: 16px; }
+.card .desc b { color: var(--text); }
+
+.stage { background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 8px; }
+svg { display: block; width: 100%; height: auto; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; margin-top: 16px; }
+.ctrl { display: flex; flex-direction: column; gap: 4px; font-size: 1.5rem; font-weight: 700; }
+.ctrl .val { color: var(--primary); font-weight: 800; }
+input[type="range"] { width: 200px; accent-color: var(--primary); height: 26px; cursor: pointer; }
+.btn {
+  padding: 12px 26px; border: none; border-radius: 8px; font-family: inherit;
+  font-weight: 700; font-size: 1.6rem; cursor: pointer; transition: all 0.25s;
+  background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(59,130,246,0.3);
+}
+.btn:hover { transform: translateY(-2px); }
+.btn.alt { background: var(--accent); box-shadow: 0 4px 14px rgba(249,115,22,0.3); }
+
+.readout {
+  margin-top: 16px; background: var(--primary-light); border-left: 4px solid var(--primary);
+  border-radius: var(--radius-sm); padding: 14px 18px; font-size: 1.7rem;
+}
+.readout .formula { font-weight: 800; color: var(--primary); }
+.readout .num { font-weight: 800; }
+
+.table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 1.55rem; }
+.table th, .table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+.table th { background: var(--primary-light); color: var(--primary); font-weight: 800; }
+.table td:first-child, .table th:first-child { text-align: left; font-weight: 700; }
+.table .pi { color: var(--accent); font-weight: 800; }
+
+.note { margin-top: 14px; font-size: 1.55rem; color: var(--text-secondary); }
+.note b { color: var(--text); }
+
+@media (max-width: 700px) {
+  .container { padding: 12px; }
+  .card { padding: 16px; }
+  header { padding: 20px 14px; }
+  input[type="range"] { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">🌓</button>
+  <h1>📏 Опыты: длина окружности и площадь круга</h1>
+  <div class="subtitle">6 класс · Параграф 23 · Рис. 3.44 и 3.45</div>
+  <div class="source">По учебнику Виленкин Н.Я., Жохов В.И., Чесноков А.С. и др. (Просвещение), стр. 149</div>
+</header>
+
+<!-- ============ ОПЫТ 1 ============ -->
+<div class="card">
+  <h2><span class="emoji">🧪</span>Опыт 1. Длина окружности (рис. 3.44)</h2>
+  <p class="desc">Поставим стакан на лист бумаги и <b>обведём его дно карандашом</b>. Возьмём бумажную ленту и <b>обогнём ею стакан один раз</b>, а затем распрямим её.</p>
+
+  <div class="stage"><svg id="svg1" viewBox="0 0 1000 480" role="img" aria-label="Опыт с бумажной лентой и стаканом"></svg></div>
+
+  <div class="controls">
+    <div class="ctrl">Диаметр стакана: <span class="val" id="dVal">8 см</span>
+      <input type="range" id="dSlider" min="2" max="12" step="0.5" value="8">
+    </div>
+    <button class="btn alt" id="tapeBtn">Распрямить ленту ➡️</button>
+  </div>
+
+  <div class="readout" id="readout1"></div>
+
+  <table class="table">
+    <thead><tr><th>Предмет</th><th>Диаметр d</th><th>Длина окружности C = πd</th><th>C : d</th></tr></thead>
+    <tbody>
+      <tr><td>Стакан</td><td>8 см</td><td>25,13 см</td><td class="pi">3,14</td></tr>
+      <tr><td>Тарелка</td><td>20 см</td><td>62,83 см</td><td class="pi">3,14</td></tr>
+      <tr><td>Кастрюля</td><td>24 см</td><td>75,40 см</td><td class="pi">3,14</td></tr>
+      <tr><td>Колесо велосипеда</td><td>60 см</td><td>188,50 см</td><td class="pi">3,14</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Отношение <b>C : d</b> для любой окружности одно и то же — это число <b>π ≈ 3,14</b>.</p>
+</div>
+
+<!-- ============ ОПЫТ 2 ============ -->
+<div class="card">
+  <h2><span class="emoji">🍕</span>Опыт 2. Площадь круга (рис. 3.45)</h2>
+  <p class="desc">Разрежем круг на равные <b>секторы</b> и составим из них фигуру, похожую на <b>прямоугольник</b>. Чем мельче сектора, тем точнее.</p>
+
+  <div class="stage"><svg id="svg2" viewBox="0 0 1000 440" role="img" aria-label="Круг, разрезанный на сектора, и фигура из секторов"></svg></div>
+
+  <div class="controls">
+    <div class="ctrl">Число секторов: <span class="val" id="nVal">16</span>
+      <input type="range" id="nSlider" min="0" max="6" step="1" value="2">
+    </div>
+    <div class="ctrl">Радиус круга: <span class="val" id="rVal2">3 см</span>
+      <input type="range" id="rSlider2" min="1" max="5" step="0.5" value="3">
+    </div>
+    <button class="btn" id="sectorBtn">Разрезать и составить ➡️</button>
+  </div>
+
+  <div class="readout" id="readout2"></div>
+  <p class="note">У «прямоугольника» одна сторона равна <b>радиусу r</b>, а другая состоит из дуг половины секторов, то есть равна <b>половине длины окружности πr</b>. Поэтому <b>S = r · πr = πr²</b>.</p>
+</div>
+
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+
+const NS = 'http://www.w3.org/2000/svg';
+const PI = Math.PI;
+function el(name, attrs, parent) {
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function fmt(x, k) { return x.toFixed(k === undefined ? 2 : k).replace('.', ','); }
+function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+/* ================= ОПЫТ 1 ================= */
+const E1 = {
+  d: 8,          // см
+  px: 9,         // пикселей в 1 см
+  cx: 250, cy: 190,
+  tapeW: 16,
+  N: 180,
+  state: 'wrapped',
+  t: 0,
+  raf: null,
+  elems: {}
+};
+const N_TAB = [4, 8, 16, 32, 64, 128, 256];
+
+function e1Geom() {
+  const r = E1.d / 2 * E1.px;
+  const R = r;                       // лента лежит на контуре: длина ленты = длина окружности
+  return { r, R, L: 2 * PI * R, x0: 500 - PI * R, yLine: 400 };
+}
+
+function e1Build() {
+  const svg = document.getElementById('svg1');
+  svg.innerHTML = '';
+  const g = {};
+  g.paper = el('rect', { x: 14, y: 14, width: 972, height: 452, rx: 12, fill: '#fffdf2', stroke: '#e7d9a7', 'stroke-width': 2 }, svg);
+  g.circleFill = el('circle', { cx: E1.cx, cy: E1.cy, r: 10, fill: 'rgba(59,130,246,0.12)', stroke: '#3b82f6', 'stroke-width': 2.5 }, svg);
+  g.tape = el('polyline', { fill: 'none', stroke: '#f59e0b', 'stroke-width': E1.tapeW, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+  g.tapeEdge = el('polyline', { fill: 'none', stroke: '#b45309', 'stroke-width': 1.6, 'stroke-dasharray': '7 6' }, svg);
+  g.circleDash = el('circle', { cx: E1.cx, cy: E1.cy, r: 10, fill: 'none', stroke: '#93c5fd', 'stroke-width': 1.5, 'stroke-dasharray': '5 5' }, svg);
+  g.dLine = el('line', { stroke: '#f97316', 'stroke-width': 2.5 }, svg);
+  g.dTick1 = el('line', { stroke: '#f97316', 'stroke-width': 2.5 }, svg);
+  g.dTick2 = el('line', { stroke: '#f97316', 'stroke-width': 2.5 }, svg);
+  g.dLabel = el('text', { 'font-size': 22, 'font-weight': 800, fill: '#f97316', 'text-anchor': 'middle' }, svg);
+  g.piLine = el('line', { stroke: '#22c55e', 'stroke-width': 3, 'stroke-dasharray': '9 6' }, svg);
+  g.cLabel = el('text', { 'font-size': 22, 'font-weight': 800, fill: '#b45309', 'text-anchor': 'middle' }, svg);
+  g.piLabel = el('text', { 'font-size': 22, 'font-weight': 800, fill: '#22c55e', 'text-anchor': 'middle' }, svg);
+  g.glassLabel = el('text', { 'font-size': 18, 'font-weight': 700, fill: '#64748b', 'text-anchor': 'middle' }, svg);
+  E1.elems = g;
+  e1Update(0);
+}
+
+function e1Points(t) {
+  const { R, L, x0, yLine } = e1Geom();
+  const pts = [];
+  for (let i = 0; i < E1.N; i++) {
+    const a = (i / (E1.N - 1)) * 2 * PI;
+    const wx = E1.cx + R * Math.cos(a), wy = E1.cy + R * Math.sin(a);
+    const ux = x0 + (i / (E1.N - 1)) * L, uy = yLine;
+    pts.push([wx + (ux - wx) * t, wy + (uy - wy) * t]);
+  }
+  return pts;
+}
+
+function e1Draw(t) {
+  const g = E1.elems;
+  const { r, R, L, x0, yLine } = e1Geom();
+  const pts = e1Points(t);
+  const str = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  g.tape.setAttribute('points', str);
+  g.tapeEdge.setAttribute('points', str);
+  g.circleFill.setAttribute('r', r);
+  g.circleDash.setAttribute('r', r);
+  g.circleDash.setAttribute('stroke-dasharray', t > 0.5 ? '0' : '5 5');
+  g.dLine.setAttribute('x1', E1.cx - r); g.dLine.setAttribute('y1', E1.cy);
+  g.dLine.setAttribute('x2', E1.cx + r); g.dLine.setAttribute('y2', E1.cy);
+  g.dTick1.setAttribute('x1', E1.cx - r); g.dTick1.setAttribute('y1', E1.cy - 7);
+  g.dTick1.setAttribute('x2', E1.cx - r); g.dTick1.setAttribute('y2', E1.cy + 7);
+  g.dTick2.setAttribute('x1', E1.cx + r); g.dTick2.setAttribute('y1', E1.cy - 7);
+  g.dTick2.setAttribute('x2', E1.cx + r); g.dTick2.setAttribute('y2', E1.cy + 7);
+  g.dLabel.setAttribute('x', E1.cx); g.dLabel.setAttribute('y', E1.cy - 10);
+  g.dLabel.textContent = 'd = ' + fmt(E1.d, 1) + ' см';
+  g.glassLabel.setAttribute('x', E1.cx); g.glassLabel.setAttribute('y', E1.cy + r + 26);
+  g.glassLabel.textContent = 'дно стакана (обведено карандашом)';
+  const showFlat = t > 0.6;
+  g.cLabel.setAttribute('opacity', showFlat ? 1 : 0);
+  g.piLine.setAttribute('opacity', showFlat ? 1 : 0);
+  g.piLabel.setAttribute('opacity', showFlat ? 1 : 0);
+  if (showFlat) {
+    g.cLabel.setAttribute('x', x0 + L / 2); g.cLabel.setAttribute('y', yLine - 16);
+    g.cLabel.textContent = 'длина ленты C ≈ ' + fmt(PI * E1.d) + ' см';
+    g.piLine.setAttribute('x1', x0); g.piLine.setAttribute('y1', yLine + 26);
+    g.piLine.setAttribute('x2', x0 + PI * E1.d * E1.px); g.piLine.setAttribute('y2', yLine + 26);
+    g.piLabel.setAttribute('x', x0 + (PI * E1.d * E1.px) / 2); g.piLabel.setAttribute('y', yLine + 48);
+    g.piLabel.textContent = '3,14 · d — столько же!';
+  }
+  document.getElementById('readout1').innerHTML =
+    'd = <span class="num">' + fmt(E1.d, 1) + ' см</span> · ' +
+    '<span class="formula">C = πd ≈ ' + fmt(PI * E1.d) + ' см</span> · ' +
+    '<span class="formula">C : d ≈ ' + fmt(PI, 2) + '</span>';
+}
+
+function e1Update(t) { E1.t = t; e1Draw(t); }
+
+function e1Animate(to) {
+  if (E1.raf) cancelAnimationFrame(E1.raf);
+  const from = E1.t, t0 = performance.now(), dur = 900;
+  function step(now) {
+    const k = Math.min(1, (now - t0) / dur);
+    e1Update(from + (to - from) * ease(k));
+    if (k < 1) E1.raf = requestAnimationFrame(step);
+  }
+  E1.raf = requestAnimationFrame(step);
+}
+
+/* ================= ОПЫТ 2 ================= */
+const E2 = {
+  N: 16,
+  r: 3,          // см
+  px: 30,        // пикселей в 1 см
+  cx: 170, cy: 220,
+  state: 'circle',
+  t: 0,
+  raf: null,
+  sectors: [],
+  elems: {}
+};
+
+function e2Geom() {
+  const r = E2.r * E2.px;
+  const s = 2 * PI * r / E2.N;                 // длина дуги сектора
+  const c = 2 * r * Math.sin(PI / E2.N);       // хорда
+  const x0 = 640 - ((E2.N - 1) * s / 2) / 2;   // центрируем полосу
+  const yTop = E2.cy - r / 2, yBottom = E2.cy + r / 2;
+  return { r, s, c, x0, yTop, yBottom };
+}
+
+function sectorPath(r, N) {
+  const half = PI / N;
+  const x = r * Math.sin(half), y = r * Math.cos(half);
+  return 'M 0,0 L ' + (-x).toFixed(3) + ',' + (-y).toFixed(3) +
+         ' A ' + r.toFixed(3) + ',' + r.toFixed(3) + ' 0 0 1 ' +
+         x.toFixed(3) + ',' + (-y).toFixed(3) + ' Z';
+}
+
+function e2Poses(k, r, N, x0, yTop, yBottom, cx, cy) {
+  const alpha = 2 * PI / N;
+  const s = 2 * PI * r / N;
+  // круг: ось сектора под углом k*alpha + alpha/2
+  const ang = k * alpha + alpha / 2;
+  const circle = { x: cx, y: cy, rot: ang * 180 / PI + 90 };
+  const xk = x0 + k * s / 2;
+  const band = (k % 2 === 0)
+    ? { x: xk, y: yBottom, rot: 0 }
+    : { x: xk, y: yTop, rot: 180 };
+  return { circle, band };
+}
+
+function e2Build() {
+  const svg = document.getElementById('svg2');
+  svg.innerHTML = '';
+  const g = {};
+  g.circle = el('circle', { cx: E2.cx, cy: E2.cy, r: 10, fill: 'rgba(59,130,246,0.10)', stroke: '#3b82f6', 'stroke-width': 2.5, 'stroke-dasharray': '6 5' }, svg);
+  g.circleLbl = el('text', { 'font-size': 18, 'font-weight': 700, fill: '#64748b', 'text-anchor': 'middle' }, svg);
+  g.sectorsG = el('g', {}, svg);
+  g.rect = el('rect', { fill: 'none', stroke: '#22c55e', 'stroke-width': 2, 'stroke-dasharray': '8 6', rx: 6 }, svg);
+  g.lblR = el('text', { 'font-size': 22, 'font-weight': 800, fill: '#22c55e', 'text-anchor': 'middle' }, svg);
+  g.lblPi = el('text', { 'font-size': 22, 'font-weight': 800, fill: '#22c55e', 'text-anchor': 'middle' }, svg);
+  g.lblBand = el('text', { 'font-size': 18, 'font-weight': 700, fill: '#64748b', 'text-anchor': 'middle' }, svg);
+  E2.elems = g;
+  e2MakeSectors();
+  e2Update(0);
+}
+
+function e2MakeSectors() {
+  const g = E2.elems;
+  g.sectorsG.innerHTML = '';
+  E2.sectors = [];
+  const { r } = e2Geom();
+  const d = sectorPath(r, E2.N);
+  const colors = ['#6366f1', '#3b82f6', '#0ea5e9', '#8b5cf6'];
+  for (let k = 0; k < E2.N; k++) {
+    const p = el('path', { d: d, fill: colors[k % 4], stroke: '#ffffff', 'stroke-width': 1, opacity: 0.92 }, g.sectorsG);
+    E2.sectors.push(p);
+  }
+}
+
+function e2Update(t) {
+  const { r, s, c, x0, yTop, yBottom } = e2Geom();
+  const g = E2.elems;
+  for (let k = 0; k < E2.N; k++) {
+    const ps = e2Poses(k, r, E2.N, x0, yTop, yBottom, E2.cx, E2.cy);
+    const a = ps.circle, b = ps.band;
+    let dr = b.rot - a.rot;
+    dr = ((dr + 180) % 360 + 360) % 360 - 180;
+    const rot = a.rot + dr * t;
+    const x = a.x + (b.x - a.x) * t;
+    const y = a.y + (b.y - a.y) * t;
+    E2.sectors[k].setAttribute('transform', 'translate(' + x.toFixed(2) + ',' + y.toFixed(2) + ') rotate(' + rot.toFixed(2) + ')');
+  }
+  const showCircle = t < 0.5;
+  g.circle.setAttribute('r', r);
+  g.circle.setAttribute('opacity', showCircle ? 1 : 0);
+  g.circleLbl.setAttribute('x', E2.cx); g.circleLbl.setAttribute('y', E2.cy + r + 26);
+  g.circleLbl.setAttribute('opacity', showCircle ? 1 : 0);
+  g.circleLbl.textContent = 'круг радиуса r';
+  const showBand = t > 0.6;
+  const bx0 = x0 - c / 2, bw = (E2.N - 1) * s / 2 + c;
+  g.rect.setAttribute('x', bx0); g.rect.setAttribute('y', yTop);
+  g.rect.setAttribute('width', bw); g.rect.setAttribute('height', r);
+  g.rect.setAttribute('opacity', showBand ? 1 : 0);
+  g.lblR.setAttribute('x', bx0 - 14); g.lblR.setAttribute('y', (yTop + yBottom) / 2 + 7);
+  g.lblR.setAttribute('opacity', showBand ? 1 : 0);
+  g.lblR.textContent = 'r';
+  g.lblPi.setAttribute('x', bx0 + bw / 2); g.lblPi.setAttribute('y', yBottom + 30);
+  g.lblPi.setAttribute('opacity', showBand ? 1 : 0);
+  g.lblPi.textContent = 'дуги половины секторов = πr ≈ ' + fmt(PI * E2.r) + ' см';
+  g.lblBand.setAttribute('x', bx0 + bw / 2); g.lblBand.setAttribute('y', yTop - 14);
+  g.lblBand.setAttribute('opacity', showBand ? 1 : 0);
+  g.lblBand.textContent = 'фигура из секторов — почти прямоугольник';
+  document.getElementById('readout2').innerHTML =
+    'r = <span class="num">' + fmt(E2.r, 1) + ' см</span> · ' +
+    'секторов: <span class="num">' + E2.N + '</span> · ' +
+    '<span class="formula">C = 2πr ≈ ' + fmt(2 * PI * E2.r) + ' см</span> · ' +
+    '<span class="formula">S = πr² ≈ ' + fmt(PI * E2.r * E2.r) + ' см²</span>';
+}
+
+function e2Animate(to) {
+  if (E2.raf) cancelAnimationFrame(E2.raf);
+  const from = E2.t, t0 = performance.now(), dur = 1100;
+  function step(now) {
+    const k = Math.min(1, (now - t0) / dur);
+    e2Update(from + (to - from) * ease(k));
+    if (k < 1) E2.raf = requestAnimationFrame(step);
+  }
+  E2.raf = requestAnimationFrame(step);
+}
+
+/* ================= ЗАПУСК ================= */
+e1Build();
+e2Build();
+
+document.getElementById('dSlider').addEventListener('input', function () {
+  E1.d = parseFloat(this.value);
+  document.getElementById('dVal').textContent = fmt(E1.d, 1) + ' см';
+  e1Update(E1.t);
+});
+document.getElementById('tapeBtn').addEventListener('click', function () {
+  const toFlat = E1.state === 'wrapped';
+  E1.state = toFlat ? 'flat' : 'wrapped';
+  this.textContent = toFlat ? 'Обернуть стакан ↩️' : 'Распрямить ленту ➡️';
+  e1Animate(toFlat ? 1 : 0);
+});
+
+document.getElementById('nSlider').addEventListener('input', function () {
+  E2.N = N_TAB[parseInt(this.value, 10)];
+  document.getElementById('nVal').textContent = E2.N;
+  e2MakeSectors();
+  e2Update(E2.t);
+});
+document.getElementById('rSlider2').addEventListener('input', function () {
+  E2.r = parseFloat(this.value);
+  document.getElementById('rVal2').textContent = fmt(E2.r, 1) + ' см';
+  const r = E2.r * E2.px;
+  const d = sectorPath(r, E2.N);
+  E2.sectors.forEach(p => p.setAttribute('d', d));
+  e2Update(E2.t);
+});
+document.getElementById('sectorBtn').addEventListener('click', function () {
+  const toBand = E2.state === 'circle';
+  E2.state = toBand ? 'band' : 'circle';
+  this.textContent = toBand ? 'Собрать круг ↩️' : 'Разрезать и составить ➡️';
+  e2Animate(toBand ? 1 : 0);
+});
+</script>
+</body>
+</html>
