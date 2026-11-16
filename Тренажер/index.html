@@ -654,7 +654,11 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 /* визуализация внутри тренажёра */
 .viz-frame { width: 100%; height: calc(100vh - 190px); min-height: 540px;
   border: 2px solid var(--border); border-radius: var(--radius); background: var(--bg); }
-@media (max-width: 700px) { .viz-frame { height: calc(100vh - 170px); min-height: 480px; } }
+body.vizMode .container { max-width: 1100px; }
+@media (max-width: 700px) {
+  .viz-frame { height: calc(100vh - 165px); min-height: 460px; }
+  body.vizMode .container { max-width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -1705,6 +1709,7 @@ function renderMenu() {
 function showScreen(id) {
   document.querySelectorAll('.container .screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById(id); if (el) el.classList.add('active');
+  document.body.classList.toggle('vizMode', id === 'screenViz');
 }
 function goMenu() { showScreen('screenMenu'); renderMenu(); }
 function confirmQuit() {

@@ -114,7 +114,7 @@ header .source { font-size: 1.25rem; opacity: 0.7; margin-top: 4px; position: re
 .frac > span { padding: 0 3px; }
 .frac > span:last-child { border-top: 2px solid currentColor; }
 
-.scene { padding: 22px 6px 4px; min-width: 900px; }
+.scene { padding: 22px 6px 4px; }
 .row { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; flex-wrap: wrap; }
 .row:last-child { margin-bottom: 10px; }
 .rlabel { width: 200px; flex-shrink: 0; font-size: 20px; font-weight: 800; color: var(--text); }
@@ -134,7 +134,7 @@ header .source { font-size: 1.25rem; opacity: 0.7; margin-top: 4px; position: re
   border-radius: var(--radius-sm); padding: 14px 18px; font-size: 1.8rem; font-weight: 600;
 }
 .caption .step { color: var(--text-secondary); font-weight: 700; margin-right: 8px; }
-.nav { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
 .nav button {
   padding: 12px 24px; border: 2px solid var(--primary); background: var(--card);
   color: var(--primary); border-radius: 8px; font-family: inherit; font-weight: 700;
@@ -143,7 +143,7 @@ header .source { font-size: 1.25rem; opacity: 0.7; margin-top: 4px; position: re
 .nav button:hover:not(:disabled) { background: var(--primary); color: white; }
 .nav button:disabled { opacity: 0.35; cursor: default; }
 .nav .dots { display: flex; gap: 8px; }
-.nav .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--border); border: none; cursor: pointer; }
+.nav .dot { width: 16px; height: 16px; padding: 0; border-radius: 50%; background: var(--border); border: none; cursor: pointer; flex-shrink: 0; }
 .nav .dot.active { background: var(--primary); transform: scale(1.25); }
 
 .answer { margin-top: 16px; font-size: 2.1rem; font-weight: 800; color: var(--green); text-align: center; }
@@ -160,6 +160,17 @@ header .source { font-size: 1.25rem; opacity: 0.7; margin-top: 4px; position: re
   .container { padding: 12px; }
   .card { padding: 16px; }
   header { padding: 20px 14px; }
+  .scene { padding: 16px 2px 4px; }
+  .row { gap: 8px; margin-bottom: 20px; }
+  .rlabel { width: 100%; font-size: 17px; }
+  .tile { width: 46px; height: 36px; border-radius: 7px; margin-top: 18px; }
+  .tile.whole { font-size: 15px; }
+  .tile .tlab { top: -18px; left: -4px; right: -4px; font-size: 12px; }
+  .caption { font-size: 1.45rem; padding: 10px 12px; }
+  .mixed input { width: 62px; font-size: 1.5rem; }
+  .mixed .frac input { width: 58px; }
+  .preset { font-size: 1.35rem; padding: 8px 12px; }
+  .btn { font-size: 1.5rem; padding: 12px 20px; }
 }
 </style>
 </head>
