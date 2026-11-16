@@ -650,6 +650,11 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   .g-cell { width: clamp(58px, calc((100vw - 100px) / 8 - 6px), 70px) !important; height: clamp(58px, calc((100vw - 100px) / 8 - 6px), 70px) !important; }
   .mode-grid { grid-template-columns: 1fr !important; }
 }
+
+/* визуализация внутри тренажёра */
+.viz-frame { width: 100%; height: calc(100vh - 190px); min-height: 540px;
+  border: 2px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+@media (max-width: 700px) { .viz-frame { height: calc(100vh - 170px); min-height: 480px; } }
 </style>
 </head>
 <body>
@@ -668,6 +673,16 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   <div class="screen" id="screenTopics">
     <div class="stats-row" id="topicStats"></div>
     <div class="menu" id="topicGrid"></div>
+  </div>
+
+  <!-- ===== ВИЗУАЛИЗАЦИЯ (параграф 11) ===== -->
+  <div class="screen" id="screenViz">
+    <div class="nav-bar">
+      <button class="nav-btn" onclick="goBackToTopics()">← К темам</button>
+      <span class="nav-title">🧩 Визуализация: параграф 11 — смешанные числа</span>
+    </div>
+    <iframe id="vizFrame" class="viz-frame" title="Визуализация параграфа 11"
+            src="../11 параграф/smeshannye-chisla.html"></iframe>
   </div>
 
   <div class="screen" id="screenMenu">
@@ -1358,7 +1373,11 @@ function selectTopic(id) {
   if (id === 'pdd') { showScreen('screenPdd'); initPdd(); return; }
   /* Канат — отдельная страница: там своя физика и настройки. */
   if (id === 'tug') { window.location.href = 'math-kanat.html'; return; }
-  if (id === 'viz11') { window.location.href = '../11 параграф/smeshannye-chisla.html'; return; }
+  if (id === 'viz11') {
+    document.getElementById('vizFrame').src = '../11 параграф/smeshannye-chisla.html';
+    showScreen('screenViz');
+    return;
+  }
   if (lessonData[id]) { showScreen('screenLesson'); initLesson(id); return; }
   if (id === 'homework') { showScreen('screenHomework'); renderHomework(); return; }
   currentTopic = id; goMenu();
