@@ -1375,7 +1375,8 @@ function renderTopics() {
   });
 }
 function selectTopic(id) {
-  if (id === 'pdd') { showScreen('screenPdd'); initPdd(); return; }
+  /* ПДД — обновлённая отдельная страница-квест. */
+  if (id === 'pdd') { window.location.href = 'pdd_peshehod_6klass.html'; return; }
   /* Канат — отдельная страница: там своя физика и настройки. */
   if (id === 'tug') { window.location.href = 'math-kanat.html'; return; }
   if (id === 'tug-mobile') { window.location.href = 'math-kanat-mobile.html'; return; }

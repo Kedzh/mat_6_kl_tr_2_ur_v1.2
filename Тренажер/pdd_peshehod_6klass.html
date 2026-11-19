@@ -1,1183 +1,982 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ПДД. Безопасный пешеход — 6 класс</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Квест по ПДД — 6 класс: Безопасный маршрут</title>
+  <style>
+    :root {
+      --bg: #eaf6ff;
+      --card: #ffffff;
+      --primary: #1f7aec;
+      --primary-dark: #155cb5;
+      --accent: #ffb703;
+      --good: #2e9b57;
+      --bad: #d64545;
+      --warn: #b7791f;
+      --text: #1e2a36;
+      --muted: #5c6b7a;
+      --border: #d9e6f2;
+      --shadow: 0 10px 30px rgba(20, 60, 120, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, #ffffff 0, transparent 30%),
+        radial-gradient(circle at 90% 20%, #fff7d6 0, transparent 25%),
+        linear-gradient(180deg, #dff1ff 0%, var(--bg) 100%);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    .app { max-width: 960px; margin: 0 auto; padding: 20px 16px 40px; }
+    .header { text-align: center; margin-bottom: 18px; }
+    .badge {
+      display: inline-block; background: #fff; border: 1px solid var(--border);
+      color: var(--primary-dark); padding: 6px 12px; border-radius: 999px;
+      font-size: 14px; font-weight: 600; margin-bottom: 8px;
+    }
+    h1 { margin: 0 0 6px; font-size: clamp(26px, 4vw, 38px); line-height: 1.15; color: #123a63; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 16px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+      box-shadow: var(--shadow); padding: 22px;
+    }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .hero { font-size: 52px; text-align: center; margin: 8px 0 4px; }
+    .lead { font-size: 18px; text-align: center; margin: 0 auto 18px; max-width: 720px; }
+    .center { text-align: center; }
+    button { font: inherit; border: none; cursor: pointer; }
+    .btn {
+      background: var(--primary); color: #fff; padding: 12px 22px; border-radius: 12px;
+      font-weight: 700; font-size: 16px; transition: transform .08s ease, background .15s ease;
+      box-shadow: 0 6px 14px rgba(31,122,236,.25);
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary { background: #eef5ff; color: #174a86; box-shadow: none; border: 1px solid #cfe0f5; }
+    .btn.ghost { background: #fff; color: #174a86; border: 1px solid var(--border); box-shadow: none; }
+    .btn.small { padding: 8px 14px; font-size: 14px; border-radius: 10px; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
 
-:root {
-  --bg: #f0f4f8;
-  --card: #ffffff;
-  --primary: #3b82f6;
-  --primary-light: #dbeafe;
-  --accent: #f97316;
-  --green: #22c55e;
-  --red: #ef4444;
-  --yellow: #eab308;
-  --text: #1e293b;
-  --text-secondary: #64748b;
-  --border: #e2e8f0;
-  --shadow: 0 4px 24px rgba(0,0,0,0.08);
-  --radius: 16px;
-  --radius-sm: 10px;
-}
-[data-theme="dark"] {
-  --bg: #0f172a; --card: #1e293b; --primary: #60a5fa; --primary-light: #1e3a5f;
-  --accent: #fb923c; --green: #4ade80; --red: #f87171; --yellow: #facc15;
-  --text: #f1f5f9; --text-secondary: #94a3b8; --border: #334155;
-  --shadow: 0 4px 24px rgba(0,0,0,0.3);
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg); color: var(--text); line-height: 1.6;
-  transition: background 0.3s, color 0.3s; overflow-x: hidden;
-}
-.container { max-width: 1600px; margin: 0 auto; padding: 24px 48px; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 14px 0 18px; }
+    .mode-card {
+      border: 2px solid #dbe8f5; border-radius: 14px; padding: 14px; background: #fff; text-align: left;
+      transition: border-color .15s, background .15s, transform .05s; cursor: pointer;
+    }
+    .mode-card:hover { border-color: #9ec5f5; background: #f7fbff; }
+    .mode-card.selected { border-color: var(--primary); background: #eef6ff; box-shadow: 0 0 0 2px rgba(31,122,236,.12) inset; }
+    .mode-card .icon { font-size: 28px; margin-bottom: 4px; }
+    .mode-card h3 { margin: 0 0 4px; font-size: 18px; color: #123a63; }
+    .mode-card p { margin: 0; color: var(--muted); font-size: 14px; }
 
-header {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white; padding: 32px 40px; border-radius: var(--radius);
-  margin-bottom: 24px; text-align: center; position: relative;
-  box-shadow: var(--shadow); overflow: hidden;
-}
-header::before {
-  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-  animation: headerPulse 8s ease-in-out infinite;
-}
-@keyframes headerPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-header h1 { font-size: clamp(2.2rem, 4.5vw, 3.4rem); font-weight: 800; position: relative; }
-header .subtitle { font-size: 1.8rem; opacity: 0.9; margin-top: 6px; position: relative; }
-header .source { font-size: 1.3rem; opacity: 0.7; margin-top: 4px; position: relative; }
-.theme-toggle {
-  position: absolute; top: 12px; right: 12px;
-  background: rgba(255,255,255,0.2); border: none; color: white;
-  font-size: 2.2rem; width: 56px; height: 56px; border-radius: 50%;
-  cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;
-}
-.theme-toggle:hover { background: rgba(255,255,255,0.35); transform: scale(1.1); }
+    .panel { background: #f7fbff; border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin: 14px 0; }
+    .panel h3 { margin: 0 0 10px; color: #123a63; font-size: 17px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 8px 12px; border-radius: 999px; border: 1px solid #cfe0f5; background: #fff; color: #174a86;
+      font-weight: 600; font-size: 14px; cursor: pointer;
+    }
+    .chip.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .toggle { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: #27445f; cursor: pointer; }
+    .toggle input { width: 18px; height: 18px; }
+    .muted { color: var(--muted); font-size: 14px; }
 
-nav {
-  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;
-  position: sticky; top: 0; background: var(--bg);
-  padding: 12px 0; z-index: 100; border-bottom: 2px solid var(--border);
-}
-nav button {
-  flex: 1; min-width: 140px; padding: 16px 20px;
-  border: 2px solid var(--border); background: var(--card); color: var(--text);
-  border-radius: var(--radius-sm); font-family: inherit; font-size: 1.3rem;
-  font-weight: 700; cursor: pointer; transition: all 0.3s;
-}
-nav button:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
-nav button.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
-nav button .nav-emoji { display: block; font-size: 2rem; margin-bottom: 2px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; font-weight: 600; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; color: var(--muted); }
+    .pill { background: #eef5ff; color: #174a86; border: 1px solid #d6e6f7; padding: 4px 10px; border-radius: 999px; font-size: 13px; }
+    .pill.warn { background: #fff7e6; color: #8a5a00; border-color: #f1ddb0; }
+    .pill.bad { background: #fff1f1; color: #8a2020; border-color: #efc7c7; }
+    .progress-wrap { width: 100%; height: 12px; background: #e8f1fb; border-radius: 999px; overflow: hidden; margin: 6px 0 12px; border: 1px solid #d6e6f7; }
+    .progress { height: 100%; width: 0%; background: linear-gradient(90deg, #2f8cff, #35c759); transition: width .25s ease; }
+    .timer-bar-wrap { width: 100%; height: 8px; background: #edf3fa; border-radius: 999px; overflow: hidden; margin: -4px 0 14px; border: 1px solid #dfeaf6; display:none; }
+    .timer-bar-wrap.show { display:block; }
+    .timer-bar { height: 100%; width: 100%; background: linear-gradient(90deg, #35c759, #ffb703, #d64545); transform-origin: left; }
 
-.section { display: none; animation: fadeIn 0.4s ease; }
-.section.active { display: block; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .scene { font-size: 46px; margin-bottom: 4px; }
+    .stage-title { margin: 0 0 8px; font-size: 24px; color: #123a63; }
+    .story { background: #f7fbff; border-left: 4px solid var(--primary); padding: 12px 14px; border-radius: 8px; margin: 0 0 14px; color: #27445f; }
+    .question { font-size: 20px; font-weight: 700; margin: 8px 0 14px; }
+    .answers { display: grid; gap: 10px; }
+    .answer {
+      text-align: left; background: #fff; border: 2px solid #dbe8f5; border-radius: 12px;
+      padding: 13px 14px; font-size: 16px; color: var(--text); transition: border-color .15s, background .15s;
+    }
+    .answer:hover:not(:disabled) { border-color: #9ec5f5; background: #f5faff; }
+    .answer:disabled { cursor: default; }
+    .answer.correct { border-color: var(--good); background: #eefaf2; }
+    .answer.wrong { border-color: var(--bad); background: #fff1f1; }
+    .answer.selected-neutral { border-color: #8fb6e6; background: #f2f8ff; }
+    .feedback { display: none; margin-top: 14px; padding: 13px 14px; border-radius: 12px; font-size: 16px; }
+    .feedback.show { display: block; }
+    .feedback.good { background: #eefaf2; border: 1px solid #bfe6cc; color: #1f6a3a; }
+    .feedback.bad { background: #fff1f1; border: 1px solid #f0c2c2; color: #7f2222; }
+    .feedback.neutral { background: #f4f8ff; border: 1px solid #cfe0f5; color: #174a86; }
+    .feedback strong { display: block; margin-bottom: 4px; }
+    .actions { margin-top: 16px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .actions-right { margin-left: auto; display: flex; gap: 10px; }
 
-.card {
-  background: var(--card); border-radius: var(--radius); padding: 32px;
-  margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border);
-  transition: background 0.3s, border 0.3s;
-}
-.card h2 { font-size: 2.2rem; margin-bottom: 6px; color: var(--primary); }
-.card h2 .emoji { margin-right: 10px; }
-.card .card-desc { color: var(--text-secondary); font-size: 1.5rem; margin-bottom: 18px; }
+    .result-score { text-align: center; font-size: 22px; margin: 8px 0 4px; }
+    .result-title { text-align: center; font-size: 30px; margin: 4px 0 8px; color: #123a63; }
+    .result-text { text-align: center; font-size: 18px; color: #27445f; margin: 0 auto 18px; max-width: 720px; }
+    .tips { background: #f7fbff; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin: 10px 0 20px; }
+    .tips h3 { margin: 0 0 8px; color: #123a63; font-size: 18px; }
+    .tips ul { margin: 0; padding-left: 20px; }
+    .tips li { margin: 6px 0; }
+    .review { margin: 14px 0 18px; }
+    .review h3 { color: #123a63; margin: 0 0 8px; }
+    .review-item { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin: 8px 0; background: #fff; }
+    .review-item.good { border-color: #bfe6cc; background: #f7fdf9; }
+    .review-item.bad { border-color: #efc7c7; background: #fff8f8; }
+    .review-q { font-weight: 700; margin-bottom: 6px; }
+    .review-a { font-size: 14px; margin: 2px 0; }
 
-.theory-box {
-  background: var(--primary-light); border-radius: var(--radius-sm); padding: 24px;
-  margin-bottom: 20px; border-left: 4px solid var(--primary);
-}
-.theory-box h3 { font-size: 1.8rem; margin-bottom: 12px; color: var(--primary); }
-.theory-box p { font-size: 1.5rem; margin-bottom: 10px; }
-.theory-box .formula {
-  background: var(--card); border: 2px solid var(--primary); border-radius: 8px;
-  padding: 16px 24px; font-size: 1.8rem; font-weight: 700; text-align: center;
-  margin: 16px 0; color: var(--primary);
-}
-.theory-box .example {
-  background: var(--card); border-radius: 8px; padding: 16px;
-  margin-top: 12px; font-size: 1.4rem;
-}
-.theory-box .example-title { font-weight: 700; color: var(--accent); margin-bottom: 6px; }
-[data-theme="dark"] .theory-box .example strong { color: #facc15; }
-
-.units-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 1.4rem; }
-.units-table th { background: var(--primary); color: white; padding: 12px 16px; text-align: left; font-weight: 700; }
-.units-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
-.units-table tr:nth-child(even) { background: rgba(59,130,246,0.05); }
-.units-table .yes { color: var(--green); font-weight: 700; }
-.units-table .no { color: var(--red); font-weight: 700; }
-.units-table .warn { color: var(--accent); font-weight: 700; }
-
-.instruments-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 16px 0; }
-.instrument-card {
-  background: var(--bg); border-radius: var(--radius-sm); padding: 16px;
-  text-align: center; border: 2px solid var(--border); transition: all 0.3s;
-}
-.instrument-card:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(59,130,246,0.2); }
-.instrument-card .inst-emoji { font-size: 3rem; margin-bottom: 6px; }
-.instrument-card .inst-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 2px; }
-.instrument-card .inst-measures { font-size: 1.2rem; color: var(--text-secondary); }
-
-.tf-item {
-  background: var(--bg); border-radius: var(--radius-sm); padding: 18px 24px;
-  margin-bottom: 12px; border-left: 4px solid var(--primary);
-  animation: slideIn 0.4s ease backwards;
-}
-@keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
-.tf-statement { font-weight: 600; font-size: 1.65rem; margin-bottom: 10px; }
-.tf-buttons { display: flex; gap: 12px; }
-.tf-buttons button {
-  padding: 10px 24px; border: 2px solid var(--border); border-radius: 8px;
-  font-family: inherit; font-weight: 700; font-size: 1.5rem;
-  cursor: pointer; transition: all 0.3s; background: var(--card); color: var(--text);
-}
-.tf-buttons button.true-btn:hover { border-color: var(--green); color: var(--green); }
-.tf-buttons button.false-btn:hover { border-color: var(--red); color: var(--red); }
-.tf-buttons button.selected-true { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 2px 12px rgba(34,197,94,0.4); }
-.tf-buttons button.selected-false { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 2px 12px rgba(239,68,68,0.4); }
-.tf-buttons button:disabled { cursor: default; opacity: 0.5; }
-.tf-comment { margin-top: 10px; padding: 10px 16px; border-radius: 8px; font-size: 1.4rem; font-weight: 600; display: none; }
-.tf-comment.correct { background: #dcfce7; color: #166534; display: block; }
-.tf-comment.wrong { background: #fee2e2; color: #991b1b; display: block; }
-[data-theme="dark"] .tf-comment.correct { background: #14532d; color: #bbf7d0; }
-[data-theme="dark"] .tf-comment.wrong { background: #7f1d1d; color: #fecaca; }
-
-.progress-bar-wrap { margin-top: 20px; background: var(--bg); border-radius: 20px; overflow: hidden; height: 34px; }
-.progress-bar {
-  height: 100%; background: linear-gradient(90deg, var(--green), #34d399);
-  border-radius: 20px; transition: width 0.6s ease; display: flex;
-  align-items: center; justify-content: center; color: white;
-  font-weight: 700; font-size: 1.35rem; min-width: 65px;
-}
-
-.match-game { max-width: 900px; margin: 0 auto; }
-.match-row {
-  display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
-  background: var(--bg); border-radius: var(--radius-sm); padding: 14px 18px;
-  border-left: 4px solid var(--primary);
-}
-.match-qty { flex: 1; font-weight: 700; font-size: 1.5rem; }
-.match-select {
-  flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px;
-  font-family: inherit; font-size: 1.5rem; font-weight: 700;
-  background: var(--card); color: var(--text); cursor: pointer; transition: border 0.3s;
-}
-.match-select:focus { border-color: var(--primary); outline: none; }
-.match-select.correct { border-color: var(--green); background: #dcfce7; }
-.match-select.wrong { border-color: var(--red); background: #fee2e2; }
-[data-theme="dark"] .match-select.correct { background: #14532d; }
-[data-theme="dark"] .match-select.wrong { background: #7f1d1d; }
-
-/* ===== СВЕТОФОР ===== */
-.light-stage { display: flex; gap: 34px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 18px; }
-.tl {
-  width: 130px; padding: 14px 12px; background: var(--card);
-  border: 5px solid var(--border); border-radius: 22px;
-  display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow);
-}
-.tl .lamp { height: 70px; border-radius: 16px; background: var(--bg); border: 2px solid var(--border); position: relative; }
-.tl .lamp.on { box-shadow: 0 0 26px currentColor; }
-.tl .lamp.on::after { content:''; position:absolute; inset:8px; border-radius:12px; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), transparent 60%); }
-.tl .lamp.red.on { background: #ef4444; border-color: #ef4444; color: #ef4444; }
-.tl .lamp.yel.on { background: #eab308; border-color: #eab308; color: #eab308; }
-.tl .lamp.grn.on { background: #22c55e; border-color: #22c55e; color: #22c55e; }
-.tl .lamp.blink::before {
-  content: ''; position: absolute; inset: -8px; border-radius: 24px;
-  border: 3px solid currentColor; animation: blinkPulse .85s infinite;
-}
-@keyframes blinkPulse { 0%,50%{opacity:1} 51%,100%{opacity:0} }
-.pd {
-  width: 130px; padding: 16px 12px; background: var(--card);
-  border: 5px solid var(--border); border-radius: 22px;
-  display: flex; flex-direction: column; gap: 14px; align-items: center;
-  justify-content: center; box-shadow: var(--shadow); min-height: 250px;
-}
-.pd .lamp {
-  width: 92px; height: 92px; border-radius: 50%; background: var(--bg);
-  border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
-}
-.pd .lamp svg { width: 54px; height: 54px; }
-.pd .lamp svg g { stroke: currentColor; }
-.pd .lamp.off svg { color: var(--border); }
-.pd .lamp.on.g { background: #dcfce7; border-color: var(--green); box-shadow: 0 0 20px rgba(34,197,94,.45); }
-.pd .lamp.on.g svg { color: #16a34a; }
-.pd .lamp.on.r { background: #fee2e2; border-color: var(--red); box-shadow: 0 0 20px rgba(239,68,68,.45); }
-.pd .lamp.on.r svg { color: #dc2626; }
-[data-theme="dark"] .pd .lamp.on.g { background: #14532d; } [data-theme="dark"] .pd .lamp.on.g svg { color: #4ade80; }
-[data-theme="dark"] .pd .lamp.on.r { background: #7f1d1d; } [data-theme="dark"] .pd .lamp.on.r svg { color: #fca5a5; }
-.pd .pd-none { font-size: 1.2rem; font-weight: 700; color: var(--text-secondary); text-align: center; }
-.pd .lamp.blink::before {
-  content: ''; position: absolute; width: 108px; height: 108px;
-  border-radius: 50%; border: 3px solid var(--green); animation: blinkPulse .85s infinite;
-}
-.pd .lamp { position: relative; }
-.light-task {
-  background: var(--primary-light); border-radius: var(--radius-sm); padding: 24px;
-  text-align: center; margin-bottom: 18px; border-left: 4px solid var(--primary);
-}
-.light-task .light-question { font-size: 1.8rem; font-weight: 700; margin-bottom: 18px; }
-.light-steps { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 18px; }
-.light-step {
-  width: 46px; height: 46px; border-radius: 50%; background: var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 1.3rem; color: var(--text-secondary); transition: all 0.4s;
-}
-.light-step.done { background: var(--green); color: white; }
-.light-step.miss { background: var(--red); color: white; }
-.light-step.current { background: var(--primary); color: white; transform: scale(1.15); box-shadow: 0 2px 12px rgba(59,130,246,0.4); }
-.light-complete { text-align: center; padding: 24px; display: none; }
-.light-complete.show { display: block; animation: fadeIn 0.5s ease; }
-.light-complete h3 { font-size: 2.2rem; color: var(--green); margin-bottom: 8px; }
-
-/* ===== ЗНАКИ ===== */
-.sign-chip {
-  width: 92px; height: 92px; background: #fff; border-radius: var(--radius-sm);
-  padding: 6px; box-shadow: var(--shadow); flex-shrink: 0; display: flex;
-}
-.sign-chip svg { width: 100%; height: 100%; display: block; }
-.sign-bank {
-  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-  background: var(--bg); border-radius: var(--radius-sm); padding: 18px; margin-bottom: 18px;
-}
-.sign-caption { font-size: 1.2rem; color: var(--text-secondary); text-align: center; width: 100%; }
-
-/* ===== ПРАКТИКА / ВАРИАНТЫ ===== */
-.variant-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-.variant-tab {
-  flex: 1; padding: 14px; border: 2px solid var(--border); background: var(--card);
-  border-radius: var(--radius-sm); font-family: inherit; font-weight: 700;
-  font-size: 1.6rem; cursor: pointer; transition: all 0.3s; color: var(--text);
-}
-.variant-tab.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 16px rgba(249,115,22,0.3); }
-.variant-content { display: none; }
-.variant-content.active { display: block; animation: fadeIn 0.4s ease; }
-
-.quiz-item {
-  background: var(--bg); border-radius: var(--radius-sm); padding: 18px 24px;
-  margin-bottom: 12px; border-left: 4px solid var(--accent);
-  animation: slideIn 0.4s ease backwards;
-}
-.quiz-q { font-weight: 600; font-size: 1.6rem; margin-bottom: 12px; }
-.quiz-q .qnum {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: white;
-  font-weight: 800; font-size: 1.2rem; margin-right: 12px; flex-shrink: 0;
-}
-.quiz-opts { display: flex; gap: 10px; flex-wrap: wrap; }
-.quiz-opts button {
-  flex: 1; min-width: 200px; text-align: left; padding: 12px 18px;
-  border: 2px solid var(--border); border-radius: 8px; background: var(--card);
-  color: var(--text); font-family: inherit; font-weight: 600; font-size: 1.45rem;
-  cursor: pointer; transition: all 0.3s;
-}
-.quiz-opts button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-.quiz-opts button.correct { background: var(--green); border-color: var(--green); color: white; }
-.quiz-opts button.wrong { background: var(--red); border-color: var(--red); color: white; }
-.quiz-opts button:disabled { cursor: default; }
-.quiz-comment { margin-top: 10px; padding: 10px 16px; border-radius: 8px; font-size: 1.4rem; font-weight: 600; display: none; }
-.quiz-comment.correct { background: #dcfce7; color: #166534; display: block; }
-.quiz-comment.wrong { background: #fee2e2; color: #991b1b; display: block; }
-[data-theme="dark"] .quiz-comment.correct { background: #14532d; color: #bbf7d0; }
-[data-theme="dark"] .quiz-comment.wrong { background: #7f1d1d; color: #fecaca; }
-
-.btn-check { padding: 14px 36px; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); font-family: inherit; font-weight: 700; font-size: 1.65rem; cursor: pointer; transition: all 0.3s; }
-.btn-check:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(59,130,246,0.4); }
-.btn-check:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
-.btn-check-all {
-  margin-top: 16px; padding: 14px 36px; background: linear-gradient(135deg, var(--accent), #ea580c);
-  color: white; border: none; border-radius: var(--radius-sm); font-family: inherit;
-  font-weight: 700; font-size: 1.65rem; cursor: pointer; transition: all 0.3s;
-  display: block; margin-left: auto; margin-right: auto;
-}
-.btn-check-all:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(249,115,22,0.4); }
-.btn-ghost {
-  padding: 12px 28px; border: 2px solid var(--border); background: var(--card);
-  color: var(--text); border-radius: var(--radius-sm); font-family: inherit;
-  font-weight: 700; font-size: 1.5rem; cursor: pointer; transition: all 0.3s;
-}
-.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
-.btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
-
-.score-display { text-align: center; margin-top: 16px; font-size: 1.9rem; font-weight: 700; display: none; animation: fadeIn 0.4s ease; }
-
-/* ===== ИТОГИ / ПАМЯТКА ===== */
-.result-big { font-size: 4.6rem; font-weight: 800; text-align: center; margin: 12px 0; }
-.result-msg { text-align: center; color: var(--text-secondary); font-size: 1.7rem; }
-.memo {
-  background: var(--primary-light); border: 3px solid var(--primary);
-  border-radius: var(--radius); padding: 28px; margin-top: 18px;
-}
-.memo h3 { font-size: 1.9rem; color: var(--primary); margin-bottom: 14px; text-align: center; }
-.memo ol, .memo ul { font-size: 1.5rem; margin-left: 24px; line-height: 1.7; }
-.memo li { margin-bottom: 6px; }
-.memo .memo-no li::marker { color: var(--red); }
-.memo .memo-yes li::marker { color: var(--green); }
-.memo .memo-foot { text-align: center; font-weight: 800; font-size: 1.6rem; color: var(--primary); margin-top: 14px; }
-
-.hw-answer { margin-top: 12px; padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; font-size: 1.4rem; font-weight: 600; animation: fadeIn 0.4s ease; }
-[data-theme="dark"] .hw-answer { background: #14532d; color: #bbf7d0; }
-
-.confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
-.confetti-piece { position: absolute; width: 10px; height: 10px; top: -20px; animation: confettiFall linear forwards; }
-@keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
-
-@media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
-@media (max-width: 600px) {
-  .container { padding: 12px; } .card { padding: 18px; } header { padding: 20px 14px; }
-  nav button { min-width: 100px; padding: 10px 6px; font-size: 1.1rem; }
-  .match-row { flex-wrap: wrap; }
-  .match-qty { flex-basis: 100%; }
-  .quiz-opts button { min-width: 100%; }
-  .tl, .pd { width: 104px; }
-  .light-step { width: 40px; height: 40px; font-size: 1.1rem; }
-}
-
-/* ПЕЧАТЬ — только памятка */
-@media print {
-  html, body { background: #fff !important; color: #000 !important; }
-  .container > *:not(#sec6) { display: none !important; }
-  #sec6 { display: block !important; }
-  #sec6 > .card:not(#memoCard) { display: none !important; }
-  #memoCard { display: block !important; box-shadow: none; border: none; padding: 0; background: #fff !important; }
-  .memo { background: #fff !important; border: 2px solid #000 !important; }
-  .memo h3, .memo .memo-foot { color: #000 !important; }
-  .memo ol, .memo ul, .memo li, .memo p { color: #000 !important; }
-  .memo p[style*="--red"] { color: #b91c1c !important; }
-  .memo p[style*="--green"] { color: #166534 !important; }
-  .card-desc { display: none; }
-  nav, header, .confetti-container, .btn-row { display: none !important; }
-  @page { margin: 1.5cm; }
-}
-</style>
+    .ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 12px 0; }
+    .ref-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: #f9fcff; }
+    .ref-card h4 { margin: 0 0 6px; color: #123a63; }
+    .ref-card ul { margin: 0; padding-left: 18px; }
+    .ref-card li { margin: 5px 0; font-size: 15px; }
+    .footer-note { text-align: center; color: var(--muted); font-size: 13px; margin-top: 14px; }
+    @media (max-width: 600px) {
+      .card { padding: 16px; }
+      .question { font-size: 18px; }
+      .answer { font-size: 15px; }
+    }
+  </style>
 </head>
 <body>
+  <div class="app">
+    <header class="header">
+      <div class="badge">Игра-квест для 6 класса</div>
+      <h1>Безопасный маршрут по ПДД</h1>
+      <p class="subtitle">Помоги Ярославу безопасно дойти до школы и проверь свои знания правил дорожного движения</p>
+    </header>
 
-<div class="container">
+    <main class="card">
+      <!-- MENU -->
+      <section id="menu-screen" class="screen active">
+        <div class="hero">🚦🧑‍🎒🏫</div>
+        <p class="lead">Выбери режим игры, сложность и при желании загляни в памятку перед стартом.</p>
 
-<header>
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">🌓</button>
-  <h1>ПДД. Безопасный пешеход</h1>
-  <div class="subtitle">6 класс · Классный час по профилактике ДДТТ · 45 минут</div>
-  <div class="source">По Правилам дорожного движения РФ · 4 практических задания · можно работать без интернета</div>
-</header>
-
-<nav id="mainNav">
-  <button class="active" onclick="showSection(0)"><span class="nav-emoji">📖</span>Теория</button>
-  <button onclick="showSection(1)"><span class="nav-emoji">🔥</span>Разминка</button>
-  <button onclick="showSection(2)"><span class="nav-emoji">🚦</span>Светофор</button>
-  <button onclick="showSection(3)"><span class="nav-emoji">🔗</span>Знаки</button>
-  <button onclick="showSection(4)"><span class="nav-emoji">🧩</span>Маршрут</button>
-  <button onclick="showSection(5)"><span class="nav-emoji">📝</span>Викторина</button>
-  <button onclick="showSection(6)"><span class="nav-emoji">🏆</span>Итоги</button>
-  <button onclick="showSection(7)"><span class="nav-emoji">📚</span>Домашняя</button>
-</nav>
-
-<!-- ===== SECTION 0: ТЕОРИЯ ===== -->
-<div class="section active" id="sec0">
-  <div class="card">
-    <h2><span class="emoji">📖</span>Теория. Правила безопасного пешехода</h2>
-    <p class="card-desc">Шесть блоков: где ходить, как смотреть светофор, как переходить дорогу, что делать во дворе, чем опасен самокат и почему тебя плохо видно в темноте.</p>
-
-    <div class="theory-box">
-      <h3>1. Где должен ходить пешеход</h3>
-      <p>Пешеход идёт <strong>по тротуару</strong>. Если тротуара нет — <strong>по пешеходной дорожке</strong>, а если нет и её — <strong>по обочине или краю проезжей части</strong>.</p>
-      <div class="formula">По краю проезжей части — навстречу движению машин</div>
-      <p>Именно <strong>навстречу</strong>: так водитель видит пешехода, а не спину. Иначе получается встречный поток, и виноват в ДТП оказывается пешеход.</p>
-      <div class="example">
-        <div class="example-title">Запомни:</div>
-        <p>Дорога — не место для прогулок, разговоров по телефону и игр. Уже только поэтому нужно идти по тротуару.</p>
-      </div>
-    </div>
-
-    <div class="theory-box">
-      <h3>2. Сигналы светофора</h3>
-      <table class="units-table">
-        <tr><th>Сигнал</th><th>Что делать пешеходу</th></tr>
-        <tr><td><strong>Красный</strong></td><td class="no">Ждём на тротуаре. Переходить нельзя</td></tr>
-        <tr><td><strong>Зелёный</strong></td><td class="yes">Переходим шагом, но сначала убеждаемся, что машины остановились и видят нас</td></tr>
-        <tr><td><strong>Мигающий зелёный</strong></td><td class="warn">Переходим, только если дорога свободна и за переходом нет опасности</td></tr>
-        <tr><td><strong>Жёлтый</strong></td><td class="no">Ждём: машины тормозят, движение запрещено</td></tr>
-      </table>
-      <div class="example">
-        <div class="example-title">Главный запрет:</div>
-        <p><strong>Нельзя выбегать на дорогу, когда для машин горит зелёный</strong> и они ещё не остановились. Зелёный для водителя — это движение, а не остановка.</p>
-      </div>
-    </div>
-
-    <div class="theory-box">
-      <h3>3. Как переходить дорогу</h3>
-      <p>Проезжую часть пересекают <strong>только по пешеходному переходу</strong> — регулируемому (со светофором) или нерегулируемому (со знаком, без светофора).</p>
-      <div class="formula">налево → направо → налево</div>
-      <p>На нерегулируемом переходе: остановились у края тротуара → осмотрелись в обе стороны → убедились, что машины остановились → переходим <strong>шагом, по прямой</strong>, не отворачивая и не останавливаясь посреди дороги.</p>
-      <div class="example">
-        <div class="example-title">Опасность за переходом:</div>
-        <p>Если за переходом стоит фургон, закрыт обзор или образовался затор — переход <strong>откладывают</strong>. Нет водителя, который увидит тебя из-за грузовика.</p>
-      </div>
-      <div class="example">
-        <div class="example-title">Водитель не тормозит:</div>
-        <p><strong>Не бежать навстречу машине.</strong> Отойти в сторону и дать водителю коридор, чтобы он объехал. На тротуаре — переждать.</p>
-      </div>
-    </div>
-
-    <div class="theory-box">
-      <h3>4. Двор и прилегающая территория</h3>
-      <p>В жилой зоне и во дворе скорость ограничена <strong>20 км/ч</strong>, и <strong>пешеход здесь главный</strong> — водитель обязан пропустить.</p>
-      <p>Но при <strong>выезде со двора на улицу</strong> преимущества нет: остановись у ворот, посмотри в обе стороны и пропусти транспорт. Двор примыкает к улице на скоростной машине — это самая опасная точка двора.</p>
-      <div class="example">
-        <div class="example-title">Нельзя:</div>
-        <p>выезжать из двора на тротуар и на проезжую часть; бежать наперекор выезжающей машине.</p>
-      </div>
-    </div>
-
-    <div class="theory-box">
-      <h3>5. Самокат и велосипед</h3>
-      <p><strong>До 14 лет</strong> выезжать на проезжую часть на велосипеде, самокате или скутере <strong>запрещено</strong>.</p>
-      <p>Пешеходный переход на самокате или велосипеде переходят <strong>пешком</strong>, ведя транспорт рядом, как пешеход. На тротуару кататься можно осторожно, уступая пешеходам.</p>
-      <div class="example">
-        <div class="example-title">Нельзя:</div>
-        <p>цепляться за движущийся автомобиль, ехать по проезжей части среди машин, нести самокат на проезжую часть.</p>
-      </div>
-    </div>
-
-    <div class="theory-box">
-      <h3>6. Чтобы тебя видели: свет и телефон</h3>
-      <div class="instruments-grid">
-        <div class="instrument-card">
-          <div class="inst-emoji">🌙</div>
-          <div class="inst-name">Темнота</div>
-          <div class="inst-measures">В тёмной одежде пешехода видно за несколько метров</div>
+        <h3 style="margin:0 0 8px;color:#123a63">Режим</h3>
+        <div class="menu-grid" id="mode-grid">
+          <button class="mode-card selected" data-mode="quest" type="button">
+            <div class="icon">🗺️</div><h3>Квест</h3>
+            <p>Сюжетный маршрут до школы с пояснениями после каждого ответа.</p>
+          </button>
+          <button class="mode-card" data-mode="exam" type="button">
+            <div class="icon">📝</div><h3>Экзамен</h3>
+            <p>Пояснения только в конце. Зачёт при результате 80% и выше.</p>
+          </button>
+          <button class="mode-card" data-mode="timed" type="button">
+            <div class="icon">⏱️</div><h3>На время</h3>
+            <p>Ограничение времени на каждый вопрос. Успей ответить правильно!</p>
+          </button>
+          <button class="mode-card" data-mode="survival" type="button">
+            <div class="icon">❤️</div><h3>Выживание</h3>
+            <p>Есть жизни. Ошибка или истёкшее время отнимает одну жизнь.</p>
+          </button>
+          <button class="mode-card" data-mode="training" type="button">
+            <div class="icon">🎯</div><h3>Тренировка по темам</h3>
+            <p>Выбери раздел ПДД и потренируйся на отдельных вопросах.</p>
+          </button>
         </div>
-        <div class="instrument-card">
-          <div class="inst-emoji">🦺</div>
-          <div class="inst-name">Светоотражатель</div>
-          <div class="inst-measures">Возвращает свет фар, делает тебя видимым</div>
+
+        <div class="panel">
+          <h3>Настройки</h3>
+          <div class="row" style="margin-bottom:10px">
+            <span style="font-weight:600;color:#27445f">Сложность:</span>
+            <div class="chips" id="difficulty-chips">
+              <button class="chip" data-diff="easy" type="button">Лёгкая</button>
+              <button class="chip selected" data-diff="medium" type="button">Средняя</button>
+              <button class="chip" data-diff="hard" type="button">Сложная</button>
+            </div>
+          </div>
+          <div class="row">
+            <label class="toggle"><input type="checkbox" id="shuffle-toggle"> Случайный порядок вопросов</label>
+          </div>
+          <p class="muted" id="diff-hint" style="margin:8px 0 0"></p>
         </div>
-        <div class="instrument-card">
-          <div class="inst-emoji">🎧</div>
-          <div class="inst-name">Наушники</div>
-          <div class="inst-measures">Не слышно сигнала машины — у самого опасного места</div>
+
+        <div class="panel" id="topic-panel" style="display:none">
+          <h3>Тема тренировки</h3>
+          <div class="chips" id="topic-chips"></div>
         </div>
-        <div class="instrument-card">
-          <div class="inst-emoji">📱</div>
-          <div class="inst-name">Телефон</div>
-          <div class="inst-measures">Не видишь яму, лужу и выезд массы со двора</div>
+
+        <div class="row" style="justify-content:center; gap:10px; margin-top:18px;">
+          <a class="btn secondary" href="index.html" style="text-decoration:none;display:inline-flex;align-items:center">← Тренажёр</a>
+          <button class="btn secondary" id="open-ref-btn" type="button">📘 Памятка</button>
+          <button class="btn" id="start-btn" type="button">Начать</button>
         </div>
-      </div>
-      <p>Правило простое: <strong>убери телефон и наушники до перехода</strong>, а в темноте надень светоотражатель или возьми фонарик.</p>
-    </div>
+      </section>
+
+      <!-- REFERENCE -->
+      <section id="ref-screen" class="screen">
+        <h2 class="stage-title" style="text-align:center">Памятка по ПДД</h2>
+        <p class="lead" style="font-size:16px">Краткие правила для пешеходов, пассажиров и велосипедистов.</p>
+        <div class="ref-grid">
+          <div class="ref-card">
+            <h4>🚶 Пешеходу</h4>
+            <ul>
+              <li>Иди по тротуару, придерживаясь правой стороны. Если тротуара нет — по обочине навстречу движению.</li>
+              <li>Переходи дорогу по пешеходному переходу, в том числе подземному или надземному, если он есть.</li>
+              <li>Перед переходом остановись: посмотри налево, затем направо и снова налево.</li>
+              <li>Не отвлекайся на телефон и не используй наушники на дороге.</li>
+            </ul>
+          </div>
+          <div class="ref-card">
+            <h4>🚦 Светофор и переход</h4>
+            <ul>
+              <li>Красный сигнал — стой, зелёный — переходи, убедившись, что машины остановились.</li>
+              <li>Мигающий зелёный предупреждает, что время перехода заканчивается: начинать переход нельзя.</li>
+              <li>На нерегулируемом переходе убедись, что водители уступают дорогу.</li>
+              <li>Если не успел перейти, остановись на островке безопасности или линии разметки.</li>
+            </ul>
+          </div>
+          <div class="ref-card">
+            <h4>🛑 Дорожные знаки</h4>
+            <ul>
+              <li>«Пешеходный переход» (синий) — место, где можно переходить дорогу.</li>
+              <li>«Подземный/надземный переход» — безопасное место перехода.</li>
+              <li>«Движение пешеходов запрещено» (красный круг) — переход запрещён.</li>
+              <li>«Дети» (красный треугольник) — предупреждает водителей о возможном появлении детей.</li>
+              <li>«Велосипедная дорожка» — путь для велосипедистов.</li>
+            </ul>
+          </div>
+          <div class="ref-card">
+            <h4>🚲 Велосипед и двор</h4>
+            <ul>
+              <li>Езди по велодорожкам; при их отсутствии — осторожно по тротуару, не мешая пешеходам.</li>
+              <li>Пересекая проезжую часть по переходу, лучше спешиться и перейти дорогу пешком.</li>
+              <li>Во дворе и жилой зоне пешеходы имеют преимущество; машины едут не быстрее 20 км/ч.</li>
+              <li>Не играй рядом с проезжей частью и парковкой.</li>
+            </ul>
+          </div>
+          <div class="ref-card">
+            <h4>🚌 Транспорт и темнота</h4>
+            <ul>
+              <li>Выходя из автобуса, дождись, пока он отъедет, и переходи дорогу по переходу.</li>
+              <li>В автомобиле пристёгивайся ремнём безопасности и не отвлекай водителя.</li>
+              <li>В темноте используй светоотражатели (фликер) и светлую одежду.</li>
+              <li>Трамвайные пути переходи только в разрешённых местах, убедившись в безопасности.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="center" style="margin-top:16px">
+          <button class="btn secondary" id="back-menu-btn" type="button">Назад в меню</button>
+        </div>
+      </section>
+
+      <!-- GAME -->
+      <section id="game-screen" class="screen" aria-live="polite">
+        <div class="topbar">
+          <div class="meta">
+            <span id="stage-counter">Вопрос 1 из 10</span>
+            <span class="pill" id="mode-label"></span>
+            <span class="pill" id="topic-label" style="display:none"></span>
+          </div>
+          <div class="meta">
+            <span class="pill" id="lives-label" style="display:none"></span>
+            <span class="pill" id="timer-label" style="display:none"></span>
+            <span id="score-counter">Баллы: 0</span>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+        <div class="timer-bar-wrap" id="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+
+        <div class="scene" id="scene-emoji">🚶</div>
+        <h2 class="stage-title" id="stage-title"></h2>
+        <p class="story" id="stage-story"></p>
+        <div class="question" id="stage-question"></div>
+        <div class="answers" id="answers"></div>
+
+        <div class="feedback" id="feedback">
+          <strong id="feedback-title"></strong>
+          <div id="feedback-text"></div>
+        </div>
+
+        <div class="actions">
+          <div class="muted" id="exam-hint" style="display:none">Режим экзамена: пояснения будут показаны в конце.</div>
+          <div class="actions-right">
+            <button class="btn secondary small" id="quit-btn" type="button">В меню</button>
+            <button class="btn" id="next-btn" type="button" style="display:none">Дальше</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULT -->
+      <section id="result-screen" class="screen">
+        <div class="hero" id="result-emoji">🏆</div>
+        <div class="result-score" id="result-score"></div>
+        <h2 class="result-title" id="result-title"></h2>
+        <p class="result-text" id="result-text"></p>
+
+        <div id="exam-badge" class="center" style="margin-bottom:12px; display:none"></div>
+        <div class="review" id="review" style="display:none"></div>
+
+        <div class="tips">
+          <h3>Памятка юного участника дорожного движения</h3>
+          <ul>
+            <li>Переходи дорогу по переходу и только убедившись в безопасности.</li>
+            <li>Даже на зелёный сигнал сначала убедись, что транспорт остановился.</li>
+            <li>Не отвлекайся на телефон и наушники у проезжей части.</li>
+            <li>В темноте используй светоотражатели или светлую одежду.</li>
+            <li>Во дворе и жилой зоне будь внимателен: машины могут выезжать из-за препятствий.</li>
+          </ul>
+        </div>
+        <div class="row" style="justify-content:center; gap:10px;">
+          <button class="btn secondary" id="result-menu-btn" type="button">В меню</button>
+          <button class="btn" id="restart-btn" type="button">Сыграть ещё раз</button>
+        </div>
+      </section>
+    </main>
+
+    <p class="footer-note">Одностраничная учебная игра по правилам дорожного движения · <a href="index.html" style="color:inherit">вернуться в тренажёр</a></p>
   </div>
-</div>
 
-<!-- ===== SECTION 1: РАЗМИНКА ВЕРЮ / НЕ ВЕРЮ ===== -->
-<div class="section" id="sec1">
-  <div class="card">
-    <h2><span class="emoji">🔥</span>Разминка. Верю или не верю</h2>
-    <p class="card-desc">8 утверждений о ПДД. Выбери «Верю» или «Не верю» — сразу появится разбор.</p>
-    <div id="tfList"></div>
-    <div class="progress-bar-wrap"><div class="progress-bar" id="tfProgress" style="width:0%">0 / 8</div></div>
-  </div>
-</div>
+  <script>
+    const TOPICS = {
+      pedestrian: "Пешеход",
+      crossing: "Переходы и светофор",
+      signs: "Дорожные знаки",
+      bike: "Велосипед и двор",
+      transport: "Транспорт и безопасность"
+    };
 
-<!-- ===== SECTION 2: СВЕТОФОР ===== -->
-<div class="section" id="sec2">
-  <div class="card">
-    <h2><span class="emoji">🚦</span>Тренажёр «Светофор»</h2>
-    <p class="card-desc">8 дорожных ситуаций. Смотри на светофор и выбирай действие пешехода — после ответа будет разбор.</p>
+    const MODE_NAMES = {
+      quest: "Квест",
+      exam: "Экзамен",
+      timed: "На время",
+      survival: "Выживание",
+      training: "Тренировка"
+    };
 
-    <div class="light-steps" id="lightSteps"></div>
+    const questions = [
+      // STORY / CORE
+      { id: 1, topic: "pedestrian", storyIndex: 1, emoji: "🏠🚶", title: "Выход из дома",
+        story: "Ярослав вышел из подъезда и направляется к школе. Рядом есть широкий тротуар.",
+        question: "Где безопаснее всего идти пешеходу в этом случае?",
+        answers: [
+          { text: "По проезжей части, чтобы быстрее дойти", correct: false },
+          { text: "По тротуару, придерживаясь правой стороны", correct: true },
+          { text: "По краю дороги спиной к движению машин", correct: false }
+        ],
+        explanation: "Пешеходы должны двигаться по тротуарам. Если тротуар есть, идти по проезжей части опасно. Придерживаясь правой стороны, удобнее расходиться со встречными." },
+      { id: 2, topic: "crossing", storyIndex: 2, emoji: "🚦", title: "Регулируемый переход",
+        story: "Ярослав подошёл к пешеходному переходу со светофором. Для пешеходов горит красный сигнал.",
+        question: "Как нужно поступить?",
+        answers: [
+          { text: "Подождать на тротуаре, пока загорится зелёный сигнал", correct: true },
+          { text: "Перебежать дорогу, если машин поблизости нет", correct: false },
+          { text: "Переходить вместе с другими, не глядя на сигнал", correct: false }
+        ],
+        explanation: "Красный сигнал запрещает переход. Нужно дождаться зелёного и только потом начинать переход, убедившись, что транспорт остановился." },
+      { id: 3, topic: "crossing", storyIndex: 3, emoji: "🚗⚠️", title: "Зелёный, но опасно",
+        story: "Загорелся зелёный сигнал пешеходного светофора. Но Ярослав видит, что машина, поворачивая, ещё не успела остановиться.",
+        question: "Что делать в этой ситуации?",
+        answers: [
+          { text: "Сразу идти, ведь горит зелёный", correct: false },
+          { text: "Убедиться, что водитель уступает дорогу, и только потом переходить", correct: true },
+          { text: "Махать руками и быстро бежать через дорогу", correct: false }
+        ],
+        explanation: "Зелёный сигнал разрешает переход, но не отменяет осторожность. Перед выходом на проезжую часть нужно убедиться, что все машины остановились." },
+      { id: 4, topic: "crossing", storyIndex: 4, emoji: "🦓👀", title: "Нерегулируемая «зебра»",
+        story: "Впереди нерегулируемый пешеходный переход без светофора. Машины движутся по дороге.",
+        question: "Как правильно перейти дорогу?",
+        answers: [
+          { text: "Посмотреть налево, затем направо и снова налево, переходить, когда безопасно", correct: true },
+          { text: "Сразу выйти на переход: водители всегда обязаны остановиться", correct: false },
+          { text: "Перебежать как можно быстрее, не останавливаясь", correct: false }
+        ],
+        explanation: "На нерегулируемом переходе важно самому оценить ситуацию. Убедись, что водители заметили тебя и готовы уступить дорогу." },
+      { id: 5, topic: "signs", storyIndex: 5, emoji: "🚸", title: "Дорожные знаки",
+        story: "На пути Ярослав видит дорожные знаки и вспоминает их значение.",
+        question: "Какой знак показывает место, где пешеходам разрешено переходить дорогу?",
+        answers: [
+          { text: "Синий квадрат с изображением пешехода — «Пешеходный переход»", correct: true },
+          { text: "Красный круг с пешеходом — «Движение пешеходов запрещено»", correct: false },
+          { text: "Красный треугольник с детьми — «Дети» (предупреждающий знак)", correct: false }
+        ],
+        explanation: "Знак «Пешеходный переход» указывает место перехода. Знак «Дети» предупреждает водителей, а «Движение пешеходов запрещено» переход запрещает." },
+      { id: 6, topic: "transport", storyIndex: 6, emoji: "🚌", title: "Остановка автобуса",
+        story: "Ярослав вышел из автобуса. До школы нужно перейти на другую сторону улицы.",
+        question: "Как безопаснее всего это сделать?",
+        answers: [
+          { text: "Сразу обойти автобус спереди и перебежать дорогу", correct: false },
+          { text: "Подождать, пока автобус отъедет, и перейти дорогу по пешеходному переходу", correct: true },
+          { text: "Пройти вплотную за автобусом, где его не видно", correct: false }
+        ],
+        explanation: "Стоящий автобус закрывает обзор дороги, и тебя могут не заметить водители других машин. Лучше дождаться, пока он уедет, и переходить в безопасном месте." },
+      { id: 7, topic: "bike", storyIndex: 7, emoji: "🚲", title: "Поездка на велосипеде",
+        story: "В другой день Ярослав (ему 12 лет) едет в школу на велосипеде.",
+        question: "Где ему безопаснее и правильнее кататься?",
+        answers: [
+          { text: "По проезжей части вместе с автомобилями", correct: false },
+          { text: "По велосипедной дорожке, а если её нет — по тротуару, не мешая пешеходам", correct: true },
+          { text: "Где захочется, главное ехать быстро", correct: false }
+        ],
+        explanation: "Велосипедистам младшего возраста обычно можно ездить по велодорожкам, а при их отсутствии — по тротуару или в пешеходных зонах, соблюдая осторожность и не создавая помех пешеходам." },
+      { id: 8, topic: "pedestrian", storyIndex: 8, emoji: "🎧📱", title: "Отвлекающие гаджеты",
+        story: "Ярослав подходит к переходу. В телефоне пришло сообщение, а в наушниках играет музыка.",
+        question: "Как правильно поступить при переходе дороги?",
+        answers: [
+          { text: "Убрать телефон и снять наушники или выключить звук, чтобы слышать дорогу", correct: true },
+          { text: "Можно продолжать смотреть в телефон, если горит зелёный свет", correct: false },
+          { text: "Громкая музыка не мешает, если идти по «зебре»", correct: false }
+        ],
+        explanation: "Телефон и громкая музыка отвлекают внимание и мешают услышать приближающийся транспорт. На дороге важно видеть и слышать обстановку." },
+      { id: 9, topic: "bike", storyIndex: 9, emoji: "🏘️", title: "Двор и жилая зона",
+        story: "Почти у школы Ярослав проходит через двор, где обозначена жилая зона.",
+        question: "Что должен помнить водитель в жилой зоне?",
+        answers: [
+          { text: "Можно ехать быстро, если пешеходов не видно", correct: false },
+          { text: "Уступать дорогу пешеходам и двигаться очень медленно (не быстрее 20 км/ч)", correct: true },
+          { text: "Пешеходы обязаны всегда пропускать машины", correct: false }
+        ],
+        explanation: "В жилой зоне и во дворах пешеходы имеют преимущество. Водитель должен ехать медленно и быть готовым уступить дорогу." },
+      { id: 10, topic: "pedestrian", storyIndex: 10, emoji: "🌙✨", title: "Возвращение домой вечером",
+        story: "После кружка Ярослав возвращается домой уже в тёмное время суток. Улица освещена слабо.",
+        question: "Что поможет водителю заметить пешехода заранее?",
+        answers: [
+          { text: "Тёмная одежда без отражающих элементов", correct: false },
+          { text: "Световозвращатели (фликер), светлая или яркая одежда", correct: true },
+          { text: "Нужно идти как можно ближе к середине дороги", correct: false }
+        ],
+        explanation: "В темноте пешехода плохо видно. Световозвращающие элементы отражают свет фар и помогают водителю заметить человека издалека." },
 
-    <div id="lightTask">
-      <div class="light-stage" id="lightStage"></div>
-      <div class="light-task">
-        <div class="light-question" id="lightQuestion"></div>
-        <div class="quiz-opts" id="lightOpts" style="justify-content:center"></div>
-        <div class="quiz-comment" id="lightComment"></div>
-      </div>
-      <div class="btn-row">
-        <button class="btn-ghost" id="lightPrev" onclick="lightPrev()">← Назад</button>
-        <button class="btn-check" id="lightNext" onclick="lightNext()" style="display:none">Следующая ситуация →</button>
-      </div>
-    </div>
+      // EXTRA
+      { id: 11, topic: "crossing", emoji: "🚥", title: "Мигающий зелёный",
+        story: "Ярослав собирается перейти дорогу, но зелёный сигнал светофора начал мигать.",
+        question: "Что означает мигающий зелёный сигнал пешеходного светофора?",
+        answers: [
+          { text: "Можно спокойно начинать переход", correct: false },
+          { text: "Время перехода скоро закончится, начинать переход нельзя", correct: true },
+          { text: "Светофор сломался, можно переходить в любое время", correct: false }
+        ],
+        explanation: "Мигающий зелёный предупреждает, что скоро включится запрещающий сигнал. Начинать переход не следует; если ты уже на дороге — постарайся завершить переход безопасно." },
+      { id: 12, topic: "crossing", emoji: "🛣️", title: "Островок безопасности",
+        story: "Дорога широкая, и Ярослав не успел полностью перейти её на зелёный сигнал.",
+        question: "Как правильно поступить, если посередине дороги есть островок безопасности?",
+        answers: [
+          { text: "Остановиться на островке безопасности и дождаться разрешающего сигнала", correct: true },
+          { text: "Бежать до конца, даже если загорелся красный", correct: false },
+          { text: "Вернуться назад бегом, не глядя на машины", correct: false }
+        ],
+        explanation: "Островок безопасности предназначен для ожидания. Дождись подходящего момента или зелёного сигнала, прежде чем продолжить переход." },
+      { id: 13, topic: "crossing", emoji: "↗️", title: "Где перейти дорогу",
+        story: "Рядом нет обозначенного пешеходного перехода, но есть перекрёсток и хороший обзор.",
+        question: "Где безопаснее переходить дорогу в такой ситуации?",
+        answers: [
+          { text: "В любом месте, где меньше машин", correct: false },
+          { text: "На перекрёстке по линии тротуаров, убедившись, что это безопасно", correct: true },
+          { text: "На крутом повороте, чтобы водители не успели разогнаться", correct: false }
+        ],
+        explanation: "Если нет пешеходного перехода, дорогу переходят на перекрёстках по линии тротуаров или обочин, убедившись в безопасности и хорошей видимости." },
+      { id: 14, topic: "signs", emoji: "🚷", title: "Запрещающий знак",
+        story: "У входа в тоннель Ярослав увидел красный круглый знак с изображением пешехода.",
+        question: "Что означает этот знак?",
+        answers: [
+          { text: "Здесь рекомендуется идти осторожно", correct: false },
+          { text: "Движение пешеходов запрещено", correct: true },
+          { text: "Здесь находится пешеходный переход", correct: false }
+        ],
+        explanation: "Красный круг с символом пешехода означает запрет движения пешеходов. Нужно найти разрешённое и безопасное место для прохода." },
+      { id: 15, topic: "signs", emoji: "🚲🚸", title: "Велосипедная дорожка",
+        story: "На дороге появился синий круглый знак с изображением велосипеда.",
+        question: "О чём сообщает такой знак?",
+        answers: [
+          { text: "Движение на велосипедах запрещено", correct: false },
+          { text: "Здесь начинается велосипедная дорожка", correct: true },
+          { text: "Велосипедистов нужно обходить стороной", correct: false }
+        ],
+        explanation: "Синий круглый знак с велосипедом обозначает велосипедную дорожку — специальный путь, предназначенный для движения на велосипеде." },
+      { id: 16, topic: "signs", emoji: "🚶‍♂️⬆️", title: "Безопасный переход",
+        story: "Перед оживлённой дорогой установлен знак «Подземный пешеходный переход».",
+        question: "Как правильно поступить пешеходу?",
+        answers: [
+          { text: "Воспользоваться подземным переходом, даже если идти немного дальше", correct: true },
+          { text: "Перебежать дорогу сверху, чтобы сэкономить время", correct: false },
+          { text: "Ждать, пока кто-нибудь переведёт через дорогу", correct: false }
+        ],
+        explanation: "Если есть подземный или надземный переход, нужно пользоваться им — это самый безопасный способ пересечь оживлённую дорогу." },
+      { id: 17, topic: "bike", emoji: "🚲🚶", title: "Пересечение дороги на велосипеде",
+        story: "Ярослав едет на велосипеде и подъезжает к пешеходному переходу через проезжую часть.",
+        question: "Как безопаснее пересечь дорогу в этом месте?",
+        answers: [
+          { text: "Разогнаться и быстро переехать", correct: false },
+          { text: "Спешиться и перейти дорогу пешком, ведя велосипед рядом", correct: true },
+          { text: "Объехать пешеходов по переходу на велосипеде", correct: false }
+        ],
+        explanation: "При пересечении проезжей части по пешеходному переходу велосипедисту безопаснее спешиться и перейти дорогу как пешеход, ведя велосипед рядом." },
+      { id: 18, topic: "bike", emoji: "⚽🚗", title: "Игры возле дороги",
+        story: "Во дворе друзья предложили Ярославу поиграть с мячом рядом с парковкой и выездом на дорогу.",
+        question: "Какое решение будет правильным?",
+        answers: [
+          { text: "Играть там, где нет машин в данный момент", correct: false },
+          { text: "Отойти подальше от проезжей части и играть в безопасном месте", correct: true },
+          { text: "Попросить водителей ехать медленнее и продолжить игру", correct: false }
+        ],
+        explanation: "Играть возле проезжей части, парковки и выездов опасно: машина может появиться внезапно. Для игр нужно выбирать безопасные места вдали от дороги." },
+      { id: 19, topic: "transport", emoji: "🚗🔒", title: "В автомобиле",
+        story: "Ярослав едет в школу на машине с родителями и садится на заднее сиденье.",
+        question: "Что нужно сделать сразу после того, как сел в автомобиль?",
+        answers: [
+          { text: "Пристегнуть ремень безопасности", correct: true },
+          { text: "Отодвинуть кресло и высунуться в окно", correct: false },
+          { text: "Встать, чтобы лучше видеть дорогу", correct: false }
+        ],
+        explanation: "Ремень безопасности помогает защитить пассажира при резком торможении или аварии. Его нужно пристёгивать в начале каждой поездки." },
+      { id: 20, topic: "transport", emoji: "🚋", title: "Трамвайные пути",
+        story: "Ярославу нужно перейти улицу, по которой проходят трамвайные пути. Рядом есть пешеходный переход.",
+        question: "Как правильно перейти трамвайные пути?",
+        answers: [
+          { text: "Перебежать пути в любом удобном месте", correct: false },
+          { text: "Перейти по пешеходному переходу, убедившись, что трамвая нет", correct: true },
+          { text: "Идти вдоль путей, чтобы быстрее дойти", correct: false }
+        ],
+        explanation: "Трамвайные пути переходят только в специально отведённых местах, убедившись, что приближающегося трамвая нет и переход безопасен." }
+    ];
 
-    <div class="light-complete" id="lightComplete">
-      <h3 id="lightCompleteTitle">🎉 Отлично!</h3>
-      <p id="lightCompleteText"></p>
-    </div>
+    // DOM
+    const screens = {
+      menu: document.getElementById('menu-screen'),
+      ref: document.getElementById('ref-screen'),
+      game: document.getElementById('game-screen'),
+      result: document.getElementById('result-screen')
+    };
+    const modeGrid = document.getElementById('mode-grid');
+    const diffChips = document.getElementById('difficulty-chips');
+    const diffHint = document.getElementById('diff-hint');
+    const topicPanel = document.getElementById('topic-panel');
+    const topicChips = document.getElementById('topic-chips');
+    const shuffleToggle = document.getElementById('shuffle-toggle');
 
-    <div class="progress-bar-wrap"><div class="progress-bar" id="lightProgress" style="width:0%">0 / 8</div></div>
-  </div>
-</div>
+    const stageCounter = document.getElementById('stage-counter');
+    const scoreCounter = document.getElementById('score-counter');
+    const modeLabel = document.getElementById('mode-label');
+    const topicLabel = document.getElementById('topic-label');
+    const livesLabel = document.getElementById('lives-label');
+    const timerLabel = document.getElementById('timer-label');
+    const progressBar = document.getElementById('progress');
+    const timerBarWrap = document.getElementById('timer-bar-wrap');
+    const timerBar = document.getElementById('timer-bar');
+    const sceneEmoji = document.getElementById('scene-emoji');
+    const stageTitle = document.getElementById('stage-title');
+    const stageStory = document.getElementById('stage-story');
+    const stageQuestion = document.getElementById('stage-question');
+    const answersEl = document.getElementById('answers');
+    const feedback = document.getElementById('feedback');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackText = document.getElementById('feedback-text');
+    const examHint = document.getElementById('exam-hint');
+    const nextBtn = document.getElementById('next-btn');
 
-<!-- ===== SECTION 3: ЗНАКИ ===== -->
-<div class="section" id="sec3">
-  <div class="card">
-    <h2><span class="emoji">🔗</span>Соответствие: дорожные знаки</h2>
-    <p class="card-desc">Выбери, что означает каждый знак. Знаки нарисованы по ГОСТ Р 52290 — так они выглядят на дороге.</p>
-    <div class="match-game" id="signGame"></div>
-    <div class="btn-row">
-      <button class="btn-check-all" onclick="checkSigns()">Проверить</button>
-      <button class="btn-ghost" onclick="showSignAnswers()">Показать ответы</button>
-      <button class="btn-ghost" onclick="initSigns()">Заново</button>
-    </div>
-    <div class="score-display" id="signScore"></div>
-  </div>
-</div>
+    // State
+    let config = { mode: 'quest', difficulty: 'medium', shuffle: false, topic: 'pedestrian' };
+    let queue = [];
+    let current = 0;
+    let score = 0;
+    let lives = 0;
+    let answered = false;
+    let results = [];
+    let timerId = null;
+    let timeLeft = 0;
+    let timePerQuestion = 0;
 
-<!-- ===== SECTION 4: МАРШРУТ (ПРАКТИКА С ВАРИАНТАМИ) ===== -->
-<div class="section" id="sec4">
-  <div class="card">
-    <h2><span class="emoji">🧩</span>Практика. Собери маршрут пешехода</h2>
-    <p class="card-desc">Расставь шаги перехода через дорогу без светофора по порядку: от «остановились у тротуара» до «дошли до другого тротуара».</p>
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-    <div class="variant-tabs">
-      <button class="variant-tab active" onclick="switchVariant(0)">6 в класс</button>
-      <button class="variant-tab" onclick="switchVariant(1)">6 г класс</button>
-      <button class="variant-tab" onclick="switchVariant(2)">6 д класс</button>
-    </div>
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
 
-    <div class="variant-content active" id="var0"></div>
-    <div class="variant-content" id="var1"></div>
-    <div class="variant-content" id="var2"></div>
+    function getDiffSettings() {
+      if (config.difficulty === 'easy') return { time: 25, lives: 4 };
+      if (config.difficulty === 'hard') return { time: 15, lives: 2 };
+      return { time: 20, lives: 3 };
+    }
 
-    <div class="btn-row">
-      <button class="btn-check-all" onclick="checkRoute()">Проверить порядок</button>
-      <button class="btn-ghost" onclick="showRouteHint()">Подсказка</button>
-    </div>
-    <div class="score-display" id="routeScore"></div>
-  </div>
-</div>
+    function updateDiffHint() {
+      const d = getDiffSettings();
+      diffHint.textContent = `Параметры: время на вопрос (в режимах с таймером) — ${d.time} сек., жизни в «Выживании» — ${d.lives}.`;
+    }
 
-<!-- ===== SECTION 5: ВИКТОРИНА ===== -->
-<div class="section" id="sec5">
-  <div class="card">
-    <h2><span class="emoji">📝</span>Викторина по ПДД</h2>
-    <p class="card-desc">12 вопросов по всему уроку. За каждый верный ответ — 3 балла.</p>
-    <div id="quizList"></div>
-    <div class="progress-bar-wrap"><div class="progress-bar" id="quizProgress" style="width:0%">0 / 12</div></div>
-  </div>
-</div>
+    function initTopics() {
+      topicChips.innerHTML = '';
+      Object.entries(TOPICS).forEach(([key, label], idx) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip' + (idx === 0 ? ' selected' : '');
+        b.dataset.topic = key;
+        b.textContent = label;
+        b.addEventListener('click', () => {
+          topicChips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+          b.classList.add('selected');
+          config.topic = key;
+        });
+        topicChips.appendChild(b);
+      });
+      config.topic = Object.keys(TOPICS)[0];
+    }
 
-<!-- ===== SECTION 6: ИТОГИ + ПАМЯТКА ===== -->
-<div class="section" id="sec6">
-  <div class="card">
-    <h2><span class="emoji">🏆</span>Итоги урока</h2>
-    <p class="card-desc">Результат считается по всем заданиям автоматически.</p>
-    <table class="units-table">
-      <tr><th>Задание</th><th>Верно</th><th>Баллы</th><th>Максимум</th></tr>
-      <tr><td>Разминка «Верю / не верю»</td><td id="rTf">0 / 8</td><td id="pTf">0</td><td>8</td></tr>
-      <tr><td>Тренажёр «Светофор»</td><td id="rLight">0 / 8</td><td id="pLight">0</td><td>16</td></tr>
-      <tr><td>Дорожные знаки</td><td id="rSign">0 / 6</td><td id="pSign">0</td><td>12</td></tr>
-      <tr><td>Маршрут пешехода</td><td id="rRoute">0 / 7</td><td id="pRoute">0</td><td>7</td></tr>
-      <tr><td>Викторина</td><td id="rQuiz">0 / 12</td><td id="pQuiz">0</td><td>36</td></tr>
-      <tr><td><strong>Итого</strong></td><td>—</td><td><strong id="rAll">0</strong></td><td><strong>79</strong></td></tr>
-    </table>
-    <div class="result-big" id="resultMark">—</div>
-    <div class="result-msg" id="resultMsg">Пройди все задания — здесь появится твой результат и отметка.</div>
-    <div class="btn-row">
-      <button class="btn-check" onclick="copyResult()">Скопировать результат</button>
-      <button class="btn-ghost" onclick="resetAll()">Пройти заново</button>
-    </div>
-    <div class="hw-answer" id="resultOut" style="display:none"></div>
-  </div>
+    function syncMenu() {
+      topicPanel.style.display = config.mode === 'training' ? 'block' : 'none';
+      if (config.mode === 'quest') {
+        shuffleToggle.checked = false;
+        shuffleToggle.disabled = false;
+      } else {
+        shuffleToggle.checked = config.shuffle;
+      }
+      updateDiffHint();
+    }
 
-  <div class="card" id="memoCard">
-    <h2><span class="emoji">📄</span>Памятка для класса</h2>
-    <p class="card-desc">Нажми «Напечатать» — на листе останется только памятка, без навигации и кнопок.</p>
-    <div class="memo">
-      <h3>🚶 Пешеход: 7 правил безопасности</h3>
-      <ol class="memo-yes">
-        <li>Иди по тротуару, а если его нет — по обочине или краю проезжей части <strong>навстречу</strong> движению машин.</li>
-        <li>Пересекай дорогу <strong>только по пешеходному переходу</strong>.</li>
-        <li>На переходе без светофора: <strong>налево → направо → налево</strong>, затем шагом по прямой, не отворачивая и не бегом.</li>
-        <li>Зелёный сигнал — <strong>не гарантия безопасности</strong>: сначала убедись, что водители остановились и видят тебя.</li>
-        <li>Во дворе скорость <strong>20 км/ч</strong> и пешеход главный — но, выезжая на улицу, уступай машинам.</li>
-        <li>В темноте и в плохую погоду — <strong>светоотражатели и светлая одежда</strong>.</li>
-        <li>Не выбегай из-за припаркованной машины, кустов, из подъезда.</li>
-      </ol>
-      <p style="font-weight:800;font-size:1.6rem;margin-top:16px;color:var(--red)">⛔ Что нельзя</p>
-      <ul class="memo-no">
-        <li>перебегать и перепрыгивать через дорогу, бежать на красный сигнал;</li>
-        <li>пересекать дорогу вне пешеходного перехода;</li>
-        <li>выбегать навстречу автомобилю, даже если кажется, что он замедлился;</li>
-        <li>идти вдоль дороги в наушниках или уткнувшись в телефон;</li>
-        <li>выезжать на проезчую часть на самокате или велосипеде до 14 лет и проезжать переход, не спешившись;</li>
-        <li>выезжать из двора на тротуар и на проезжую часть.</li>
-      </ul>
-      <p style="font-weight:800;font-size:1.6rem;margin-top:16px;color:var(--green)">📞 Помни</p>
-      <ul>
-        <li>Пешеходный переход — место, где <strong>пешеход имеет преимущество</strong>, но водитель может не заметить ребёнка.</li>
-        <li>Сбили человека на переходе — виноват <strong>водитель</strong>, он обязан уступить. Нарушение совершил ребёнок младше 16 лет — отвечают <strong>родители</strong>.</li>
-        <li>Экстренные номера: <strong>112</strong> (работает без сим-карты), <strong>102</strong> (полиция).</li>
-      </ul>
-      <div class="memo-foot">Вижу — предупредил. Остановился — защитил!</div>
-    </div>
-    <div class="btn-row">
-      <button class="btn-check" onclick="window.print()">🖨 Напечатать памятку</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== SECTION 7: ДОМАШНЯЯ РАБОТА ===== -->
-<div class="section" id="sec7">
-  <div class="card">
-    <h2><span class="emoji">📚</span>Домашняя работа</h2>
-    <p class="card-desc">Задания базового и повышенного уровня. Ответы — под кнопками.</p>
-
-    <div class="theory-box">
-      <h3>Задание 1 (базовый). Правила и знаки на своём маршруте</h3>
-      <p>Выучи 7 правил безопасного пешехода из памятки. По маршруту <strong>«дом — школа»</strong> найди и зарисуй в тетради <strong>3 дорожных знака</strong>, укажи их номера и назначение.</p>
-      <div class="hw-answer" id="hw1Answer" style="display:none">
-        <p><strong>Подсказка:</strong> ищи на переходах, у выездов из дворов, на поворотах и рядом со школой. Чаще всего встретишь знаки <strong>5.19.1 «Пешеходный переход»</strong>, <strong>2.1 «Главная дорога»</strong>, <strong>2.2 «Уступить дорогу»</strong>, <strong>3.24 «Ограничение скорости 60»</strong> и <strong>8.20.1 «Въезд на прилегающую территорию»</strong>.</p>
-      </div>
-      <button class="btn-check" onclick="document.getElementById('hw1Answer').style.display='block'; this.disabled=true;">Показать ответ</button>
-    </div>
-
-    <div class="theory-box">
-      <h3>Задание 2 (базовый). Своё правило</h3>
-      <p>Придумай и запиши <strong>одно правило безопасного поведения</strong>, которого нет в памятке, и объясни, почему оно важно именно для подростка.</p>
-      <div class="hw-answer" id="hw2Answer" style="display:none">
-        <p><strong>Примеры хороших ответов:</strong></p>
-        <ul>
-          <li>не выбегать на дорогу с телефоном в руке — в аварийной ситуации ты не сможешь отшатнуться и не заметишь машину;</li>
-          <li>на велосипеде и самокате надевать шлем — даже в городе можно упасть или попасть под колёса автомобиля;</li>
-          <li>в дождь не перебегать через лужу у проезжей части — под ней может быть яма или люк, в темноте это не видно;</li>
-          <li>не выходить на проезжую часть сразу после того, как зашёл автобус или остановился грузовик — они закрывают обзор.</li>
-        </ul>
-      </div>
-      <button class="btn-check" onclick="document.getElementById('hw2Answer').style.display='block'; this.disabled=true;">Показать ответ</button>
-    </div>
-
-    <div class="theory-box">
-      <h3>Задание 3 (повышенный). Вопросы к следующему уроку</h3>
-      <p>Следующий урок — <strong>«ПДД для велосипедиста и пассажира»</strong>. Подготовь 3–4 вопроса по теме и свою памятку «Правила безопасного пассажира» из 6–8 пунктов.</p>
-      <div class="hw-answer" id="hw3Answer" style="display:none">
-        <p><strong>Вопросы, которые чаще всего задают:</strong></p>
-        <ul>
-          <li>можно ли перевозить ребёнка на переднем сиденье автомобиля;</li>
-          <li>где в машине должен находиться пассажир и зачем нужен ремень безопасности;</li>
-          <li>можно ли выходить из машины на проезжую часть, если она остановилась;</li>
-          <li>что делать, если водитель выпил алкоголь, а ехать нужно прямо сейчас.</li>
-        </ul>
-      </div>
-      <button class="btn-check" onclick="document.getElementById('hw3Answer').style.display='block'; this.disabled=true;">Показать ответ</button>
-    </div>
-  </div>
-</div>
-
-</div>
-
-<div class="confetti-container" id="confettiContainer"></div>
-
-<script>
-/* ===================== ТЕМА ===================== */
-function toggleTheme() {
-  const html = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? '' : 'dark');
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-  renderLight();
-}
-(function () {
-  const saved = localStorage.getItem('theme');
-  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-})();
-
-function showSection(idx) {
-  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i === idx));
-  document.querySelectorAll('#mainNav button').forEach((b, i) => b.classList.toggle('active', i === idx));
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  updateResults();
-}
-
-/* ===================== SVG: ЗНАКИ И ФИГУРКИ ===================== */
-const WALK = '<g stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="0" cy="0" r="7" fill="currentColor" stroke="none"/><path d="M0 8 L0 24"/><path d="M0 13 L-9 20"/><path d="M0 13 L9 9"/><path d="M0 24 L-8 38"/><path d="M0 24 L9 38"/></g>';
-const STAND = '<g stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="0" cy="0" r="7" fill="currentColor" stroke="none"/><path d="M0 8 L0 26"/><path d="M0 12 L-8 26"/><path d="M0 12 L8 26"/><path d="M0 26 L-7 38"/><path d="M0 26 L7 38"/></g>';
-const WALK_DARK = WALK.replace(/currentColor/g, '#111');
-const CAR = '<path d="M14 60 L22 40 H78 L86 60 V70 H14 Z" fill="#111"/><circle cx="30" cy="70" r="8" fill="#111"/><circle cx="70" cy="70" r="8" fill="#111"/><rect x="26" y="44" width="18" height="10" fill="#fff"/><rect x="56" y="44" width="18" height="10" fill="#fff"/>';
-
-const SIGNS = {
-  p5191: { name: '5.19.1 «Пешеходный переход»', svg: '<rect width="100" height="100" fill="#0b5cab"/><path d="M50 10 L88 84 L12 84 Z" fill="#fff"/><g transform="translate(50,66) scale(0.62)">' + WALK_DARK + '</g>' },
-  p123: { name: '1.23 «Дети»', svg: '<path d="M50 6 L96 94 L4 94 Z" fill="#fff" stroke="#e11d1d" stroke-width="9"/><g transform="translate(40,66) scale(0.6)">' + WALK_DARK + '</g><g transform="translate(64,66) scale(0.5)">' + WALK_DARK + '</g>' },
-  p21: { name: '2.1 «Главная дорога»', svg: '<rect x="18" y="18" width="64" height="64" rx="3" fill="#ffd400" stroke="#fff" stroke-width="8" transform="rotate(45 50 50)"/>' },
-  p22: { name: '2.2 «Уступить дорогу»', svg: '<path d="M50 92 L6 12 L94 12 Z" fill="#fff" stroke="#e11d1d" stroke-width="9"/>' },
-  p324: { name: '3.24 «Ограничение скорости 60»', svg: '<circle cx="50" cy="50" r="40" fill="#fff" stroke="#e11d1d" stroke-width="10"/><text x="50" y="63" font-size="30" font-weight="800" text-anchor="middle" fill="#111" font-family="Arial,sans-serif">60</text>' },
-  p8201: { name: '8.20.1 «Въезд на прилегающую территорию»', svg: '<rect x="6" y="26" width="88" height="48" fill="#fff" stroke="#111" stroke-width="3"/>' + CAR }
-};
-function signSvg(id) { return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' + SIGNS[id].svg + '</svg>'; }
-
-/* ===================== РАЗМИНКА: ВЕРЮ / НЕ ВЕРЮ ===================== */
-const tfData = [
-  { t: 'Пешеход должен идти по тротуару, а если тротуара нет — по обочине или краю проезжей части.', correct: true, e: 'Верно! По краю проезжей части пешеход движется навстречу потоку машин, чтобы водитель его видел.' },
-  { t: 'Дорогу можно переходить в любом месте, если рядом не видно машин.', correct: false, e: 'Неверно! Проезжую часть пересекают только по пешеходному переходу.' },
-  { t: 'Мигающий зелёный сигнал разрешает переход, если машин на переходе нет.', correct: true, e: 'Верно! Но если за переходом стоит транспорт или закрыт обзор — переход откладывают.' },
-  { t: 'В жилой зоне и во дворе скорость ограничена 20 км/ч, и пешеход здесь главный.', correct: true, e: 'Верно! Но при выезде со двора на улицу пешеход перестаёт быть главным и уступает машинам.' },
-  { t: 'До 14 лет можно выезжать на проезжую часть на самокате, если рядом нет машин.', correct: false, e: 'Неверно! До 14 лет выезд на проезжую часть на велосипеде, самокате и скутере запрещён.' },
-  { t: 'На пешеходном переходе пешеход имеет преимущество перед автомобилем.', correct: true, e: 'Верно! Водитель обязан уступить пешеходу, поэтому виноват в наезде на переходе он.' },
-  { t: 'Перед переходом дороги без светофора нужно осмотреться: налево — направо — налево.', correct: true, e: 'Верно! Сначала смотрим налево, потом направо, потом снова налево — и только потом переходим шагом.' },
-  { t: 'Если машина не тормозит, нужно бежать быстрее, чтобы проскочить на другую сторону.', correct: false, e: 'Неверно! Бежать навстречу машине опасно. Нужно отойти в сторону и дать водителю коридор.' }
-];
-let tfAnswered = 0, tfCorrect = 0;
-
-function initTF() {
-  const list = document.getElementById('tfList');
-  list.innerHTML = '';
-  tfData.forEach((item, i) => {
-    const d = document.createElement('div');
-    d.className = 'tf-item'; d.id = 'tf' + i; d.style.animationDelay = (i * 0.05) + 's';
-    d.innerHTML = `
-      <div class="tf-statement">${i + 1}. ${item.t}</div>
-      <div class="tf-buttons">
-        <button class="true-btn" onclick="checkTF(${i}, true)">✔ Верю</button>
-        <button class="false-btn" onclick="checkTF(${i}, false)">✘ Не верю</button>
-      </div>
-      <div class="tf-comment" id="tf-comment-${i}"></div>`;
-    list.appendChild(d);
-  });
-  tfAnswered = 0; tfCorrect = 0;
-  document.getElementById('tfProgress').style.width = '0%';
-  document.getElementById('tfProgress').textContent = '0 / 8';
-  updateResults();
-}
-function checkTF(idx, userAnswer) {
-  const item = document.getElementById('tf' + idx);
-  const buttons = item.querySelectorAll('.tf-buttons button');
-  if (buttons[0].disabled) return;
-  buttons.forEach(b => b.disabled = true);
-  const isCorrect = userAnswer === tfData[idx].correct;
-  tfAnswered++; if (isCorrect) tfCorrect++;
-  buttons[userAnswer ? 0 : 1].classList.add(isCorrect ? 'selected-true' : 'selected-false');
-  const comment = document.getElementById('tf-comment-' + idx);
-  comment.className = 'tf-comment ' + (isCorrect ? 'correct' : 'wrong');
-  comment.innerHTML = (isCorrect ? '✅ Правильно! ' : '❌ Неправильно. ') + tfData[idx].e;
-  updateTFProgress();
-}
-function updateTFProgress() {
-  const bar = document.getElementById('tfProgress');
-  bar.style.width = (tfAnswered / 8 * 100) + '%';
-  bar.textContent = tfCorrect + ' / 8';
-  if (tfAnswered === 8 && tfCorrect === 8) launchConfetti();
-  updateResults();
-}
-
-/* ===================== СВЕТОФОР ===================== */
-const lightData = [
-  { lamp: 'grn', pd: 'stop', q: 'Ты на пешеходном переходе. Для тебя горит красный, для машин — зелёный. Ребята рядом разбежались. Ты:',
-    o: ['Перебегу, пока машины ещё едут, — успею', 'Останусь на тротуаре и дождусь своего сигнала'], a: 1,
-    e: 'Зелёный для машин — это движение, а не остановка. Выбегать навстречу зелёному сигналу нельзя: водитель не обязан тормозить.' },
-  { lamp: 'red', pd: 'go', q: 'Для тебя горит зелёный. Машины остановились, дорога свободна. Ты:',
-    o: ['Спокойно перейду шагом, оглядываясь', 'Ускорюсь и перебегу, пока не оглядели'], a: 0,
-    e: 'Зелёный для пешехода разрешает переход. Переходи шагом по прямой и обязательно посмотри направо: со двора могут выезжать машины.' },
-  { lamp: 'red', pd: 'blink', q: 'Мигает зелёный сигнал для пешехода. Машин на проезжей части нет. Ты:',
-    o: ['Жду: мигающий сигнал ничего не разрешает', 'Перехожу — дорога свободна'], a: 1,
-    e: 'Мигающий зелёный разрешает переход при условии, что нет транспорта и нет опасности за переходом. Условия выполнены.' },
-  { lamp: 'red', pd: 'go', q: 'Для тебя зелёный, но прямо за переходом на остановке стоит фургон и закрывает обзор встречного потока. Ты:',
-    o: ['Перейду: машина же стоит', 'Останусь на тротуаре, пока фургон не уедет'], a: 1,
-    e: 'Опасность за переходом — главная причина откладывать переход. За фургоном тебя никто не увидит.' },
-  { lamp: 'grn', pd: 'stop', q: 'Машины едут на зелёный. Один школьник перебегает дорогу, другой выбегает из-за припаркованной машины. Ты:',
-    o: ['Побегу вместе с ними, чтобы не отставать', 'Останусь на тротуаре и предупрежу их громко'], a: 1,
-    e: 'Бежать на дорогу при движущемся транспорте нельзя. Лучшее действие — остаться и предупредить товарищей.' },
-  { lamp: 'yel', pd: 'stop', q: 'Для машин горит жёлтый — движение запрещено, машины тормозят. Для тебя красный. Ты:',
-    o: ['Пробегу на жёлтый: машины всё равно остановятся', 'Жду своего сигнала'], a: 1,
-    e: 'Жёлтый запрещает движение, и именно он останавливает машины. Ждать надо своего сигнала.' },
-  { lamp: 'none', pd: 'none', q: 'Светофора нет: узкая улица, нерегулируемый переход без знака. Машин пока не видно, но они могут быть за поворотом. Ты:',
-    o: ['Сразу побегу — машины далеко', 'Дойду до края, осмотрюсь: налево — направо — налево, и перейду', 'Буду стоять и ждать, пока поставят светофор'], a: 1,
-    e: 'На переходе без знака и светофора решает только то, что видно. Поэтому — шагом, с осмотром в обе стороны.' },
-  { lamp: 'red', pd: 'go', q: 'Для тебя зелёный. Но на самом переходе стоит легковой автомобиль, водитель мигает и не собирается уезжать. Ты:',
-    o: ['Перейду перед его машиной — она же не едет', 'Подожду, водитель освободит переход', 'Обойду сзади по проезжей части'], a: 1,
-    e: 'Водителю не положено останавливаться на пешеходном переходе. Но обходить по проезжей части нельзя — ждём, когда машина уедет.' }
-];
-let lightIdx = 0, lightCorrect = 0, lightAns = [];   // lightAns[i] = номер выбранного ответа
-
-function renderLight() {
-  const item = lightData[lightIdx];
-  const stage = document.getElementById('lightStage');
-  let html = '<div class="tl">'
-    + '<div class="lamp red' + (item.lamp === 'red' ? ' on' : '') + '"></div>'
-    + '<div class="lamp yel' + (item.lamp === 'yel' ? ' on' : '') + '"></div>'
-    + '<div class="lamp grn' + (item.lamp === 'grn' ? ' on' : '') + '"></div></div>';
-  html += '<div class="pd">';
-  if (item.pd === 'go') {
-    html += '<div class="lamp on g"><svg viewBox="-26 -8 52 54">' + WALK + '</svg></div><div class="lamp off r"><svg viewBox="-26 -8 52 54">' + STAND + '</svg></div>';
-  } else if (item.pd === 'blink') {
-    html += '<div class="lamp on g blink"><svg viewBox="-26 -8 52 54">' + WALK + '</svg></div><div class="lamp off r"><svg viewBox="-26 -8 52 54">' + STAND + '</svg></div>';
-  } else if (item.pd === 'stop') {
-    html += '<div class="lamp off g"><svg viewBox="-26 -8 52 54">' + WALK + '</svg></div><div class="lamp on r"><svg viewBox="-26 -8 52 54">' + STAND + '</svg></div>';
-  } else {
-    html += '<div class="pd-none">СВЕТОФОРА<br>НЕТ</div>';
-  }
-  html += '</div>';
-  stage.innerHTML = html;
-
-  document.getElementById('lightQuestion').textContent = item.q;
-  const opts = document.getElementById('lightOpts');
-  opts.innerHTML = item.o.map((t, i) => `<button onclick="answerLight(${i})">${String.fromCharCode(65 + i)}. ${t}</button>`).join('');
-  const answered = lightAns[lightIdx] !== undefined;
-  if (answered) paintLightAnswer(lightAns[lightIdx]);
-  const c = document.getElementById('lightComment');
-  if (answered) {
-    const ok = lightAns[lightIdx] === item.a;
-    c.className = 'quiz-comment ' + (ok ? 'correct' : 'wrong');
-    c.innerHTML = (ok ? '✅ Верно! ' : '❌ Ошибка. ') + item.e;
-  } else c.className = 'quiz-comment';
-
-  document.getElementById('lightNext').style.display = answered ? 'block' : 'none';
-  document.getElementById('lightNext').textContent = lightIdx === lightData.length - 1 ? 'К знакам →' : 'Следующая ситуация →';
-  document.getElementById('lightPrev').style.display = lightIdx > 0 ? 'block' : 'none';
-  renderLightSteps();
-}
-function paintLightAnswer(chosen) {
-  const item = lightData[lightIdx];
-  const btns = document.querySelectorAll('#lightOpts button');
-  btns.forEach(b => b.disabled = true);
-  if (btns[item.a]) btns[item.a].classList.add('correct');
-  if (chosen !== item.a && btns[chosen]) btns[chosen].classList.add('wrong');
-}
-function answerLight(choice) {
-  const item = lightData[lightIdx];
-  if (lightAns[lightIdx] !== undefined) return;
-  const ok = choice === item.a;
-  lightAns[lightIdx] = choice;
-  if (ok) lightCorrect++;
-  paintLightAnswer(choice);
-  const c = document.getElementById('lightComment');
-  c.className = 'quiz-comment ' + (ok ? 'correct' : 'wrong');
-  c.innerHTML = (ok ? '✅ Верно! ' : '❌ Ошибка. ') + item.e;
-  document.getElementById('lightNext').style.display = 'block';
-  renderLightSteps();
-  updateLightProgress();
-}
-function lightNext() {
-  if (lightAns[lightIdx] === undefined) return;
-  if (lightIdx === lightData.length - 1) { showSection(3); return; }
-  lightIdx++;
-  renderLight();
-}
-function lightPrev() {
-  if (lightIdx === 0) return;
-  lightIdx--;
-  renderLight();
-}
-function renderLightSteps() {
-  const box = document.getElementById('lightSteps');
-  box.innerHTML = '';
-  lightData.forEach((item, i) => {
-    const s = document.createElement('div');
-    s.className = 'light-step';
-    if (lightAns[i] !== undefined) s.className += (lightAns[i] === item.a ? ' done' : ' miss');
-    else if (i === lightIdx) s.className += ' current';
-    s.textContent = i + 1;
-    box.appendChild(s);
-  });
-}
-function updateLightProgress() {
-  let answered = 0;
-  for (let i = 0; i < lightData.length; i++) if (lightAns[i] !== undefined) answered++;
-  const bar = document.getElementById('lightProgress');
-  bar.style.width = (answered / 8 * 100) + '%';
-  bar.textContent = lightCorrect + ' / 8';
-  bar.style.background = answered === 8
-    ? (lightCorrect === 8 ? 'linear-gradient(90deg,#22c55e,#34d399)' : 'linear-gradient(90deg,#eab308,#facc15)')
-    : 'linear-gradient(90deg,#22c55e,#34d399)';
-  if (answered === 8 && lightCorrect === 8) launchConfetti();
-  updateResults();
-}
-
-/* ===================== ЗНАКИ ===================== */
-const signData = [
-  { id: 'p5191', correct: 'Пешеходный переход: здесь можно переходить дорогу' },
-  { id: 'p123', correct: 'Впереди дети — водитель обязан снизить скорость' },
-  { id: 'p21', correct: 'Главная дорога: движение по второстепенной нужно уступать' },
-  { id: 'p22', correct: 'Уступить дорогу: остановись и дай проехать главной' },
-  { id: 'p324', correct: 'Максимальная скорость 60 км/ч — ехать быстрее нельзя' },
-  { id: 'p8201', correct: 'Выезд на прилегающую территорию — уступай и смотри обе стороны' }
-];
-
-function initSigns() {
-  const game = document.getElementById('signGame');
-  game.innerHTML = '';
-  signData.forEach((item, i) => {
-    const row = document.createElement('div');
-    row.className = 'match-row';
-    const shuffled = [...signData].sort(() => Math.random() - 0.5).map(s => s.correct);
-    const options = shuffled.map(v => `<option value="${v}">${v}</option>`).join('');
-    row.innerHTML = `
-      <div class="sign-chip">${signSvg(item.id)}</div>
-      <div class="match-qty">${i + 1}. ${SIGNS[item.id].name}</div>
-      <select class="match-select" id="sign${i}">
-        <option value="">— Выбери значение —</option>
-        ${options}
-      </select>`;
-    game.appendChild(row);
-  });
-  document.getElementById('signScore').style.display = 'none';
-  updateResults();
-}
-function checkSigns() {
-  let correct = 0;
-  signData.forEach((item, i) => {
-    const sel = document.getElementById('sign' + i);
-    sel.classList.remove('correct', 'wrong');
-    if (sel.value === item.correct) { sel.classList.add('correct'); correct++; }
-    else if (sel.value) sel.classList.add('wrong');
-  });
-  const el = document.getElementById('signScore');
-  el.style.display = 'block';
-  const pct = Math.round((correct / signData.length) * 100);
-  const color = pct === 100 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
-  el.innerHTML = 'Результат: <span style="color:' + color + '">' + correct + ' из ' + signData.length + '</span> (' + pct + '%)'
-    + (pct < 100 ? ' — неверные строки помечены красным. Нажми «Заново», чтобы попробовать ещё раз.' : '');
-  if (pct === 100) launchConfetti();
-  updateResults();
-}
-function showSignAnswers() {
-  signData.forEach((item, i) => {
-    const sel = document.getElementById('sign' + i);
-    sel.innerHTML = `<option selected>${item.correct}</option>`;
-    sel.classList.add('correct');
-  });
-  document.getElementById('signScore').style.display = 'block';
-  document.getElementById('signScore').innerHTML = '👁 Правильные значения подставлены. Запиши номера знаков в тетрадь!';
-}
-
-/* ===================== МАРШРУТ ПЕШЕХОДА ===================== */
-const routeSteps = [
-  'Подойти к краю тротуара и остановиться — не выходя на дорогу',
-  'Посмотреть налево',
-  'Посмотреть направо',
-  'Снова посмотреть налево',
-  'Убедиться, что машины остановились, а водители меня видят',
-  'Выйти на дорогу и переходить прямо, не отворачивая и не бегом',
-  'Дойти до противоположного тротуара и только там осмотреться'
-];
-const routeTraps = [
-  'Перебежать быстро, пока машины ещё далеко',
-  'Выйти сразу, не глядя: машины на улице не ездят',
-  'Кричать «аа», чтобы водитель услышал и испугался'
-];
-let activeVariant = 0;
-
-function initRoute() {
-  for (let v = 0; v < 3; v++) {
-    const box = document.getElementById('var' + v);
-    box.innerHTML = '';
-    routeSteps.forEach((_, i) => {
-      const row = document.createElement('div');
-      row.className = 'match-row';
-      const opts = [...routeSteps, ...routeTraps].sort(() => Math.random() - 0.5);
-      row.innerHTML = `
-        <div class="match-qty">Шаг ${i + 1}:</div>
-        <select class="match-select" id="route${v}_${i}">
-          <option value="">— Выбери действие —</option>
-          ${opts.map(o => `<option value="${o}">${o}</option>`).join('')}
-        </select>`;
-      box.appendChild(row);
+    modeGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.mode-card');
+      if (!card) return;
+      modeGrid.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      config.mode = card.dataset.mode;
+      if (config.mode === 'quest') config.shuffle = false;
+      syncMenu();
     });
-  }
-  document.getElementById('routeScore').style.display = 'none';
-  updateResults();
-}
-function switchVariant(idx) {
-  activeVariant = idx;
-  document.querySelectorAll('.variant-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
-  document.querySelectorAll('.variant-content').forEach((c, i) => c.classList.toggle('active', i === idx));
-  document.getElementById('routeScore').style.display = 'none';
-}
-function checkRoute() {
-  let correct = 0;
-  routeSteps.forEach((_, i) => {
-    const sel = document.getElementById('route' + activeVariant + '_' + i);
-    sel.classList.remove('correct', 'wrong');
-    if (sel.value === routeSteps[i]) { sel.classList.add('correct'); correct++; }
-    else if (sel.value) sel.classList.add('wrong');
-  });
-  const el = document.getElementById('routeScore');
-  el.style.display = 'block';
-  const pct = Math.round((correct / routeSteps.length) * 100);
-  const color = pct === 100 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
-  let msg = 'Результат: <span style="color:' + color + '">' + correct + ' из ' + routeSteps.length + '</span> (' + pct + '%)';
-  if (correct === routeSteps.length) { msg = '🎉 Маршрут собран верно! ' + pct + '%'; launchConfetti(); }
-  else if (pct < 100) msg += ' — в маршрут попали лишние шаги-ловушки или нарушен порядок. Нажми «Подсказка».';
-  el.innerHTML = msg;
-  updateResults();
-}
-function showRouteHint() {
-  const el = document.getElementById('routeScore');
-  el.style.display = 'block';
-  el.innerHTML = '<strong>Правильный порядок:</strong> остановиться у края тротуара → налево → направо → снова налево → убедиться, что машины остановились → переходить прямо шагом → дойти до другого тротуара. Шаги-ловушки в маршрут не входят.';
-}
 
-/* ===================== ВИКТОРИНА ===================== */
-const quizData = [
-  { q: 'Где должен идти пешеход?', c: 'Тротуар', o: ['По краю проезжей части, если так короче', 'По тротуару, а если тротуара нет — по обочине или краю проезжей части навстречу движению машин', 'Посреди проезжей части'], a: 1, e: 'Тротуар — основное место пешехода. По краю проезжей части движение идёт навстречу потоку машин.' },
-  { q: 'Горит зелёный сигнал для тебя. Что делаешь?', c: 'Сигналы', o: ['Сразу бегу через дорогу, чтобы быстрее', 'Перехожу шагом, но сначала убеждаюсь, что машины остановились и видят меня', 'Жду дополнительного сигнала — зелёный вроде для машин'], a: 1, e: 'Зелёный разрешает переход, но не гарантирует безопасность: водитель может не заметить ребёнка.' },
-  { q: 'Что означает мигающий зелёный сигнал?', c: 'Сигналы', o: ['Переходить запрещено, это аварийный сигнал', 'Переходить можно, если дорога свободна и нет опасности', 'Переходить можно только бегом'], a: 1, e: 'Мигающий зелёный разрешает переход при условии, что нет транспорта и опасности за переходом.' },
-  { q: 'Как перейти нерегулируемый пешеходный переход?', c: 'Переход', o: ['Смотри только направо', 'Смотри налево — направо — налево, переходи шагом по прямой', 'Смотри налево — налево — направо'], a: 1, e: 'Сначала налево (самый быстрый поток), потом направо, потом снова налево. Переходи шагом, не отворачивая.' },
-  { q: 'Водитель не тормозит, а ты уже на переходе. Твоё действие?', c: 'Опасные ситуации', o: ['Ускоряюсь, чтобы проскочить', 'Кричу и машу руками, чтобы привлечь внимание', 'Отхожу в сторону, освобождая коридор, чтобы машина объехала'], a: 2, e: 'Бежать навстречу машине нельзя. Лучшее действие — уйти в сторону и дать водителю место.' },
-  { q: 'Ты выезжаешь из двора на улицу. Что правильно?', c: 'Двор', o: ['Двор — это не дорога, можно выходить сразу', 'Останавливаюсь у ворот, смотрю в обе стороны и уступаю машинам', 'Перебегаю, чтобы водитель затормозил'], a: 1, e: 'Во дворе скорость 20 км/ч и пешеход главный. Но выезжая на улицу, преимущества нет.' },
-  { q: 'Можно ли выезжать на проезжую часть на самокате в 12 лет?', c: 'Самокат', o: ['Можно, если на улице нет машин', 'Можно, но только не в темноте', 'Нельзя: до 14 лет выезд на проезжую часть запрещён'], a: 2, e: 'До 14 лет нельзя выезжать на проезжую часть на велосипеде, самокате или скутере.' },
-  { q: 'Как правильно перейти пешеходный переход на самокате?', c: 'Самокат', o: ['Проехать по переходу на самокате', 'Войти на переход пешком, ведя самокат рядом', 'Остановиться на переходе и ждать'], a: 1, e: 'Велосипед и самокат — транспортное средство. Переход переходят пешком, ведя его рядом.' },
-  { q: 'Чем опасны у дороги наушники и телефон?', c: 'Видимость', o: ['Ничем, на тротуаре безопаснее', 'Не слышно сигнала машины, не видно препятствия и выездов машин со двора', 'Мешают только слушать музыку'], a: 1, e: 'У дороги наушники и телефон опаснее самого перехода. Убери телефон до перехода.' },
-  { q: 'Что делает пешехода заметным в темноте?', c: 'Видимость', o: ['Тёмная одежда', 'Светоотражатели, светлая одежда и фонарь', 'Громкий разговор'], a: 1, e: 'Светоотражатель возвращает свет фар и делает тебя видимым за десятки метров.' },
-  { q: 'Что означает знак «Дети» (1.23)?', c: 'Знаки', o: ['Осторожно: впереди могут быть дети — снизить скорость', 'Детям здесь ходить нельзя', 'Впереди школа, парковаться нельзя'], a: 0, e: 'Знак предупреждает о возможном появлении детей на проезжей части и требует снизить скорость.' },
-  { q: 'Кто виноват, если водитель наехал на пешехода на переходе?', c: 'Ответственность', o: ['Пешеход, если он ещё не достиг 16 лет', 'Водитель: он обязан уступить пешеходу на переходе', 'Виноваты оба поровну'], a: 1, e: 'Водитель обязан уступить пешеходу на переходе. Если же нарушение совершил сам ребёнок до 16 лет — отвечают родители.' }
-];
-let quizAnswered = 0, quizCorrect = 0;
+    diffChips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      diffChips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      config.difficulty = chip.dataset.diff;
+      updateDiffHint();
+    });
 
-function initQuiz() {
-  const list = document.getElementById('quizList');
-  list.innerHTML = '';
-  quizData.forEach((item, i) => {
-    const d = document.createElement('div');
-    d.className = 'quiz-item'; d.id = 'quiz' + i; d.style.animationDelay = (i * 0.04) + 's';
-    d.innerHTML = `
-      <div class="quiz-q"><span class="qnum">${i + 1}</span>${item.q}</div>
-      <div class="quiz-opts">
-        ${item.o.map((t, j) => `<button onclick="answerQuiz(${i}, ${j})">${String.fromCharCode(65 + j)}. ${t}</button>`).join('')}
-      </div>
-      <div class="quiz-comment" id="quiz-comment-${i}"></div>`;
-    list.appendChild(d);
-  });
-  quizAnswered = 0; quizCorrect = 0;
-  document.getElementById('quizProgress').style.width = '0%';
-  document.getElementById('quizProgress').textContent = '0 / 12';
-  updateResults();
-}
-function answerQuiz(idx, choice) {
-  const item = document.getElementById('quiz' + idx);
-  const btns = item.querySelectorAll('.quiz-opts button');
-  if (btns[0].disabled) return;
-  btns.forEach(b => b.disabled = true);
-  const isCorrect = choice === quizData[idx].a;
-  quizAnswered++; if (isCorrect) quizCorrect++;
-  btns[quizData[idx].a].classList.add('correct');
-  if (!isCorrect) btns[choice].classList.add('wrong');
-  const c = document.getElementById('quiz-comment-' + idx);
-  c.className = 'quiz-comment ' + (isCorrect ? 'correct' : 'wrong');
-  c.innerHTML = (isCorrect ? '✅ Правильно! ' : '❌ Неправильно. ') + quizData[idx].e;
-  updateQuizProgress();
-}
-function updateQuizProgress() {
-  const bar = document.getElementById('quizProgress');
-  bar.style.width = (quizAnswered / 12 * 100) + '%';
-  bar.textContent = quizCorrect + ' / 12';
-  if (quizAnswered === 12) {
-    bar.style.background = quizCorrect >= 10 ? 'linear-gradient(90deg,#22c55e,#34d399)' : 'linear-gradient(90deg,#eab308,#facc15)';
-    if (quizCorrect >= 11) launchConfetti();
-  }
-  updateResults();
-}
+    shuffleToggle.addEventListener('change', () => { config.shuffle = shuffleToggle.checked; });
 
-/* ===================== ИТОГИ ===================== */
-function signPoints() {
-  let c = 0;
-  signData.forEach((item, i) => {
-    const sel = document.getElementById('sign' + i);
-    if (sel && sel.value === item.correct) c++;
-  });
-  return c;
-}
-function routePoints() {
-  let c = 0;
-  routeSteps.forEach((_, i) => {
-    const sel = document.getElementById('route' + activeVariant + '_' + i);
-    if (sel && sel.value === routeSteps[i]) c++;
-  });
-  return c;
-}
-function updateResults() {
-  const signC = signPoints(), routeC = routePoints();
-  const pTf = tfCorrect, pLight = 2 * lightCorrect, pSign = 2 * signC, pRoute = routeC, pQuiz = 3 * quizCorrect;
-  const total = pTf + pLight + pSign + pRoute + pQuiz;
-  document.getElementById('rTf').textContent = tfCorrect + ' / 8';
-  document.getElementById('pTf').textContent = pTf;
-  document.getElementById('rLight').textContent = lightCorrect + ' / 8';
-  document.getElementById('pLight').textContent = pLight;
-  document.getElementById('rSign').textContent = signC + ' / 6';
-  document.getElementById('pSign').textContent = pSign;
-  document.getElementById('rRoute').textContent = routeC + ' / 7';
-  document.getElementById('pRoute').textContent = pRoute;
-  document.getElementById('rQuiz').textContent = quizCorrect + ' / 12';
-  document.getElementById('pQuiz').textContent = pQuiz;
-  document.getElementById('rAll').textContent = total;
+    document.getElementById('open-ref-btn').addEventListener('click', () => showScreen('ref'));
+    document.getElementById('back-menu-btn').addEventListener('click', () => showScreen('menu'));
+    document.getElementById('result-menu-btn').addEventListener('click', () => showScreen('menu'));
+    document.getElementById('quit-btn').addEventListener('click', () => { stopTimer(); showScreen('menu'); });
 
-  const pct = total / 79;
-  const mark = document.getElementById('resultMark');
-  const msg = document.getElementById('resultMsg');
-  if (total === 0) {
-    mark.textContent = '—';
-    mark.style.color = 'var(--text-secondary)';
-    msg.textContent = 'Пройди все задания — здесь появится твой результат и отметка.';
-  } else {
-    mark.textContent = pct >= .85 ? '«5»' : pct >= .7 ? '«4»' : pct >= .5 ? '«3»' : '«2»';
-    mark.style.color = pct >= .85 ? 'var(--green)' : pct >= .7 ? 'var(--primary)' : pct >= .5 ? 'var(--yellow)' : 'var(--red)';
-    msg.textContent = 'Набрано ' + total + ' из 79 баллов (' + Math.round(pct * 100) + '%). '
-      + (pct >= .85 ? 'Отлично! Ты можешь объяснить эти правила другу.'
-        : pct >= .7 ? 'Хорошо! Повтори знаки и разбор ситуаций.'
-          : pct >= .5 ? 'Неплохо, но сигналы и переход дороги стоит повторить.'
-            : 'Нужно повторить правила: вернись к теории и тренажёру «Светофор».');
-  }
-}
-function copyResult() {
-  const signC = signPoints(), routeC = routePoints();
-  const total = tfCorrect + 2 * lightCorrect + 2 * signC + routeC + 3 * quizCorrect;
-  const pct = Math.round(total / 79 * 100);
-  const text = 'ПДД. Безопасный пешеход — 6 класс\n'
-    + 'Разминка: ' + tfCorrect + '/8 | Светофор: ' + lightCorrect + '/8 | Знаки: ' + signC + '/6\n'
-    + 'Маршрут: ' + routeC + '/7 | Викторина: ' + quizCorrect + '/12\n'
-    + 'Баллы: ' + total + ' из 79 (' + pct + '%)';
-  const box = document.getElementById('resultOut');
-  box.style.display = 'block';
-  box.textContent = text;
-  box.focus();
-  try {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta); ta.select();
-    document.execCommand('copy');
-    ta.remove();
-    box.textContent = text + '\n\n✅ Скопировано — вставь учителю в мессенджер.';
-  } catch (e) {
-    box.textContent = text + '\n\nВыдели текст и нажми Ctrl+C.';
-  }
-}
-function resetAll() {
-  initTF(); initLight(); initSigns(); initRoute(); initQuiz();
-  showSection(0);
-}
+    function buildQueue() {
+      let list = [];
+      if (config.mode === 'quest') {
+        list = questions.filter(q => q.storyIndex).sort((a,b) => a.storyIndex - b.storyIndex);
+      } else if (config.mode === 'training') {
+        list = questions.filter(q => q.topic === config.topic);
+      } else {
+        list = questions.slice();
+      }
+      if (config.shuffle) list = shuffle(list);
+      // safety: ensure non-empty
+      if (!list.length) list = questions.slice();
+      return list;
+    }
 
-/* ===================== КОНФЕТТИ ===================== */
-function launchConfetti() {
-  const c = document.getElementById('confettiContainer');
-  const colors = ['#6366f1', '#8b5cf6', '#22c55e', '#ef4444', '#eab308', '#3b82f6', '#ec4899'];
-  for (let i = 0; i < 120; i++) {
-    const p = document.createElement('div'); p.className = 'confetti-piece';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.background = colors[Math.floor(Math.random() * colors.length)];
-    p.style.width = (Math.random() * 8 + 6) + 'px'; p.style.height = (Math.random() * 8 + 6) + 'px';
-    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-    p.style.animationDuration = (Math.random() * 2 + 2) + 's';
-    p.style.animationDelay = (Math.random() * 1.5) + 's';
-    c.appendChild(p);
-  }
-  setTimeout(() => { c.innerHTML = ''; }, 5000);
-}
+    function startGame() {
+      const diff = getDiffSettings();
+      queue = buildQueue();
+      current = 0;
+      score = 0;
+      results = [];
+      answered = false;
+      lives = (config.mode === 'survival') ? diff.lives : 0;
+      timePerQuestion = (config.mode === 'timed' || config.mode === 'survival') ? diff.time : 0;
 
-/* ===================== INIT ===================== */
-function initLight() {
-  lightIdx = 0; lightCorrect = 0; lightAns = [];
-  document.getElementById('lightTask').style.display = 'block';
-  document.getElementById('lightComplete').classList.remove('show');
-  renderLight();
-  updateLightProgress();
-}
-initTF(); initLight(); initSigns(); initRoute(); initQuiz();
-</script>
+      modeLabel.textContent = MODE_NAMES[config.mode] || config.mode;
+      topicLabel.style.display = config.mode === 'training' ? 'inline-block' : 'none';
+      if (config.mode === 'training') topicLabel.textContent = TOPICS[config.topic] || '';
+      examHint.style.display = config.mode === 'exam' ? 'block' : 'none';
+      timerLabel.style.display = timePerQuestion ? 'inline-block' : 'none';
+      timerBarWrap.classList.toggle('show', !!timePerQuestion);
+      updateLivesLabel();
+
+      showScreen('game');
+      renderQuestion();
+    }
+
+    document.getElementById('start-btn').addEventListener('click', startGame);
+    document.getElementById('restart-btn').addEventListener('click', startGame);
+
+    function updateLivesLabel() {
+      if (config.mode === 'survival') {
+        livesLabel.style.display = 'inline-block';
+        livesLabel.textContent = 'Жизни: ' + '❤️'.repeat(Math.max(0,lives)) + '🤍'.repeat(Math.max(0, getDiffSettings().lives - lives));
+        livesLabel.className = 'pill ' + (lives <= 1 ? 'bad' : lives <= 2 ? 'warn' : '');
+      } else {
+        livesLabel.style.display = 'none';
+      }
+    }
+
+    function stopTimer() {
+      if (timerId) { clearInterval(timerId); timerId = null; }
+    }
+
+    function startTimer() {
+      stopTimer();
+      if (!timePerQuestion) return;
+      timeLeft = timePerQuestion;
+      updateTimerUI();
+      timerId = setInterval(() => {
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) {
+          timeLeft = 0;
+          updateTimerUI();
+          stopTimer();
+          onTimeout();
+        } else {
+          updateTimerUI();
+        }
+      }, 100);
+    }
+
+    function updateTimerUI() {
+      if (!timePerQuestion) return;
+      const secs = Math.ceil(timeLeft);
+      timerLabel.textContent = `⏱ ${secs} с`;
+      timerLabel.className = 'pill ' + (secs <= 5 ? 'bad' : secs <= 10 ? 'warn' : '');
+      const pct = Math.max(0, (timeLeft / timePerQuestion) * 100);
+      timerBar.style.width = pct + '%';
+    }
+
+    function renderQuestion() {
+      const q = queue[current];
+      answered = false;
+      stopTimer();
+      nextBtn.style.display = 'none';
+      feedback.className = 'feedback';
+      feedbackTitle.textContent = '';
+      feedbackText.textContent = '';
+
+      stageCounter.textContent = `Вопрос ${current + 1} из ${queue.length}`;
+      scoreCounter.textContent = `Баллы: ${score}`;
+      progressBar.style.width = `${(current / queue.length) * 100}%`;
+
+      sceneEmoji.textContent = q.emoji || '🚦';
+      stageTitle.textContent = q.title || '';
+      stageStory.textContent = q.story || '';
+      stageQuestion.textContent = q.question || '';
+
+      answersEl.innerHTML = '';
+      const opts = shuffle(q.answers.map((a, i) => ({ ...a, idx: i })));
+      opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'answer';
+        btn.textContent = opt.text;
+        btn.dataset.correct = opt.correct ? '1' : '0';
+        btn.addEventListener('click', () => onAnswer(btn, q));
+        answersEl.appendChild(btn);
+      });
+
+      updateLivesLabel();
+      startTimer();
+    }
+
+    function revealCorrect() {
+      answersEl.querySelectorAll('.answer').forEach(btn => {
+        if (btn.dataset.correct === '1') btn.classList.add('correct');
+      });
+    }
+
+    function onAnswer(selectedBtn, q) {
+      if (answered) return;
+      answered = true;
+      stopTimer();
+
+      const isCorrect = selectedBtn.dataset.correct === '1';
+      const buttons = answersEl.querySelectorAll('.answer');
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (config.mode === 'exam') {
+        selectedBtn.classList.add('selected-neutral');
+      } else {
+        revealCorrect();
+        if (!isCorrect) selectedBtn.classList.add('wrong');
+      }
+
+      if (isCorrect) {
+        score++;
+        scoreCounter.textContent = `Баллы: ${score}`;
+      } else if (config.mode === 'survival') {
+        lives = Math.max(0, lives - 1);
+        updateLivesLabel();
+      }
+
+      results.push({
+        title: q.title,
+        question: q.question,
+        correct: isCorrect,
+        explanation: q.explanation,
+        chosen: selectedBtn.textContent,
+        correctAnswer: q.answers.find(a => a.correct)?.text || ''
+      });
+
+      if (config.mode === 'exam') {
+        feedback.className = 'feedback show neutral';
+        feedbackTitle.textContent = 'Ответ принят';
+        feedbackText.textContent = 'Перейди к следующему вопросу. Разбор будет в конце.';
+      } else {
+        feedback.className = 'feedback show ' + (isCorrect ? 'good' : 'bad');
+        feedbackTitle.textContent = isCorrect ? 'Верно!' : 'Неверно';
+        feedbackText.textContent = (config.mode === 'survival' && !isCorrect ? 'Потеряна 1 жизнь. ' : '') + q.explanation;
+      }
+
+      prepareNext();
+    }
+
+    function onTimeout() {
+      if (answered) return;
+      answered = true;
+      const q = queue[current];
+      const buttons = answersEl.querySelectorAll('.answer');
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (config.mode === 'exam') {
+        // no reveal
+      } else {
+        revealCorrect();
+      }
+
+      if (config.mode === 'survival') {
+        lives = Math.max(0, lives - 1);
+        updateLivesLabel();
+      }
+
+      results.push({
+        title: q.title,
+        question: q.question,
+        correct: false,
+        explanation: q.explanation,
+        chosen: 'Время вышло',
+        correctAnswer: q.answers.find(a => a.correct)?.text || ''
+      });
+
+      if (config.mode === 'exam') {
+        feedback.className = 'feedback show neutral';
+        feedbackTitle.textContent = 'Время вышло';
+        feedbackText.textContent = 'Ответ не засчитан. Разбор будет в конце.';
+      } else {
+        feedback.className = 'feedback show bad';
+        feedbackTitle.textContent = 'Время вышло';
+        feedbackText.textContent = (config.mode === 'survival' ? 'Потеряна 1 жизнь. ' : '') + q.explanation;
+      }
+
+      prepareNext();
+    }
+
+    function prepareNext() {
+      const isLast = current === queue.length - 1;
+      const outOfLives = config.mode === 'survival' && lives <= 0;
+      if (outOfLives) {
+        nextBtn.textContent = 'Узнать результат';
+      } else {
+        nextBtn.textContent = isLast ? 'Узнать результат' : 'Дальше';
+      }
+      nextBtn.style.display = 'inline-block';
+      nextBtn.dataset.out = outOfLives ? '1' : '0';
+      nextBtn.dataset.last = isLast ? '1' : '0';
+    }
+
+    nextBtn.addEventListener('click', () => {
+      stopTimer();
+      const out = nextBtn.dataset.out === '1';
+      const last = nextBtn.dataset.last === '1';
+      if (out || last) {
+        showResult();
+      } else {
+        current++;
+        renderQuestion();
+      }
+    });
+
+    function showResult() {
+      stopTimer();
+      progressBar.style.width = '100%';
+      const total = results.length;
+      const percent = total ? Math.round((score / total) * 100) : 0;
+      const outOfLives = config.mode === 'survival' && lives <= 0 && current < queue.length - 1;
+      let title, text, emoji;
+
+      if (config.mode === 'exam') {
+        const pass = percent >= 80;
+        emoji = pass ? '✅' : '❌';
+        title = pass ? 'Экзамен сдан' : 'Экзамен не сдан';
+        text = pass
+          ? `Ты набрал ${percent}% — это отличный результат. Правила дорожного движения усвоены хорошо.`
+          : `Ты набрал ${percent}%. Для зачёта нужно 80% и выше. Повтори памятку и попробуй ещё раз.`;
+      } else if (outOfLives) {
+        emoji = '💥';
+        title = 'Жизни закончились';
+        text = 'Попытка завершилась раньше времени, но это хороший повод повторить правила и попробовать снова.';
+      } else if (percent === 100) {
+        emoji = '🏆';
+        title = 'Отличный результат!';
+        text = 'Ты отлично знаешь правила дорожного движения и помог Ярославу сделать правильный выбор. Так держать!';
+      } else if (percent >= 70) {
+        emoji = '🌟';
+        title = 'Очень хорошо!';
+        text = 'Ты уверенно разбираешься в ПДД, но есть моменты, которые стоит повторить.';
+      } else if (percent >= 40) {
+        emoji = '🙂';
+        title = 'Неплохо, но нужно повторить';
+        text = 'Некоторые правила ты знаешь, но важно лучше разобраться в дорожных ситуациях. Попробуй ещё раз.';
+      } else {
+        emoji = '📘';
+        title = 'Стоит повторить правила';
+        text = 'Сейчас много ошибок, но это отличный повод выучить правила дорожного движения. Загляни в памятку и попробуй снова.';
+      }
+
+      document.getElementById('result-emoji').textContent = emoji;
+      document.getElementById('result-score').textContent = `Результат: ${score} из ${total} (${percent}%) · Режим: ${MODE_NAMES[config.mode]}` + (config.mode === 'training' ? ` · ${TOPICS[config.topic]}` : '');
+      document.getElementById('result-title').textContent = title;
+      document.getElementById('result-text').textContent = text;
+
+      const examBadge = document.getElementById('exam-badge');
+      if (config.mode === 'exam') {
+        examBadge.style.display = 'block';
+        const pass = percent >= 80;
+        examBadge.innerHTML = `<span class="pill ${pass ? '' : 'bad'}" style="font-size:16px;padding:8px 14px;">${pass ? 'ЗАЧЁТ (≥ 80%)' : 'НЕЗАЧЁТ (< 80%)'}</span>`;
+      } else {
+        examBadge.style.display = 'none';
+      }
+
+      const review = document.getElementById('review');
+      if (config.mode === 'exam' || results.some(r => !r.correct)) {
+        review.style.display = 'block';
+        const showAll = config.mode === 'exam';
+        const items = showAll ? results : results.filter(r => !r.correct);
+        let html = `<h3>${showAll ? 'Разбор ответов' : 'Разбор ошибок'}</h3>`;
+        items.forEach((r, i) => {
+          html += `<div class="review-item ${r.correct ? 'good' : 'bad'}">
+            <div class="review-q">${i + 1}. ${r.question}</div>
+            <div class="review-a"><strong>Твой ответ:</strong> ${r.chosen || '—'} ${r.correct ? '✅' : '❌'}</div>
+            ${!r.correct ? `<div class="review-a"><strong>Правильный ответ:</strong> ${r.correctAnswer}</div>` : ''}
+            <div class="review-a"><strong>Пояснение:</strong> ${r.explanation}</div>
+          </div>`;
+        });
+        if (!items.length) html += `<p class="muted">Ошибок нет — отлично!</p>`;
+        review.innerHTML = html;
+      } else {
+        review.style.display = 'none';
+      }
+
+      showScreen('result');
+    }
+
+    // Init
+    initTopics();
+    syncMenu();
+  </script>
 </body>
 </html>
