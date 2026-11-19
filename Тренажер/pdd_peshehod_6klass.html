@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Квест по ПДД — 6 класс: Безопасный маршрут</title>
   <style>
     :root {
@@ -20,10 +20,13 @@
       --shadow: 0 10px 30px rgba(20, 60, 120, 0.12);
     }
     * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Arial, sans-serif;
       color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
       background:
         radial-gradient(circle at 10% 10%, #ffffff 0, transparent 30%),
         radial-gradient(circle at 90% 20%, #fff7d6 0, transparent 25%),
@@ -141,10 +144,75 @@
     .ref-card ul { margin: 0; padding-left: 18px; }
     .ref-card li { margin: 5px 0; font-size: 15px; }
     .footer-note { text-align: center; color: var(--muted); font-size: 13px; margin-top: 14px; }
-    @media (max-width: 600px) {
-      .card { padding: 16px; }
-      .question { font-size: 18px; }
-      .answer { font-size: 15px; }
+
+    /* ===== Мобильная адаптация ===== */
+    .btn, .chip, .mode-card, .answer, .toggle { touch-action: manipulation; }
+    @media (max-width: 700px) {
+      .app { padding: 12px 10px calc(30px + env(safe-area-inset-bottom)); }
+      .header { margin-bottom: 12px; }
+      .badge { font-size: 12px; padding: 5px 10px; margin-bottom: 6px; }
+      h1 { font-size: clamp(22px, 7vw, 30px); }
+      .subtitle { font-size: 14px; }
+      .card { padding: 14px 12px; border-radius: 16px; }
+      .hero { font-size: 40px; margin: 4px 0; }
+      .lead { font-size: 15px; margin-bottom: 14px; }
+
+      .menu-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 10px 0 14px; }
+      .mode-card { padding: 10px 12px; border-radius: 12px; }
+      .mode-card .icon { font-size: 22px; margin-bottom: 2px; }
+      .mode-card h3 { font-size: 16px; margin-bottom: 2px; }
+      .mode-card p { font-size: 12.5px; line-height: 1.35; }
+
+      .panel { padding: 12px; margin: 10px 0; border-radius: 12px; }
+      .panel h3 { font-size: 15px; margin-bottom: 8px; }
+      .chip { padding: 9px 13px; font-size: 14px; min-height: 40px; }
+      .toggle { font-size: 14px; }
+      .muted { font-size: 13px; }
+
+      .btn { width: 100%; padding: 14px 18px; font-size: 16px; min-height: 48px; border-radius: 12px; }
+      .btn.small { width: auto; min-height: 40px; padding: 9px 14px; font-size: 14px; }
+
+      .topbar { font-size: 13px; gap: 6px; margin-bottom: 6px; }
+      .meta { gap: 6px 8px; }
+      .pill { font-size: 12px; padding: 3px 8px; }
+      .progress-wrap { height: 10px; margin: 4px 0 10px; }
+
+      .scene { font-size: 36px; }
+      .stage-title { font-size: 20px; }
+      .story { padding: 10px 12px; font-size: 14.5px; margin-bottom: 12px; }
+      .question { font-size: 17px; margin: 6px 0 12px; }
+      .answers { gap: 8px; }
+      .answer { padding: 13px 12px; font-size: 15px; min-height: 48px; border-radius: 12px; }
+      .feedback { padding: 11px 12px; font-size: 14.5px; margin-top: 12px; }
+
+      .actions { flex-direction: column-reverse; align-items: stretch; margin-top: 14px; }
+      .actions-right { margin-left: 0; width: 100%; gap: 8px; }
+      .actions-right .btn { flex: 1; }
+
+      .result-score { font-size: 18px; }
+      .result-title { font-size: 24px; }
+      .result-text { font-size: 15.5px; }
+      .tips { padding: 12px; margin-bottom: 16px; }
+      .tips h3 { font-size: 16px; }
+      .tips li { font-size: 14px; margin: 5px 0; }
+      .review-item { padding: 10px 12px; }
+      .review-q { font-size: 14.5px; }
+      .ref-grid { grid-template-columns: 1fr; gap: 8px; }
+      .ref-card li { font-size: 14px; }
+      .footer-note { font-size: 12px; }
+    }
+    @media (max-width: 400px) {
+      .menu-grid { grid-template-columns: 1fr; }
+      .mode-card p { font-size: 13px; }
+    }
+    /* Альбомная ориентация: компактная шапка, больше места под игру */
+    @media (orientation: landscape) and (max-height: 520px) {
+      .header { margin-bottom: 8px; }
+      .badge { display: none; }
+      .subtitle { display: none; }
+      .hero { font-size: 30px; margin: 0; }
+      .lead { font-size: 14px; margin-bottom: 10px; }
+      .scene { font-size: 30px; }
     }
   </style>
 </head>
