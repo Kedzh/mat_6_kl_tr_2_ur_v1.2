@@ -1342,6 +1342,7 @@ const TOPICS = [
 ];
 const ARCHIVE_TOPICS = [
   { id:'tug', label:'Канат: дуэль команд', icon:'⚔️', desc:'Перетягивание каната: дроби, проценты, отрицательные числа' },
+  { id:'tug-mobile', label:'Канат: мобильная версия', icon:'📱', desc:'Математический канат, адаптированный для телефона' },
   { id:'homework', label:'📌 Домашняя работа', icon:'📚', desc:'Задания на дом по урокам 4–11' },
   { id:'lesson4', label:'Урок 4: Среднее арифметическое', icon:'🧮', desc:'Теория, разминка, лабиринт, тест' },
   { id:'lesson5', label:'Урок 5: Среднее арифметическое — уровень 2', icon:'🧮', desc:'Теория, разминка, лабиринт, тест' },
@@ -1377,6 +1378,7 @@ function selectTopic(id) {
   if (id === 'pdd') { showScreen('screenPdd'); initPdd(); return; }
   /* Канат — отдельная страница: там своя физика и настройки. */
   if (id === 'tug') { window.location.href = 'math-kanat.html'; return; }
+  if (id === 'tug-mobile') { window.location.href = 'math-kanat-mobile.html'; return; }
   if (id === 'viz11') {
     document.getElementById('vizFrame').src = '../11 параграф/smeshannye-chisla.html?v=' + Date.now();
     showScreen('screenViz');

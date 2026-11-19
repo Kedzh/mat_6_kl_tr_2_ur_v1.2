@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔ Математический канат</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { touch-action:manipulation; }
+body {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:16px; color:#fff;
+}
+h1 { font-size:2em; margin-bottom:4px; text-shadow:0 0 20px #00d4ff; color:#00d4ff; letter-spacing:.5px; }
+.sub { color:#8899cc; font-size:.9em; margin-bottom:10px; text-align:center; }
+
+.topbar { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; justify-content:center; }
+.chip { background:rgba(0,212,255,.15); border:1px solid #00d4ff; color:#bdefff; padding:6px 12px; border-radius:16px; font-size:.9em; font-weight:600; }
+.menu-btn {
+    width:40px; height:40px; border-radius:50%; border:2px solid #00d4ff;
+    background:rgba(0,212,255,.15); color:#00d4ff; font-size:1.3em; cursor:pointer;
+    transition:.2s; display:flex; align-items:center; justify-content:center;
+}
+.menu-btn:hover { background:rgba(0,212,255,.3); transform:scale(1.08); }
+
+#arenaWrap {
+    width:100%; max-width:1000px; border-radius:16px; overflow:hidden;
+    border:2px solid rgba(0,212,255,.35);
+    box-shadow:0 0 40px rgba(0,212,255,.25); background:#0d1226;
+}
+canvas { width:100%; display:block; }
+
+.panel {
+    width:100%; max-width:1000px; margin-top:12px;
+    background:linear-gradient(145deg,#1e2450,#141a3a);
+    border:2px solid rgba(0,212,255,.35); border-radius:16px; padding:16px 18px;
+}
+.turnbar { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.turn { font-weight:800; font-size:1.05em; padding:6px 14px; border-radius:14px; flex:1; text-align:center; }
+.turn.l { background:rgba(0,212,255,.18); border:2px solid #00d4ff; color:#9fe8ff; }
+.turn.r { background:rgba(255,47,109,.18); border:2px solid #ff2f6d; color:#ffb3c9; }
+.turn.idle { background:rgba(0,0,0,.3); border:2px solid #556; color:#8899cc; }
+
+.timer { height:8px; background:rgba(0,0,0,.4); border-radius:5px; overflow:hidden; margin-bottom:14px; }
+.timer > div { height:100%; width:100%; background:linear-gradient(90deg,#00ff88,#00d4ff); transition:width .2s linear; }
+.timer.warn > div { background:linear-gradient(90deg,#ffd400,#ff8c00); }
+.timer.crit > div { background:linear-gradient(90deg,#ff2f6d,#ff0000); }
+
+.topic { display:inline-block; font-size:.78em; padding:4px 10px; border-radius:12px; background:rgba(0,255,136,.15); border:1px solid #00ff88; color:#9dffcf; margin-bottom:8px; }
+.q { font-size:1.5em; font-weight:700; margin:6px 0 16px; line-height:1.35; text-shadow:0 2px 10px rgba(0,0,0,.5); }
+.opts { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.opt {
+    padding:16px 12px; font-size:1.3em; font-weight:700; border-radius:14px; cursor:pointer;
+    background:rgba(0,0,0,.35); border:2px solid rgba(0,212,255,.35); color:#fff;
+    transition:.15s; position:relative; font-family:inherit; text-align:center;
+}
+.opt:hover:not(:disabled) { border-color:#00d4ff; background:rgba(0,212,255,.12); transform:translateY(-3px); }
+.opt .key { position:absolute; top:6px; left:10px; font-size:.6em; color:#6f80aa; font-weight:700; }
+.opt:disabled { cursor:default; }
+.opt.ok { border-color:#00ff88; background:rgba(0,255,136,.2); color:#c4ffe4; }
+.opt.no { border-color:#ff2f6d; background:rgba(255,47,109,.18); color:#ffc9d8; }
+.opt.dim { opacity:.35; }
+
+.fb { margin-top:16px; min-height:26px; font-size:1em; line-height:1.5; }
+.fb.good { color:#00ff88; } .fb.bad { color:#ff6b8f; } .fb.info { color:#9fe8ff; }
+.sol { background:rgba(0,0,0,.3); border-left:3px solid #00d4ff; padding:10px 12px; border-radius:8px; margin-top:8px; color:#cfe0ff; }
+
+.pull { margin-top:14px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.btn {
+    padding:13px 22px; font-size:1em; font-weight:700; border:none; border-radius:12px; cursor:pointer;
+    font-family:inherit; transition:.15s;
+}
+.btn.p { background:linear-gradient(145deg,#00d4ff,#00a4cc); color:#06202b; }
+.btn.p:hover { transform:scale(1.03); box-shadow:0 0 22px rgba(0,212,255,.5); }
+.btn.g { background:linear-gradient(145deg,#00ff88,#00b464); color:#04240f; }
+.btn.d { background:rgba(0,0,0,.35); color:#aab; border:2px solid #4a5a80; }
+#tugBtn { display:none; background:linear-gradient(145deg,#ffd400,#ff8c00); color:#2b1a00; user-select:none; }
+#tugBtn:active { transform:scale(.97); }
+.tugbar { flex:1; min-width:150px; height:16px; background:rgba(0,0,0,.4); border-radius:9px; overflow:hidden; border:1px solid #ff8c00; display:none; }
+.tugbar > div { height:100%; width:0%; background:linear-gradient(90deg,#ffd400,#ff2f6d); }
+
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:999; display:none; overflow:auto; }
+.overlay.active { display:flex; align-items:center; justify-content:center; padding:20px; }
+.modal {
+    background:linear-gradient(145deg,#232a5e,#141a3e); padding:26px 30px; border-radius:20px;
+    border:2px solid #00d4ff; box-shadow:0 0 60px rgba(0,212,255,.4); width:100%; max-width:460px; margin:auto;
+    animation:slideIn .25s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateY(20px) scale(.95)} to{opacity:1;transform:none} }
+.modal h2 { color:#00d4ff; margin-bottom:16px; font-size:1.6em; text-align:center; }
+.row { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.opt-row {
+    flex:1; min-width:150px; padding:11px 14px; background:rgba(0,0,0,.3); border:2px solid rgba(0,212,255,.3);
+    border-radius:10px; color:#aab; cursor:pointer; font-family:inherit; font-size:.92em; text-align:left; transition:.15s;
+}
+.opt-row:hover { border-color:#00d4ff; color:#fff; }
+.opt-row.on { border-color:#00ff88; color:#c4ffe4; background:rgba(0,255,136,.1); }
+.opt-row b { color:#fff; display:block; font-size:1em; }
+.modal .btn { width:100%; margin-top:10px; }
+.help { font-size:.92em; line-height:1.65; color:#c8d4f5; }
+.help b { color:#ffd400; }
+.help ul { margin:8px 0 8px 20px; }
+.winTeam { font-size:1.6em; font-weight:800; text-align:center; margin:10px 0; }
+.scores { display:flex; gap:14px; justify-content:center; margin:12px 0; font-size:1.1em; }
+
+@media (max-width:700px) {
+    body { padding:10px; }
+    h1 { font-size:1.35em; } .sub { font-size:.82em; }
+    .q { font-size:1.15em; }
+    .opts { grid-template-columns:1fr 1fr; gap:8px; }
+    .opt { padding:14px 8px; font-size:1.05em; min-height:54px; }
+    .panel { padding:12px; }
+    .topbar { gap:6px; }
+    .chip { font-size:.8em; padding:5px 9px; }
+    .btn { padding:12px 14px; font-size:.95em; }
+    #tugBtn { width:100%; min-height:50px; }
+    .pull { gap:8px; }
+}
+@media (max-width:420px) {
+    .opts { grid-template-columns:1fr; }
+    #arenaWrap { border-radius:12px; }
+    .turn { font-size:.95em; }
+}
+</style>
+</head>
+<body>
+
+<h1>⚔ МАТЕМАТИЧЕСКИЙ КАНАТ</h1>
+<div class="sub">Тянуть тяжелее — значит решать точнее · <a href="math-kanat-mobile.html" style="color:#9fe8ff;text-decoration:underline">📱 мобильная версия</a></div>
+
+<div class="topbar">
+    <span class="chip" id="chipScore">Счёт 0 : 0</span>
+    <span class="chip" id="chipWins">Победы 0 : 0</span>
+    <span class="chip" id="chipRound">Раунд 1</span>
+    <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
+</div>
+
+<div id="arenaWrap"><canvas id="cv"></canvas></div>
+
+<div class="panel">
+    <div class="turnbar">
+        <div class="turn idle" id="turnLbl">Ход ожидается</div>
+    </div>
+    <div class="timer" id="timerBox"><div id="timerFill"></div></div>
+
+    <div id="topicTag" style="display:none"><span class="topic"></span></div>
+    <div class="q" id="qText">Нажмите «Начать матч», чтобы вывести команды на канат</div>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb"></div>
+
+    <div class="pull">
+        <button class="btn p" id="startBtn">▶ Начать матч</button>
+        <button class="btn g" id="tugBtn">💪 ТЯНИ! (держи)</button>
+        <div class="tugbar" id="tugBar"><div id="tugFill"></div></div>
+        <button class="btn d" id="nextBtn" style="display:none">Дальше →</button>
+    </div>
+</div>
+
+<div class="overlay" id="ov"><div class="modal" id="modal"></div></div>
+
+<script>
+/* ================= ТЕМЫ ================= */
+const TOPICS = {
+    frac : { label:'Дроби',                 max:6 },
+    pct  : { label:'Проценты',              max:300 },
+    neg  : { label:'Отрицательные числа',   max:18 },
+    ops  : { label:'Порядок действий',      max:49 },
+    ratio: { label:'Отношения и пропорции', max:200 }
+};
+
+/* ================= БАНК ЗАДАЧ ================= */
+/* t — тема, q — вопрос, a — верный ответ, o — варианты, v — числовое значение (вес груза), sol — разбор */
+const BANK = [
+/* --- дроби --- */
+{t:'frac', q:'3/4 + 1/4 = ?',           a:'1',    o:['1','3/2','1/2','2'],        v:1,      sol:'3/4 + 1/4 = 4/4 = 1'},
+{t:'frac', q:'1/2 + 1/3 = ?',           a:'5/6',  o:['5/6','4/6','2/5','1/6'],    v:0.8333, sol:'Знаменатель 6: 3/6 + 2/6 = 5/6'},
+{t:'frac', q:'5/6 − 1/3 = ?',           a:'1/2',  o:['1/2','2/3','4/9','3/4'],    v:0.5,    sol:'5/6 − 2/6 = 3/6 = 1/2'},
+{t:'frac', q:'2 1/4 + 3/4 = ?',         a:'3',    o:['3','2 1/2','3 1/4','4'],    v:3,      sol:'1/4 + 3/4 = 1, значит 2 + 1 = 3'},
+{t:'frac', q:'3/5 : 9/10 = ?',          a:'2/3',  o:['2/3','1/3','3/2','2/9'],    v:0.6667, sol:'Делим на дробь: 3/5 · 10/9 = 6/9 = 2/3'},
+{t:'frac', q:'7/8 − 5/8 = ?',           a:'1/4',  o:['1/4','3/8','1/2','5/8'],    v:0.25,   sol:'2/8 = 1/4'},
+{t:'frac', q:'4/9 + 2/9 = ?',           a:'2/3',  o:['2/3','5/9','1/3','7/9'],    v:0.6667, sol:'6/9 = 2/3'},
+{t:'frac', q:'1 − 3/7 = ?',             a:'4/7',  o:['4/7','3/7','5/7','4/8'],    v:0.5714, sol:'7/7 − 3/7 = 4/7'},
+{t:'frac', q:'3/4 : 1/8 = ?',           a:'6',    o:['6','2','12','3/4'],         v:6,      sol:'Умножаем на 8/1: 3/4 · 8 = 6'},
+{t:'frac', q:'5 1/2 − 2 1/3 = ?',       a:'3 1/6',o:['3 1/6','3 1/3','4 1/6','2 5/6'], v:3.1667, sol:'5 1/2 − 2 1/3 = 3 1/6'},
+{t:'frac', q:'2/3 + 1/6 = ?',           a:'5/6',  o:['5/6','1/2','2/3','7/6'],    v:0.8333, sol:'4/6 + 1/6 = 5/6'},
+{t:'frac', q:'1/2 + 1/3 + 1/6 = ?',     a:'1',    o:['1','5/6','7/6','2'],        v:1,      sol:'3/6 + 2/6 + 1/6 = 6/6 = 1'},
+
+/* --- проценты --- */
+{t:'pct',  q:'Найди 25 % от 80',        a:'20',   o:['20','16','40','25'],        v:20,     sol:'80 : 4 = 20'},
+{t:'pct',  q:'Найди 15 % от 200',       a:'30',   o:['30','20','15','45'],         v:30,     sol:'200 · 0,15 = 30'},
+{t:'pct',  q:'Найди 40 % от 150',       a:'60',   o:['60','40','90','15'],         v:60,     sol:'150 · 0,4 = 60'},
+{t:'pct',  q:'250 увеличили на 20 %',   a:'300',  o:['300','270','500','250'],      v:300,    sol:'250 + 50 = 300'},
+{t:'pct',  q:'400 уменьшили на 15 %',    a:'340',  o:['340','385','460','60'],       v:340,    sol:'400 − 60 = 340'},
+{t:'pct',  q:'20 % числа равны 40. Найди число', a:'200', o:['200','80','20','400'], v:200,  sol:'40 : 0,2 = 200'},
+{t:'pct',  q:'Сколько процентов в 1/2?',a:'50%',  o:['50%','25%','100%','0,5%'],  v:50,     sol:'1/2 = 0,5 = 50 %'},
+{t:'pct',  q:'Запиши 60 % в виде десятичной дроби', a:'0,6', o:['0,6','0,06','6','0,36'], v:0.6, sol:'60 : 100 = 0,6'},
+{t:'pct',  q:'Найди 30 % от 90',        a:'27',   o:['27','18','63','30'],         v:27,     sol:'90 · 0,3 = 27'},
+{t:'pct',  q:'Сколько процентов 25 от 50?', a:'50%', o:['50%','25%','75%','2%'],  v:50,     sol:'25 : 50 = 0,5 = 50 %'},
+{t:'pct',  q:'Найди 10 % от 350',       a:'35',   o:['35','25','70','350'],        v:35,     sol:'350 : 10 = 35'},
+{t:'pct',  q:'200 увеличили на 50 %',   a:'300',  o:['300','100','400','250'],      v:300,    sol:'200 + 100 = 300'},
+
+/* --- отрицательные числа --- */
+{t:'neg',  q:'−7 + 12 = ?',             a:'5',     o:['5','19','−5','−19'],      v:5,      sol:'12 − 7 = 5'},
+{t:'neg',  q:'−4 − 9 = ?',              a:'−13',   o:['−13','13','−5','5'],       v:13,     sol:'−(4 + 9) = −13'},
+{t:'neg',  q:'−6 · 3 = ?',              a:'−18',   o:['−18','18','−2','−9'],     v:18,     sol:'минус умножается — знак минус'},
+{t:'neg',  q:'−8 : (−2) = ?',           a:'4',     o:['4','−4','16','−16'],       v:4,      sol:'минус на минус = плюс: 8 : 2 = 4'},
+{t:'neg',  q:'−15 + 15 = ?',            a:'0',     o:['0','30','−30','15'],       v:0,      sol:'противоположные числа дают 0'},
+{t:'neg',  q:'(−3)² = ?',               a:'9',     o:['9','−9','6','−6'],         v:9,      sol:'степень чётная — знак плюс'},
+{t:'neg',  q:'|−7| = ?',                a:'7',     o:['7','−7','0','1/7'],        v:7,      sol:'модуль — расстояние, всегда ≥ 0'},
+{t:'neg',  q:'−1/2 + 1/3 = ?',          a:'−1/6',  o:['−1/6','1/6','−5/6','5/6'],  v:0.1667, sol:'−3/6 + 2/6 = −1/6'},
+{t:'neg',  q:'−5 − (−8) = ?',           a:'3',     o:['3','−3','13','−13'],       v:3,      sol:'−5 + 8 = 3'},
+{t:'neg',  q:'(−2)³ = ?',               a:'−8',    o:['−8','8','−6','6'],         v:8,      sol:'степень нечётная — знак минус'},
+{t:'neg',  q:'−20 : 5 = ?',             a:'−4',    o:['−4','4','−25','−100'],     v:4,      sol:'−20 : 5 = −4'},
+{t:'neg',  q:'−2,5 + 1,5 = ?',          a:'−1',    o:['−1','1','−4','4'],         v:1,      sol:'−2,5 + 1,5 = −1'},
+
+/* --- порядок действий --- */
+{t:'ops',  q:'2 + 3 · 4 = ?',           a:'14',    o:['14','20','11','24'],       v:14,     sol:'Сначала умножение: 2 + 12 = 14'},
+{t:'ops',  q:'(2 + 3) · 4 = ?',         a:'20',    o:['20','14','24','9'],        v:20,     sol:'Скобки первыми: 5 · 4 = 20'},
+{t:'ops',  q:'18 : 6 · 3 = ?',          a:'9',     o:['9','1','54','6'],          v:9,      sol:'Слева направо: 3 · 3 = 9'},
+{t:'ops',  q:'2² · 3 = ?',              a:'12',    o:['12','36','9','6'],         v:12,     sol:'4 · 3 = 12'},
+{t:'ops',  q:'100 − 4 · 25 = ?',        a:'0',     o:['0','80','−24','96'],       v:0,      sol:'100 − 100 = 0'},
+{t:'ops',  q:'(10 − 4)² : 9 = ?',       a:'4',     o:['4','36','12','16'],         v:4,      sol:'36 : 9 = 4'},
+{t:'ops',  q:'3 + 5 · 2 − 4 = ?',       a:'9',     o:['9','4','−11','14'],        v:9,      sol:'3 + 10 − 4 = 9'},
+{t:'ops',  q:'2 · (3 + 4) − 5 = ?',     a:'9',     o:['9','19','24','4'],         v:9,      sol:'14 − 5 = 9'},
+{t:'ops',  q:'36 : 4 + 2 = ?',          a:'11',    o:['11','9','7','19'],         v:11,     sol:'Деление раньше сложения: 9 + 2 = 11'},
+{t:'ops',  q:'7² − 49 = ?',             a:'0',     o:['0','98','14','−14'],       v:0,      sol:'49 − 49 = 0'},
+
+/* --- отношения и пропорции --- */
+{t:'ratio',q:'Разделили 32 в отношении 3 : 5. Сколько пришлось на первую часть?', a:'12', o:['12','20','8','15'], v:12, sol:'3 к 5 — это 8 частей по 4: 3 · 4 = 12'},
+{t:'ratio',q:'В 5 одинаковых коробках 20 помидоров. Сколько в одной?', a:'4', o:['4','5','10','15'], v:4, sol:'20 : 5 = 4'},
+{t:'ratio',q:'Поезд шёл 2 ч со скоростью 80 км/ч и 3 ч со скоростью 60 км/ч. Какой путь?', a:'340 км', o:['340 км','300 км','420 км','140 км'], v:340, sol:'160 + 180 = 340 км'},
+{t:'ratio',q:'Цена 15 руб. Сколько стоит после повышения на 20 %?', a:'18 руб.', o:['18 руб.','12 руб.','3 руб.','16,2 руб.'], v:18, sol:'15 + 3 = 18 руб.'},
+{t:'ratio',q:'6 одинаковых ручек стоят 90 руб. Сколько стоит одна?', a:'15 руб.', o:['15 руб.','6 руб.','90 руб.','21 руб.'], v:15, sol:'90 : 6 = 15 руб.'},
+{t:'ratio',q:'Найди 3/5 от 40',        a:'24',    o:['24','15','8','35'],         v:24,     sol:'40 : 5 = 8, затем 8 · 3 = 24'},
+{t:'ratio',q:'5 пеналов стоят 250 руб. Цена пенала после скидки 20 %?', a:'40 руб.', o:['40 руб.','50 руб.','30 руб.','60 руб.'], v:40, sol:'250 : 5 = 50; 50 − 10 = 40 руб.'}
+];
+
+/* ================= НАСТРОЙКИ ================= */
+const DEF_SET = { topics:Object.keys(TOPICS), time:30, tug:true, tugMax:1.0 };
+let SET = loadSet();
+function loadSet(){ try{ return Object.assign({}, DEF_SET, JSON.parse(localStorage.getItem('tugSet'))||{}); }catch(e){ return Object.assign({},DEF_SET); } }
+function saveSet(){ try{ localStorage.setItem('tugSet', JSON.stringify(SET)); }catch(e){} }
+
+/* ================= СОСТОЯНИЕ ================= */
+const W = 980, H = 470;
+const CX = 490, ROPE_L = 60, ROPE_R = 920, ROPE_Y = 268, GROUND = 372;
+const GOAL = 430;
+const TEAM = {
+  l: { name:'КОМАНДА СИНИХ', color:'#00d4ff', glow:'rgba(0,212,255,.75)' },
+  r: { name:'КОМАНДА КРАСНЫХ', color:'#ff2f6d', glow:'rgba(255,47,109,.75)' }
+};
+
+let S = freshState();
+function freshState(){
+  return { phase:'idle', turn:'l', wins:{l:0,r:0}, mass:{l:0,r:0}, x:0, v:0,
+           streak:0, timeLeft:0, q:null, opts:[], answerIdx:-1, tug:0, tugHeld:false,
+           solved:{l:0,r:0}, flash:0, paused:false };
+}
+
+/* ================= ЗВУК ================= */
+let AC = null;
+function ac(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC && AC.state==='suspended') AC.resume(); return AC; }
+function tone(f, dur, type, vol, slide){
+  const a = ac(); if(!a) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type||'sine'; o.frequency.setValueAtTime(f, a.currentTime);
+  if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(40,f*slide), a.currentTime+dur);
+  g.gain.setValueAtTime(0, a.currentTime);
+  g.gain.linearRampToValueAtTime(vol||.18, a.currentTime+.012);
+  g.gain.exponentialRampToValueAtTime(.0001, a.currentTime+dur);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+dur+.02);
+}
+function noise(dur, vol, f0){
+  const a = ac(); if(!a) return;
+  const n = a.sampleRate*dur, buf = a.createBuffer(1,n,a.sampleRate), d = buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i] = (Math.random()*2-1)*Math.pow(1-i/n,2);
+  const src = a.createBufferSource(); src.buffer = buf;
+  const bp = a.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value = f0||500; bp.Q.value=.8;
+  const g = a.createGain(); g.gain.value = vol||.25;
+  src.connect(bp); bp.connect(g); g.connect(a.destination); src.start();
+}
+const SFX = {
+  click: () => tone(660,.07,'square',.10),
+  good:  () => { tone(523,.12,'triangle',.16); setTimeout(()=>tone(784,.18,'triangle',.14),90); },
+  bad:   () => { tone(220,.16,'sawtooth',.12,.7); setTimeout(()=>tone(150,.22,'sawtooth',.10,.6),80); },
+  step:  () => tone(320,.05,'triangle',.07),
+  tug:   () => noise(.13,.16,260),
+  win:   () => { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.28,'triangle',.16),i*110)); },
+  tick:  () => tone(1200,.03,'square',.06)
+};
+
+/* ================= КАНВАС ================= */
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let scale = 1;
+function resize(){
+  const cssW = cv.clientWidth || 1000;
+  const dpr = Math.min(2, window.devicePixelRatio||1);
+  scale = cssW / W;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+  cv.style.height = (H*scale)+'px';
+  ctx.setTransform(dpr*scale,0,0,dpr*scale,0,0);
+}
+window.addEventListener('resize', resize);
+
+let parts = [];
+function confetti(x, y, color, n){
+  for(let i=0;i<(n||26);i++){
+    parts.push({ x, y, vx:(Math.random()-.5)*520, vy:-Math.random()*640-90,
+      g:1100, life:.9+Math.random()*1.1, t:0, r:Math.random()*6, s:5+Math.random()*7, c:color });
+  }
+}
+function dust(x,y,color){
+  for(let i=0;i<10;i++) parts.push({ x, y, vx:(Math.random()-.5)*260, vy:-Math.random()*190-30,
+    g:420, life:.5+Math.random()*.4, t:0, r:0, s:3+Math.random()*4, c:color });
+}
+
+/* геометрия каната */
+function ropeShape(){
+  const mx = CX + S.x;
+  const ten = Math.min(1, Math.abs(S.x)/GOAL);
+  /* Провис максимален в середине, когда силы равны, и почти исчезает,
+     когда канат натянут в одну сторону. */
+  const dip = 26 + (1-ten)*36;
+  /* Сторона с большим грузом проседает чуть ниже. */
+  const tilt = (S.mass.l - S.mass.r) * 2.5;
+  return { mx, dip: dip + tilt, ten };
+}
+function ropePoint(u, sh){
+  const my = ROPE_Y + sh.dip;
+  if(u <= .5){
+    const t = u/.5;
+    return { x: ROPE_L + (sh.mx-ROPE_L)*t, y: ROPE_Y + (my-ROPE_Y)*Math.sin(t*Math.PI/2) };
+  }
+  const t = (u-.5)/.5;
+  return { x: sh.mx + (ROPE_R-sh.mx)*t, y: my + (ROPE_Y-my)*Math.sin(t*Math.PI/2) };
+}
+
+function draw(){
+  const sh = ropeShape();
+  ctx.clearRect(0,0,W,H);
+
+  /* фон */
+  const bg = ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#0d1330'); bg.addColorStop(.62,'#131a3d'); bg.addColorStop(1,'#0a0f22');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  /* дальний план — «арена» */
+  ctx.fillStyle='rgba(255,255,255,.02)';
+  for(let i=0;i<28;i++) ctx.fillRect(Math.random()*W, 0, 1, 1);
+  const glow = ctx.createRadialGradient(CX,ROPE_Y-30,20,CX,ROPE_Y+40,520);
+  glow.addColorStop(0,'rgba(0,212,255,.10)'); glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
+
+  /* зоны */
+  /* Полоса «поля боя» по высоте каната: слева рубеж синих, справа красных,
+   в центре — нейтральная зона. */
+  ctx.fillStyle='rgba(0,212,255,.08)';   ctx.fillRect(ROPE_L,ROPE_Y-30,CX-GOAL-ROPE_L,150);
+  ctx.fillStyle='rgba(255,47,109,.08)';  ctx.fillRect(CX+GOAL,ROPE_Y-30,ROPE_R-(CX+GOAL),150);
+  ctx.fillStyle='rgba(0,255,136,.06)';   ctx.fillRect(CX-GOAL,ROPE_Y-30,GOAL*2,150);
+
+  ctx.strokeStyle='rgba(255,255,255,.22)'; ctx.setLineDash([7,9]); ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(CX,ROPE_Y-34); ctx.lineTo(CX,GROUND); ctx.stroke();
+  ctx.setLineDash([]);
+  [CX-GOAL, CX+GOAL].forEach(px=>{
+    ctx.strokeStyle='rgba(255,255,255,.45)'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(px,ROPE_Y-28); ctx.lineTo(px,GROUND); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.55)';
+    ctx.font='700 11px Segoe UI, sans-serif'; ctx.textAlign='center';
+    ctx.fillText(px===CX-GOAL?'РУБЕЖ СИНИХ':'РУБЕЖ КРАСНЫХ', px, ROPE_Y-36);
+  });
+
+  /* земля */
+  const gr = ctx.createLinearGradient(0,GROUND-14,0,H);
+  gr.addColorStop(0,'#1a2a2a'); gr.addColorStop(1,'#0d1518');
+  ctx.fillStyle=gr; ctx.fillRect(0,GROUND-6,W,H-GROUND+6);
+  ctx.strokeStyle='rgba(0,255,136,.18)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=26){ ctx.beginPath(); ctx.moveTo(x,GROUND-6); ctx.lineTo(x-14,GROUND-26); ctx.stroke(); }
+  ctx.strokeStyle='rgba(0,255,255,.25)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,GROUND-6); ctx.lineTo(W,GROUND-6); ctx.stroke();
+
+  /* кучи грузов — почему канат держит эту сторону */
+  drawPiles('l'); drawPiles('r');
+
+  /* команды */
+  drawTeam('l', sh); drawTeam('r', sh);
+
+  /* канат */
+  ctx.save();
+  ctx.lineCap='round';
+  const ten = Math.min(1, Math.abs(S.x)/GOAL);
+  ctx.shadowColor = S.mass.l > S.mass.r ? TEAM.l.glow : TEAM.r.glow;
+  ctx.shadowBlur = 12 + ten*22;
+  ctx.strokeStyle='#c9a06a'; ctx.lineWidth=11;
+  ctx.beginPath();
+  for(let i=0;i<=60;i++){ const p = ropePoint(i/60, sh); i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y); }
+  ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.strokeStyle='rgba(90,60,30,.55)'; ctx.lineWidth=3; ctx.setLineDash([10,10]);
+  ctx.beginPath();
+  for(let i=0;i<=60;i++){ const p = ropePoint(i/60, sh); i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y); }
+  ctx.stroke(); ctx.setLineDash([]);
+
+  /* руки на канате */
+  ctx.fillStyle='#0f1730';
+  [[0,'l'],[1,'r']].forEach(([u])=>{ const p=ropePoint(u,sh); ctx.beginPath(); ctx.arc(p.x,p.y,7,0,7); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=2; ctx.stroke(); });
+
+  /* центральный узел-флаг */
+  drawMarker(sh);
+  ctx.restore();
+
+  /* частицы */
+  for(const p of parts){
+    ctx.globalAlpha = Math.max(0, 1 - p.t/p.life);
+    ctx.fillStyle = p.c;
+    if(p.s>4){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.t*7+p.r); ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6); ctx.restore(); }
+    else { ctx.beginPath(); ctx.arc(p.x,p.y,p.s/2,0,7); ctx.fill(); }
+  }
+  ctx.globalAlpha = 1;
+
+  /* подписи щитов команд (груз вынесен на сам щит) */
+  ctx.font='800 15px Segoe UI, sans-serif';
+  ctx.textAlign='left';  ctx.fillStyle=TEAM.l.color;
+  ctx.fillText('◀ ' + TEAM.l.name, 16, 40);
+  ctx.textAlign='right'; ctx.fillStyle=TEAM.r.color;
+  ctx.fillText(TEAM.r.name + ' ▶', W-16, 40);
+}
+
+function drawMarker(sh){
+  const p = ropePoint(.5, sh);
+  const ten = Math.min(1, Math.abs(S.x)/GOAL);
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(Math.atan2(ropePoint(.62,sh).y - ropePoint(.38,sh).y, ropePoint(.62,sh).x - ropePoint(.38,sh).x));
+  ctx.fillStyle = '#fff';
+  ctx.shadowColor='rgba(255,255,255,.6)'; ctx.shadowBlur=8+ten*16;
+  ctx.fillRect(-11,-15,22,30);
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#ff2f6d'; ctx.fillRect(-11,-15,22,15);
+  ctx.strokeStyle='rgba(0,0,0,.4)'; ctx.lineWidth=1.5; ctx.strokeRect(-11,-15,22,30);
+  ctx.restore();
+
+  /* Флажок-указатель на узле: мачта вверх от верёвки, полотнище вбок. */
+  ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(p.x,p.y-15); ctx.lineTo(p.x,p.y-52); ctx.stroke();
+  ctx.fillStyle = ten>.8 ? '#ff2f6d' : '#ffd400';
+  ctx.beginPath(); ctx.moveTo(p.x+2,p.y-52); ctx.lineTo(p.x+30,p.y-45); ctx.lineTo(p.x+2,p.y-38); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(p.x+2,p.y-52); ctx.lineTo(p.x+30,p.y-45); ctx.lineTo(p.x+2,p.y-38); ctx.closePath(); ctx.stroke();
+}
+
+function drawTeam(side, sh){
+  const cfgT = TEAM[side];
+  const isL = side==='l';
+  const mass = S.mass[isL?'l':'r'], other = S.mass[isL?'r':'l'];
+  const ahead = mass >= other;
+  const tension = Math.min(1, Math.abs(S.mass.l - S.mass.r)/26);
+  const baseX = isL ? 108 : W-108;
+  const dir = isL ? 1 : -1;
+  /* Отклоняются НАЗАД от каната, когда тянут своё, и вперёд — когда
+     проигрывают и сдваивают усилие. */
+  const lean = (ahead ? 1 : -1) * (0.08 + tension*0.26) * dir * (S.phase==='tug' ? 1.7 : 1);
+
+  for(let i=0;i<3;i++){
+    const fx = baseX + dir*i*34;
+    /* Фигура стоит на земле, а её руки достают до каната: точка hands
+       берётся с конца верёвки (u = 0 или 1), а не из середины. */
+    const hands = ropePoint(isL ? 0.055 : 0.945, sh);
+    /* Фигура всегда стоит на земле (пропорции фиксированы), а рука
+       тянется к канату — тогда высота верёвки не ломает анатомию. */
+    ctx.save(); ctx.translate(fx, GROUND); ctx.rotate(lean);
+    ctx.fillStyle='rgba(0,0,0,.35)';
+    ctx.beginPath(); ctx.ellipse(0,3,16,5,0,0,7); ctx.fill();
+
+    ctx.strokeStyle=cfgT.color; ctx.lineCap='round'; ctx.lineWidth=5.5;
+    const LEG=32, TORSO=38, HR=11;
+    const hipY=-LEG, bodyY=hipY-TORSO, headY=bodyY-HR-2;
+    ctx.beginPath(); ctx.moveTo(0,hipY); ctx.lineTo(-15,0);
+    ctx.moveTo(0,hipY); ctx.lineTo(16,0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,hipY); ctx.lineTo(0,bodyY); ctx.stroke();
+    /* Рука от плеча к канату: длина получается сама, наклон — вверх-внутрь. */
+    ctx.beginPath(); ctx.moveTo(0,bodyY+4); ctx.lineTo(dir*17, hands.y - GROUND + 7); ctx.stroke();
+    ctx.fillStyle=cfgT.color; ctx.beginPath(); ctx.arc(0,headY,HR,0,7); ctx.fill();
+    ctx.restore();
+  }
+
+  /* щит команды */
+  /* Подписи щита — вверху, чтобы не наезжать на фигуры у земли. */
+  const bx = isL ? 16 : W-16, by = 62;
+  ctx.textAlign = isL ? 'left' : 'right';
+  ctx.font='800 13px Segoe UI, sans-serif';
+  ctx.fillStyle=cfgT.color;
+  ctx.fillText('ПОБЕД: ' + S.wins[side], bx, by);
+  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='700 12px Segoe UI, sans-serif';
+  ctx.fillText('задач решено: ' + S.solved[side], bx, by+16);
+  ctx.font='700 13px Segoe UI, sans-serif'; ctx.fillStyle=cfgT.color;
+  ctx.fillText('груз: ' + S.mass[side].toFixed(1), bx, by+33);
+}
+
+function drawPiles(side){
+  const isL = side==='l';
+  const m = S.mass[isL?'l':'r'];
+  const n = Math.min(13, Math.floor(m));
+  const col = TEAM[side].color;
+  const x0 = isL ? 236 : W-236;
+  ctx.textAlign='center'; ctx.font='700 11px Segoe UI, sans-serif';
+  /* Куча грузов: максимум 4 в ряд, ряды копятся у самой земли.
+       Порог показа — 13 грузов, дальше просто растёт подпись ∑. */
+  const perRow = 4;
+  for(let i=0;i<n;i++){
+    const bx = x0 + (i%perRow)*34 - (isL?0:(perRow-1)*34);
+    const by = GROUND-20 - Math.floor(i/perRow)*20;
+    ctx.fillStyle='rgba(0,0,0,.45)';
+    ctx.fillRect(bx+2, by+3, 30, 17);
+    ctx.fillStyle = col+'33'; ctx.strokeStyle = col; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(bx,by,30,17,4); else ctx.rect(bx,by,30,17);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle=col; ctx.fillRect(bx+12,by+6,5,5);
+  }
+  if(m>0){
+    ctx.fillStyle='rgba(255,255,255,.55)';
+    ctx.fillText('∑ ' + m.toFixed(1), x0+51, GROUND-7-Math.floor(Math.min(13,Math.floor(m))/4)*20);
+  }
+}
+
+/* ================= ФИЗИКА ================= */
+let lastT = 0;
+function frame(ts){
+  const dt = Math.min(.05, (ts-lastT)/1000 || .016); lastT = ts;
+  if(!S.paused) update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+function update(dt){
+  if(S.phase==='idle' || S.phase==='over'){ S.v *= Math.pow(.02, dt); S.x += S.v*dt; }
+
+  /* Отклик каната на разницу грузов. Коэффициент подобран так, чтобы
+     раунд выигрывала команда с перевесом примерно в 6–8 грузов:
+     при равных силах разница копится случайно блужданием, и матч
+     на дистанции 14 ед./груз мог бы не закончиться вообще. */
+  const diff = S.mass.l - S.mass.r;
+  /* Синие стоят слева и тянут влево, поэтому перевес слева = отрицательное
+     смещение каната. Знак должен совпадать с импульсом в applyPull(),
+     иначе выигрывает не та команда, которая сильнее. */
+  const target = Math.max(-GOAL, Math.min(GOAL, -diff*58));
+  const acc = (target - S.x)*12 - S.v*7;
+  S.v += acc*dt; S.x += S.v*dt;
+  /* Упёршись в край, канат там и остаётся: если бы мы просто обрезали
+     координату, пружина тут же отбросила бы его назад и победа «мигала». */
+  if(S.x < -GOAL){ S.x = -GOAL; S.v = 0; }
+  if(S.x >  GOAL){ S.x =  GOAL; S.v = 0; }
+
+  /* частицы */
+  for(const p of parts){ p.t+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=p.g*dt; p.r+=p.r*dt; }
+  parts = parts.filter(p=>p.t<p.life);
+  if(parts.length>420) parts = parts.slice(-420);
+
+  if(Math.abs(S.v)>170 && Math.random()<.35) dust(CX+S.x+(Math.random()-.5)*160, GROUND-10, 'rgba(200,200,180,.5)');
+
+  /* рывок */
+  if(S.phase==='tug' && S.tugHeld){ S.tug = Math.min(SET.tugMax, S.tug + dt*0.85); }
+  if(SET.time > 0 && (S.phase==='ask' || S.phase==='tug')){
+    S.timeLeft -= dt;
+    if(S.timeLeft<=0){ S.timeLeft=0; onTimeout(); }
+  }
+  renderTimer();
+}
+
+let lastTickSec = -1;
+function renderTimer(){
+  const box = document.getElementById('timerBox'), fill = document.getElementById('timerFill');
+  if(SET.time===0 || (S.phase!=='ask' && S.phase!=='tug')){ box.style.opacity=.25; return; }
+  box.style.opacity=1;
+  const f = S.timeLeft/SET.time;
+  fill.style.width = (f*100)+'%';
+  box.className = 'timer' + (f<.2?' crit':f<.45?' warn':'');
+  const sec = Math.ceil(S.timeLeft);
+  if(sec <= 5 && sec !== lastTickSec){ lastTickSec = sec; SFX.tick(); }
+}
+
+/* ================= ИГРА ================= */
+const $ = id => document.getElementById(id);
+function pool(){
+  let p = BANK.filter(q => SET.topics.indexOf(q.t) >= 0);
+  if(!p.length) p = BANK;
+  return p;
+}
+function pickQ(){
+  const p = pool();
+  return p[Math.floor(Math.random()*p.length)];
+}
+function forceOf(q){
+  const mx = TOPICS[q.t].max || 100;
+  const norm = Math.min(1, Math.abs(q.v)/mx);
+  return 1.2 + norm*2.8;
+}
+
+function newGame(){
+  S = freshState();
+  S.turn = 'r';            /* чтобы nextTurn() отдал первый ход синим */
+  parts = [];
+  lastTickSec = -1;
+  updateChips();
+  nextTurn();
+}
+function nextTurn(){
+  S.turn = S.turn==='l' ? 'r' : 'l';
+  S.tug=0; S.tugHeld=false;
+  lastTickSec = -1;
+  showQuestion();
+}
+function showQuestion(){
+  S.phase = 'ask';
+  S.timeLeft = SET.time;
+  S.q = pickQ();
+  const others = S.q.o.filter(x => x !== S.q.a);
+  while(others.length < 3){
+    const extra = SFX_LINE_FALLBACK || [];
+    others.push(extra[Math.floor(Math.random()*extra.length)] || '—');
+  }
+  S.opts = [S.q.a, ...others.slice(0,3)];
+  for(let i=S.opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [S.opts[i],S.opts[j]]=[S.opts[j],S.opts[i]]; }
+
+  $('topicTag').style.display='block';
+  $('topicTag').firstElementChild.textContent = TOPICS[S.q.t].label;
+  $('qText').textContent = S.q.q;
+  $('fb').innerHTML = '';
+  $('fb').className = 'fb';
+  $('startBtn').style.display='none';
+  $('nextBtn').style.display='none';
+  $('tugBtn').style.display='none';
+  $('tugBar').style.display='none';
+
+  const tl = $('turnLbl');
+  tl.textContent = TEAM[S.turn].name + ' — ваш ход!';
+  tl.className = 'turn ' + S.turn;
+
+  const box = $('opts'); box.innerHTML='';
+  S.opts.forEach((o,i)=>{
+    const b = document.createElement('button');
+    b.className='opt'; b.innerHTML = '<span class="key">'+(i+1)+'</span>'+o;
+    b.onclick = ()=>choose(i);
+    box.appendChild(b);
+  });
+}
+
+function choose(i){
+  if((S.phase!=='ask' && S.phase!=='tug') || !S.q) return;
+  const good = S.opts[i] === S.q.a;
+  const btns = [...$('opts').children];
+  btns.forEach((b,j)=>{
+    b.disabled = true;
+    if(S.opts[j]===S.q.a) b.classList.add('ok');
+    else if(j===i) b.classList.add('no');
+    else b.classList.add('dim');
+  });
+  S.answerIdx = i;
+  if(good){ onCorrect(); } else { onWrong(); }
+}
+
+function onCorrect(){
+  S.streak++;
+  S.solved[S.turn]++;
+  const combo = S.streak>=3 ? 1.25 : 1;
+  let f = forceOf(S.q) * combo;
+  S.pendingForce = f;
+  S.pendingSide = S.turn;
+  S.pendingLabel = S.q.a;
+  $('fb').className='fb good';
+  $('fb').innerHTML = '✅ Верно! <b>'+S.q.a+'</b> — груз <b>'+f.toFixed(1)+'</b>'
+    + (combo>1 ? ' <span style="color:#ffd400">· серия ×'+(S.streak)+'</span>' : '')
+    + '<div class="sol">' + S.q.sol + '</div>';
+  if(SET.tug){
+    S.phase='tug'; S.tug=0;
+    $('tugBtn').style.display='inline-block';
+    $('tugBar').style.display='block';
+    $('tugBtn').textContent = TEAM[S.turn].name.split(' ')[1] + ', ТЯНИ! (держи)';
+  } else {
+    applyPull(S.turn, f);
+    S.phase='feedback';
+    $('nextBtn').style.display='inline-block';
+    $('nextBtn').textContent='Дальше →';
+  }
+  SFX.good(); updateChips();
+}
+
+function onWrong(){
+  S.streak = 0;
+  $('fb').className='fb bad';
+  $('fb').innerHTML = '❌ Неверно. Правильный ответ: <b>'+S.q.a+'</b>'
+    + '<div class="sol">' + S.q.sol + '</div>'
+    + '<div style="margin-top:8px">Противник получает лёгкий груз 0,8 — ошибка стоит сил.</div>';
+  SFX.bad();
+  applyPull(S.turn==='l'?'r':'l', .8);
+  S.phase='feedback';
+  $('tugBtn').style.display='none'; $('tugBar').style.display='none';
+  $('nextBtn').style.display='inline-block';
+  $('nextBtn').textContent='Дальше →';
+  updateChips();
+}
+
+function onTimeout(){
+  if(S.phase!=='ask' || !S.q) return;
+  const btns = [...$('opts').children];
+  btns.forEach(b=>{ b.disabled=true; });
+  btns.forEach((b,j)=>{ if(S.opts[j]===S.q.a) b.classList.add('ok'); });
+  S.streak = 0;
+  $('fb').className='fb bad';
+  $('fb').innerHTML='⏰ Время вышло! Правильный ответ: <b>'+S.q.a+'</b><div class="sol">'+S.q.sol+'</div>';
+  SFX.bad();
+  applyPull(S.turn==='l'?'r':'l', .8);
+  S.phase='feedback';
+  $('nextBtn').style.display='inline-block';
+  updateChips();
+}
+
+function applyPull(side, f){
+  S.mass[side] += f;
+  const dir = side==='l' ? -1 : 1;
+  S.v += dir * (60 + f*22);
+  S.flash = .35;
+  dust(CX+S.x + (side==='l'?-70:70), ROPE_Y+8, TEAM[side].glow);
+  SFX.tug();
+  updateChips();
+}
+
+function finishTug(){
+  if(S.phase!=='tug') return;
+  const bonus = S.tug;
+  applyPull(S.pendingSide, S.pendingForce);
+  if(bonus>0){
+    const dir = S.pendingSide==='l' ? -1 : 1;
+    S.v += dir * bonus*90;
+    S.mass[S.pendingSide] += bonus*.6;
+    SFX.tug();
+    $('fb').innerHTML += '<div style="margin-top:6px;color:#ffd400">💪 Рывок: +'+(bonus*1.4).toFixed(1)+' к силе</div>';
+  }
+  S.phase='feedback';
+  $('tugBtn').style.display='none'; $('tugBar').style.display='none';
+  $('nextBtn').style.display='inline-block';
+  $('nextBtn').textContent='Дальше →';
+  updateChips();
+}
+
+/* Проверка победы. Только когда вопрос в игре и ответ уже зафиксирован:
+   иначе канат может дойти до края на инерции от предыдущего ответа,
+   пока команда ещё думает, и очко уйдёт не тому. */
+setInterval(()=>{
+  if(S.paused) return;
+  if(S.phase!=='ask' && S.phase!=='tug') return;
+  /* Побеждаем не «уперелись в край», а по перевесу груза: канат —
+     наглядный индикатор, а решение принимает счёт. Порог 90 % длины,
+     иначе пружина подползает к краю по асимптоте и очко не наступает. */
+  if(Math.abs(S.x) >= GOAL*0.9){ win(); }
+}, 300);
+
+function win(){
+  const w = S.x<0 ? 'l':'r';
+  S.wins[w]++;
+  S.phase='over';
+  S.tugHeld=false; S.tug=0;      /* иначе «зажатый» рывок переедет в следующий раунд */
+  SFX.win();
+  for(let i=0;i<3;i++) setTimeout(()=>confetti(Math.random()*W, 120, ['#00d4ff','#ff2f6d','#00ff88','#ffd400'][i%4], 40), i*140);
+  dust(CX, ROPE_Y, TEAM[w].glow);
+  updateChips();
+  showWinModal(w);
+}
+
+function showWinModal(w){
+  const need = 3;
+  const ov = $('ov'), m = $('modal');
+  m.innerHTML =
+    '<h2>Канат перетянут!</h2>' +
+    '<div class="winTeam" style="color:'+TEAM[w].color+'">'+TEAM[w].name+'</div>' +
+    '<div class="scores"><span style="color:#00d4ff">Синие '+S.wins.l+'</span> ✖ <span style="color:#ff2f6d">Красные '+S.wins.r+'</span></div>' +
+    '<div class="help" style="text-align:center">решено задач: синие <b>'+S.solved.l+'</b> · красные <b>'+S.solved.r+'</b></div>' +
+    '<button class="btn p" id="mNext">Продолжить матч</button>' +
+    (S.wins[w]>=need ? '<button class="btn g" id="mNew">🏆 Победили '+need+' раз — новый матч</button>' : '');
+  ov.classList.add('active');
+  const nb = $('mNext');
+  if(nb) nb.onclick = ()=>{ ov.classList.remove('active'); resetRound(); };
+  const nw = $('mNew');
+  if(nw) nw.onclick = ()=>{ ov.classList.remove('active'); newGame(); };
+}
+
+function resetRound(){
+  /* Новый раунд: канат в центр, грузы обнуляются — иначе победитель
+     выигрывал бы следующий раунд автоматически, ещё до первого ответа. */
+  S.x = 0; S.v = 0; S.streak = 0;
+  S.mass.l = 0; S.mass.r = 0;
+  S.phase = 'idle';
+  updateChips();
+  nextTurn();
+}
+
+function updateChips(){
+  $('chipScore').textContent = 'Груз  ' + S.mass.l.toFixed(1) + ' : ' + S.mass.r.toFixed(1);
+  $('chipWins').textContent = 'Победы ' + S.wins.l + ' : ' + S.wins.r;
+  $('chipRound').textContent = 'Раунд ' + (S.wins.l+S.wins.r+1);
+}
+
+/* ================= УПРАВЛЕНИЕ ================= */
+$('startBtn').onclick = ()=>{ ac(); SFX.click(); newGame(); };
+$('nextBtn').onclick = ()=>{ SFX.click(); nextTurn(); };
+$('tugBtn').addEventListener('pointerdown', e=>{ e.preventDefault(); S.tugHeld=true; SFX.tug(); });
+window.addEventListener('pointerup', ()=>{ if(S.tugHeld){ S.tugHeld=false; finishTug(); } });
+window.addEventListener('pointercancel', ()=>{ if(S.tugHeld){ S.tugHeld=false; finishTug(); } });
+$('tugBtn').addEventListener('pointerleave', ()=>{ /* держим — ждём отпускания */ });
+
+document.addEventListener('keydown', e=>{
+  if(e.repeat) return;
+  if(S.paused){ if(e.key==='Escape'){ e.preventDefault(); closeMenu(); } return; }
+  if(e.key>='1' && e.key<='4'){ const i=+e.key-1; if($('opts').children[i]){ SFX.step(); choose(i); } }
+  if(e.code==='Space' && S.phase==='tug'){ e.preventDefault(); S.tugHeld=true; }
+  if(e.key==='Enter' && S.phase==='feedback'){ e.preventDefault(); nextTurn(); }
+  if(e.key==='Escape'){ e.preventDefault(); openMenu(); }
+});
+document.addEventListener('keyup', e=>{
+  if(e.code==='Space' && S.phase==='tug'){ e.preventDefault(); S.tugHeld=false; finishTug(); }
+});
+
+/* рывок по кнопке отпускания — свайп безопасный */
+$('tugFill').style.width='0%';
+setInterval(()=>{ if(S.phase==='tug') $('tugFill').style.width = (S.tug/SET.tugMax*100)+'%'; }, 60);
+
+/* ================= МЕНЮ ================= */
+function openMenu(){
+  /* Не выходим сюда, если оверлей открыт: открытие уже идёт, повторный
+     вызов просто перерисует содержимое (например, «Назад» из справки). */
+  S.paused = true;
+  const m = $('modal');
+  let html = '<h2>⚔ Канат</h2><div class="row">';
+  Object.keys(TOPICS).forEach(k=>{
+    html += '<button class="opt-row'+(SET.topics.indexOf(k)>=0?' on':'')+'" data-t="'+k+'">'
+          + '<b>'+(SET.topics.indexOf(k)>=0?'✔ ':'✖ ')+TOPICS[k].label+'</b></button>';
+  });
+  html += '</div><div class="row">';
+  [0,20,30,45].forEach(t=>{
+    html += '<button class="opt-row'+(SET.time===t?' on':'')+'" data-tm="'+t+'"><b>'+(t===0?'Без таймера':t+' сек')+'</b>Время на ответ</button>';
+  });
+  html += '</div><div class="row">'
+        + '<button class="opt-row'+(SET.tug?' on':'')+'" data-tg="1"><b>'+(SET.tug?'✔ Включён':'✖ Выключен')+'</b>Рывок силой</button>'
+        + '<button class="opt-row on" data-help="1"><b>Как играть</b>Правила и подсказки</button>'
+        + '</div>';
+  html += '<button class="btn p" id="mResume">▶ Продолжить</button>'
+        + '<button class="btn d" id="mReset">Новый матч</button>'
+        + '<button class="btn d" id="mClose">Закрыть</button>';
+  m.innerHTML = html;
+  $('ov').classList.add('active');
+
+  m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.t, i=SET.topics.indexOf(k);
+    if(i>=0){ if(SET.topics.length===1){ SET.topics=[k]; } else SET.topics.splice(i,1); }
+    else SET.topics.push(k);
+    if(!SET.topics.length) SET.topics=[k];
+    saveSet(); openMenu(); SFX.click();
+  });
+  m.querySelectorAll('[data-tm]').forEach(b=>b.onclick=()=>{ SET.time=+b.dataset.tm; saveSet(); openMenu(); SFX.click(); });
+  m.querySelector('[data-tg]').onclick=()=>{ SET.tug=!SET.tug; saveSet(); openMenu(); SFX.click(); };
+  m.querySelector('[data-help]').onclick=()=>{ showHelp(); };
+  $('mResume').onclick = closeMenu;
+  $('mClose').onclick = closeMenu;
+  $('mReset').onclick = ()=>{ closeMenu(); newGame(); };
+}
+function closeMenu(){ $('ov').classList.remove('active'); S.paused=false; }
+function showHelp(){
+  S.paused = true;
+  $('modal').innerHTML =
+    '<h2>Как играть</h2><div class="help">'
+    + '<p>Команды по очереди решают задачу. <b>Числовое значение правильного ответа — это вес груза.</b> Чем больше число, тем тяжелее груз и тем сильнее канат идёт в вашу сторону.</p>'
+    + '<ul>'
+    + '<li><b>Сила</b> = 1,2 + нормированное значение ответа. Ответ 300 тянет сильнее, чем ответ 20.</li>'
+    + '<li><b>Ошибка</b> — противник получает лёгкий груз 0,8. Неправильный ответ стоит сил.</li>'
+    + '<li><b>Серия</b> из 3 верных ответов подряд даёт ×1,25 к силе.</li>'
+    + '<li>После верного ответа можно <b>зажать «ТЯНИ»</b> и добавить рывок. Это бонус, а не основа — решает математика.</li>'
+    + '<li>Канат доходит до края — команда забирает очко. Первой до 3 побед выигрывает матч.</li>'
+    + '<li>Грузы накапливаются: кто больше натащил, тот и держит канат.</li>'
+    + '</ul>'
+    + '<p style="color:#ffd400">Клавиши: <b>1–4</b> — ответ, <b>Пробел</b> — рывок, <b>Enter</b> — дальше, <b>Esc</b> — меню.</p>'
+    + '</div><button class="btn p" id="hBack">Понятно</button>';
+  $('hBack').onclick = openMenu;
+}
+$('menuBtn').onclick = openMenu;
+$('ov').addEventListener('click', e=>{ if(e.target===$('ov')) closeMenu(); });
+
+/* ================= СТАРТ ================= */
+const SFX_LINE_FALLBACK = ['','—','?','нет','да'];
+resize();
+updateChips();
+requestAnimationFrame(t=>{ lastT=t; requestAnimationFrame(frame); });
+</script>
+</body>
+</html>
